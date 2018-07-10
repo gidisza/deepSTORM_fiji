@@ -28,69 +28,18 @@
  */
 package mpicbg.csbd.normalize;
 
+import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
-import net.imglib2.Cursor;
-import net.imglib2.RandomAccess;
+import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
 
-public class PercentileNormalizer< T extends RealType< T > & NativeType<T>> implements Normalizer< T > {
+public interface Percentile< T extends RealType< T > > {
 
-	private double[] percentiles = new double[]{3.0, 99.8};
-	private float[] destValues = new float[]{0, 1};
-	private List<T> resValues;
-	private boolean clip = false;
-
-	protected float min;
-	protected float max;
-	protected float factor;
-
-	@Override
-	public float normalize( final T val ) {
-		if(clip) {
-			if(val.getRealFloat() < min) {
-				return min;
-			}
-			if(val.getRealFloat() > max) {
-				return max;
-			}
-		}
-		return (val.getRealFloat() - resValues.get(0).getRealFloat())*factor+min;
-	}
-
-	@Override
-	public Img< FloatType > normalize(final RandomAccessibleInterval<T> im, OpService opService) {
-		HistogramPercentile<T> percentile = new HistogramPercentile<>();
-		resValues = percentile.computePercentiles(im, percentiles, opService);
-		min = destValues[0];
-		max = destValues[1];
-		factor = (max - min) / (resValues.get(1).getRealFloat() - resValues.get(0).getRealFloat());
-		final Img< FloatType > output = new ArrayImgFactory<FloatType>(new FloatType()).create(im);
-
-		final RandomAccess< T > in = im.randomAccess();
-		final Cursor< FloatType > out = output.localizingCursor();
-		while ( out.hasNext() ) {
-			out.fwd();
-			in.setPosition( out );
-			out.get().set( normalize( in.get() ) );
-		}
-
-		return output;
-	}
-
-	@Override
-	public void setup(final double[] percentiles, final float[] destValues, boolean clip) {
-		assert(percentiles.length == 2);
-		assert(destValues.length == 2);
-		this.percentiles = percentiles;
-		this.destValues = destValues;
-		this.clip = clip;
-	}
+	List<T> computePercentiles(final RandomAccessibleInterval<T> im, final double[] percentiles, OpService opService);
 
 }

@@ -106,7 +106,7 @@
 		</license.copyrightOwners>
 
 		<!-- VERSIONS -->
-		<tensorflow.version>1.6.0</tensorflow.version>
+		<tensorflow.version>1.8.0</tensorflow.version>
 		<imagej-tensorflow.version>1.0.0</imagej-tensorflow.version>
 	</properties>
 
@@ -132,43 +132,39 @@
 			<artifactId>proto</artifactId>
 			<version>${tensorflow.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.tensorflow</groupId>
-			<artifactId>libtensorflow</artifactId>
-			<version>${tensorflow.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tensorflow</groupId>
-			<artifactId>libtensorflow_jni_gpu</artifactId>
-			<version>${tensorflow.version}</version>
-		</dependency>
+	<!--<dependency>
+        <groupId>org.tensorflow</groupId>
+        <artifactId>libtensorflow</artifactId>
+        <version>${tensorflow.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.tensorflow</groupId>
+        <artifactId>libtensorflow_jni_gpu</artifactId>
+        <version>${tensorflow.version}</version>
+    </dependency>-->
 
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej-tensorflow</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-cache</artifactId>
-		</dependency>
-
-	</dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19</version>
-                <configuration>
-                    <argLine>-Xmx32768m</argLine>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <dependency>
+        <groupId>net.imagej</groupId>
+        <artifactId>imagej-tensorflow</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+<!--
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.19</version>
+            <configuration>
+                <argLine>-Xmx8192m</argLine>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+-->
 </project>

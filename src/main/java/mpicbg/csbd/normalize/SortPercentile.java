@@ -28,69 +28,65 @@
  */
 package mpicbg.csbd.normalize;
 
+import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
-import net.imglib2.RandomAccess;
+import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-public class PercentileNormalizer< T extends RealType< T > & NativeType<T>> implements Normalizer< T > {
+public class SortPercentile< T extends RealType< T > & NativeType<T>> implements Percentile< T > {
 
-	private double[] percentiles = new double[]{3.0, 99.8};
-	private float[] destValues = new float[]{0, 1};
-	private List<T> resValues;
-	private boolean clip = false;
+	private static < T extends RealType< T > > List<T>
+			percentiles( final IterableInterval< T > d, final float[] percentiles, ImageJ ij ) {
 
-	protected float min;
-	protected float max;
-	protected float factor;
-
-	@Override
-	public float normalize( final T val ) {
-		if(clip) {
-			if(val.getRealFloat() < min) {
-				return min;
-			}
-			if(val.getRealFloat() > max) {
-				return max;
-			}
-		}
-		return (val.getRealFloat() - resValues.get(0).getRealFloat())*factor+min;
-	}
-
-	@Override
-	public Img< FloatType > normalize(final RandomAccessibleInterval<T> im, OpService opService) {
-		HistogramPercentile<T> percentile = new HistogramPercentile<>();
-		resValues = percentile.computePercentiles(im, percentiles, opService);
-		min = destValues[0];
-		max = destValues[1];
-		factor = (max - min) / (resValues.get(1).getRealFloat() - resValues.get(0).getRealFloat());
-		final Img< FloatType > output = new ArrayImgFactory<FloatType>(new FloatType()).create(im);
-
-		final RandomAccess< T > in = im.randomAccess();
-		final Cursor< FloatType > out = output.localizingCursor();
-		while ( out.hasNext() ) {
-			out.fwd();
-			in.setPosition( out );
-			out.get().set( normalize( in.get() ) );
+		final List<T> res = new ArrayList<>();
+		for (float percentile : percentiles) {
+			T resi = d.firstElement().copy();
+			ij.op().stats().percentile(resi, d, (double) percentile);
+			res.add(resi);
 		}
 
-		return output;
+		return res;
 	}
 
-	@Override
-	public void setup(final double[] percentiles, final float[] destValues, boolean clip) {
-		assert(percentiles.length == 2);
-		assert(destValues.length == 2);
-		this.percentiles = percentiles;
-		this.destValues = destValues;
-		this.clip = clip;
+	public List<T> computePercentiles(RandomAccessibleInterval<T> src, final double[] percentiles, OpService opService) {
+
+		int dimensions = 1;
+		for(int i = 0; i < src.numDimensions(); i++) {
+			dimensions *= src.dimension(i);
+		}
+
+		final Img<T> dst = new CellImgFactory<>(((IterableInterval<T>)src).firstElement())
+				.create( dimensions );
+
+		Cursor<T> srcCursor = ((IterableInterval<T>)src).cursor();
+		Cursor<T> dstCursor = dst.cursor();
+
+		while(srcCursor.hasNext()) {
+			srcCursor.fwd();
+			dstCursor.fwd();
+			dstCursor.get().set(srcCursor.get());
+		}
+
+		MyPercentile<T> percentile = new MyPercentile<>();
+		percentile.setData(dst);
+		T p1 = percentile.evaluate(percentiles[0]);
+		T p2 = percentile.evaluate(percentiles[1]);
+
+		List<T> resValues = new ArrayList<>();
+		resValues.add(p1);
+		resValues.add(p2);
+		return resValues;
 	}
 
 }

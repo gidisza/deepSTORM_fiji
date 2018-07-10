@@ -52,15 +52,15 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	@Parameter
 	protected boolean normalizeInput = true;
 	@Parameter
-	protected double percentileBottom = 0.03f;
+	protected double percentileBottom = 3.0;
 	@Parameter
-	protected double percentileTop = 0.998f;
+	protected double percentileTop = 99.8;
 
 	protected float min = 0;
 	protected float max = 1;
 
-	@Parameter( label = "Clamp normalization" )
-	protected boolean clamp = false;
+	@Parameter( label = "Clip normalization" )
+	protected boolean clip = false;
 
 	@Parameter( label = "Import model (.zip)", callback = "modelChanged", initializer = "modelInitialized", persist = false )
 	private File modelFile;
@@ -109,7 +109,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	@Override
 	protected void setupNormalizer() {
-		((DefaultInputNormalizer)inputNormalizer).getNormalizer().setup(new double[]{percentileBottom, percentileTop}, new float[]{min, max}, clamp);
+		((DefaultInputNormalizer)inputNormalizer).getNormalizer().setup(new double[]{percentileBottom, percentileTop}, new float[]{min, max}, clip);
 	}
 
 	@Override

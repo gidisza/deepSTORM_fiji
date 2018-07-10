@@ -5,6 +5,8 @@ import mpicbg.csbd.util.DatasetHelper;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
+import org.scijava.convert.ConvertService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +20,10 @@ public class DefaultInputProcessor extends DefaultTask implements InputProcessor
 
 		setStarted();
 
-		RandomAccessibleInterval<FloatType> rai = (RandomAccessibleInterval<FloatType>) input.getImgPlus();
+		log("Dataset type: " + input.getTypeLabelLong() );
+		DatasetHelper.logDim( this, "Dataset dimensions", input );
 
-		DatasetHelper.logDim( this, "Dataset dimensions", rai );
+		RandomAccessibleInterval<FloatType> rai = (RandomAccessibleInterval<FloatType>) input.getImgPlus();
 
 		output.add( rai );
 

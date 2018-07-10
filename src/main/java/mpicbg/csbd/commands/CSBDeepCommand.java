@@ -54,6 +54,7 @@ import net.imagej.DatasetService;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imagej.ops.OpService;
 import net.imagej.tensorflow.TensorFlowService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
@@ -92,7 +93,7 @@ public abstract class CSBDeepCommand implements Cancelable, Initializable, Dispo
 	protected UIService uiService;
 
 	@Parameter
-	protected ImageJ ij;
+	protected OpService opService;
 
 	@Parameter( label = "Number of tiles", min = "1" )
 	protected int nTiles = 8;
@@ -213,7 +214,7 @@ public abstract class CSBDeepCommand implements Cancelable, Initializable, Dispo
 		final List< RandomAccessibleInterval< FloatType > > normalizedInput;
 		if(doInputNormalization()) {
 			setupNormalizer();
-			normalizedInput = inputNormalizer.run( processedInput, ij );
+			normalizedInput = inputNormalizer.run( processedInput, opService );
 		} else {
 			normalizedInput = processedInput;
 		}

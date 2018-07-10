@@ -50,15 +50,20 @@ public class TensorFlowNetwork extends DefaultNetwork {
 	@Override
 	public void loadLibrary() {
 		log( "The current library path is: LD_LIBRARY_PATH=" + System.getenv( "LD_LIBRARY_PATH" ) );
+		boolean foundJNI;
+
+
+
 		log( "Loading tensorflow jni from library path..." );
 		try {
 			System.loadLibrary( "tensorflow_jni" );
+			foundJNI = true;
 		} catch ( final UnsatisfiedLinkError e ) {
-			log(
-					"Couldn't load tensorflow from library path:" );
-			log( e.getMessage() );
-			log( "If the problem is CUDA related. Make sure CUDA and cuDNN are in the LD_LIBRARY_PATH." );
-			log( "The current library path is: LD_LIBRARY_PATH=" + System.getenv( "LD_LIBRARY_PATH" ) );
+			foundJNI = false;
+		}
+		if(!foundJNI){
+			log( "Couldn't load tensorflow GPU support." );
+			log( "If the problem is CUDA related, make sure CUDA and cuDNN are in the LD_LIBRARY_PATH." );
 			log( "Using CPU version from jar file." );
 		}
 	}

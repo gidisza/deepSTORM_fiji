@@ -28,8 +28,7 @@
  */
 package mpicbg.csbd.normalize;
 
-import net.imagej.ImageJ;
-import net.imglib2.IterableInterval;
+import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.RealType;
@@ -37,8 +36,9 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public interface Normalizer< T extends RealType< T > > {
 
-	T normalize(T val);
+	float normalize( T val );
 
-	Img<T> normalize(final RandomAccessibleInterval<T> im, ImageJ ij);
+	Img< FloatType > normalize(RandomAccessibleInterval<T> im, OpService opService);
 
+	void setup(double[] percentiles, float[] destValues, boolean clip);
 }

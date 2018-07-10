@@ -2,13 +2,14 @@ package mpicbg.csbd.normalize;
 
 import net.imagej.ImageJ;
 import net.imglib2.Cursor;
-import net.imglib2.cache.img.DiskCachedCellImg;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
+import net.imglib2.histogram.Histogram1d;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.numeric.real.FloatType;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import java.util.List;
 import java.util.Random;
@@ -47,7 +48,7 @@ public class NormalizeTest {
 	@Test
 	public void testPercentileInvertedArrayLong(){
 
-		final long[] dimensions = new long[] { 50, 20 };
+		final long[] dimensions = new long[] { 500, 2000 };
 		final double[] data = new double[(int)mult(dimensions)];
 		for(int i = 0; i < data.length; i++) {
 			data[i] = data.length-i;
@@ -73,16 +74,39 @@ public class NormalizeTest {
 
 	@Test
 	public void testCachedCellImg(){
+
+		System.out.println("Max heap size: " + Runtime.getRuntime().maxMemory());
+
+		long[] dims = new long[]{2000000};
+
+		final Img<FloatType> src = new DiskCachedCellImgFactory<>(new FloatType()).create( dims );
+		final Img<FloatType> dst = new DiskCachedCellImgFactory<>(new FloatType()).create( dims );
+
+		Cursor<FloatType> srcCursor = src.cursor();
+		Cursor<FloatType> dstCursor = dst.cursor();
+
+		while(srcCursor.hasNext()) {
+			srcCursor.fwd();
+			dstCursor.fwd();
+			dstCursor.get().set(srcCursor.get());
+		}
+	}
+
+	@Test @Ignore
+	public void testHistogramNormalization(){
+
 		ImageJ ij = new ImageJ();
 
+		System.out.println("started imagej");
+
 		final Img< FloatType > img = new DiskCachedCellImgFactory<>(new FloatType())
-				.create( new long[]{10000,10000, 20} );
+				.create( new long[]{100000,100000, 20} );
 
-		FloatType el = img.firstElement();
+		System.out.println("created img");
 
-		PercentileNormalizer<FloatType> normalizer = new PercentileNormalizer<>();
-		normalizer.setup(new double[]{1.0, 99.0}, new float[]{0,1}, false);
-		normalizer.normalize(img, ij);
+		Histogram1d<FloatType> histogram = ij.op().image().histogram(img, 1000);
+
+		System.out.println("created histogram");
 	}
 
 	private long mult(long[] dims){
@@ -104,10 +128,10 @@ public class NormalizeTest {
 		// Get amount of free memory within the heap in bytes. This size will increase // after garbage collection and decrease as new objects are created.
 		System.out.println("Free heap size: " + Runtime.getRuntime().freeMemory());
 
-		PercentileNormalizer<FloatType> normalizer = new PercentileNormalizer<>();
+		mpicbg.csbd.normalize.Percentile normalizer = new HistogramPercentile<>();
 		ImageJ ij = new ImageJ();
 
-		ij.launch();
+//		ij.launch();
 
 		final Img< FloatType > img = new CellImgFactory<>(new FloatType())
 				.create( dimensions );
@@ -120,9 +144,7 @@ public class NormalizeTest {
 			cursor.get().set((float)data[i]);
 		}
 
-		normalizer.setup(percentiles, new float[]{0,1}, false);
-		normalizer.normalize(img, ij);
-		List<FloatType> res1 = normalizer.getPercentiles();
+		List<FloatType> res1 = normalizer.computePercentiles(img, percentiles, ij.op());
 
 		Percentile percentile = new Percentile();
 		percentile.setData(data);
@@ -130,6 +152,7 @@ public class NormalizeTest {
 			double res2 = percentile.evaluate(percentiles[j]);
 			assertEquals((float) res2, res1.get(j).getRealFloat(), 0.001);
 		}
+
 	}
 
 }

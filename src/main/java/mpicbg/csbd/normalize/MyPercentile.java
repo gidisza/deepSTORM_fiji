@@ -16,9 +16,11 @@
  */
 package mpicbg.csbd.normalize;
 
+import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
 import org.apache.commons.math3.exception.*;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
@@ -345,7 +347,9 @@ public class MyPercentile< T extends RealType< T >> {
 //                }
 //            }
 //            return work;
-	    return getDataRef();
+        long[] minInt = new long[]{begin};
+        long[] maxInt = new long[]{begin+length};
+	    return Views.interval(values, minInt, maxInt);
     }
 
 //    /**
