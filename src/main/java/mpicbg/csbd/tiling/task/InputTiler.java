@@ -5,15 +5,16 @@ import java.util.List;
 import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.tiling.Tiling;
 
-public interface InputTiler extends Task {
+public interface InputTiler< T extends RealType< T >> extends Task {
 
-	public List< AdvancedTiledView< FloatType > > run(
-			List< RandomAccessibleInterval< FloatType > > input,
+	public List< AdvancedTiledView< T > > run(
+			List< RandomAccessibleInterval< T > > input,
 			Dataset dataset,
 			Tiling prediction );
 

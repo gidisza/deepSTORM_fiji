@@ -36,9 +36,9 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public interface Normalizer< T extends RealType< T > > {
 
-	float normalize( T val );
+	T normalize( T val );
 
-	Img< FloatType > normalize(RandomAccessibleInterval<T> im, OpService opService);
+	Img< T > normalize(RandomAccessibleInterval<T> im, OpService opService);
 
 	void setup(double[] percentiles, float[] destValues, boolean clip);
 }

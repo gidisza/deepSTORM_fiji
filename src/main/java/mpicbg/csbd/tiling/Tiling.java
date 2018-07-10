@@ -31,14 +31,15 @@ package mpicbg.csbd.tiling;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import mpicbg.csbd.task.Task;
 
-public interface Tiling {
+public interface Tiling< T extends RealType< T >> {
 
-	public AdvancedTiledView< FloatType > preprocess(RandomAccessibleInterval< FloatType > input, Dataset dataset, Task parent);	
+	AdvancedTiledView< T > preprocess(RandomAccessibleInterval< T > input, Dataset dataset, Task parent);
 	
-	public RandomAccessibleInterval< FloatType> postprocess( Task parent, final AdvancedTiledView< FloatType > results, AxisType[] axisTypes );
+	RandomAccessibleInterval< T > postprocess( Task parent, final AdvancedTiledView< T > results, AxisType[] axisTypes );
 	
 }

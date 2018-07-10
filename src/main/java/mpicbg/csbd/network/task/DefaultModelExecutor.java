@@ -4,28 +4,31 @@ import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.util.DatasetHelper;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class DefaultModelExecutor extends DefaultTask implements ModelExecutor {
+public class DefaultModelExecutor< T extends RealType< T >> extends DefaultTask implements ModelExecutor<T> {
 
 	protected static String PROGRESS_CANCELED = "";
 	protected ExecutorService pool = null;
 
 	@Override
-	public List< AdvancedTiledView< FloatType > >
-			run( final List< AdvancedTiledView< FloatType > > input, final Network network ) {
+	public List< AdvancedTiledView< T > >
+			run( final List< AdvancedTiledView< T > > input, final Network network ) {
 		setStarted();
 		if(input.size() > 0) {
 			DatasetHelper.logDim(this, "Network input size", input.get(0).randomAccess().get());
 		}
 		pool = Executors.newSingleThreadExecutor();
-		final List< AdvancedTiledView< FloatType > > output =
+		final List< AdvancedTiledView< T > > output =
 				input.stream().map( tile -> run( tile, network ) ).collect( Collectors.toList() );
 		pool.shutdown();
 		if(output.size() > 0) {
@@ -35,15 +38,15 @@ public class DefaultModelExecutor extends DefaultTask implements ModelExecutor {
 		return output;
 	}
 
-	private AdvancedTiledView< FloatType > run(
-			final AdvancedTiledView< FloatType > input,
+	private AdvancedTiledView< T > run(
+			final AdvancedTiledView< T > input,
 			final Network network ) throws OutOfMemoryError {
 
 		input.getProcessedTiles().clear();
 
 		try {
 			network.setTiledView( input );
-			input.getProcessedTiles().addAll( pool.submit( network ).get() );
+			input.getProcessedTiles().addAll((Collection<? extends RandomAccessibleInterval<T>>) pool.submit( network ).get());
 		} catch ( final ExecutionException exc ) {
 			exc.printStackTrace();
 			setIdle();

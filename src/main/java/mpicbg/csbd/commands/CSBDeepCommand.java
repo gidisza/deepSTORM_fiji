@@ -75,7 +75,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalLong;
 
-public abstract class CSBDeepCommand implements Cancelable, Initializable, Disposable {
+public abstract class CSBDeepCommand< T extends RealType< T > > implements Cancelable, Initializable, Disposable {
 
 	@Parameter( type = ItemIO.INPUT, initializer = "processDataset" )
 	public Dataset input;
@@ -208,10 +208,10 @@ public abstract class CSBDeepCommand implements Cancelable, Initializable, Dispo
 		taskManager.finalizeSetup();
 
 		prepareInputAndNetwork();
-		final List< RandomAccessibleInterval< FloatType > > processedInput =
+		final List< RandomAccessibleInterval< T > > processedInput =
 				inputProcessor.run( getInput() );
 
-		final List< RandomAccessibleInterval< FloatType > > normalizedInput;
+		final List< RandomAccessibleInterval< T > > normalizedInput;
 		if(doInputNormalization()) {
 			setupNormalizer();
 			normalizedInput = inputNormalizer.run( processedInput, opService );
@@ -296,13 +296,13 @@ public abstract class CSBDeepCommand implements Cancelable, Initializable, Dispo
 	}
 
 	private List< AdvancedTiledView< FloatType > > tryToTileAndRunNetwork(
-			final List< RandomAccessibleInterval< FloatType > > normalizedInput ) throws OutOfMemoryError {
+			final List< RandomAccessibleInterval< T > > normalizedInput ) throws OutOfMemoryError {
 		List< AdvancedTiledView< FloatType > > tiledOutput = null;
 		boolean isOutOfMemory = true;
 		boolean canHandleOutOfMemory = true;
 		while ( isOutOfMemory && canHandleOutOfMemory ) {
 			try {
-				final List< AdvancedTiledView< FloatType > > tiledInput =
+				final List< AdvancedTiledView< T > > tiledInput =
 						inputTiler.run( normalizedInput, getInput(), tiling );
 				tiledOutput = modelExecutor.run( tiledInput, network );
 				isOutOfMemory = false;

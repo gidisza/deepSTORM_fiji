@@ -30,6 +30,7 @@ package mpicbg.csbd.normalize;
 
 import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
+import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
@@ -47,34 +48,40 @@ public class PercentileNormalizer< T extends RealType< T > & NativeType<T>> impl
 	private List<T> resValues;
 	private boolean clip = false;
 
-	protected float min;
-	protected float max;
+	protected T min;
+	protected T max;
 	protected float factor;
 
 	@Override
-	public float normalize( final T val ) {
+	public T normalize( final T val ) {
 		if(clip) {
-			if(val.getRealFloat() < min) {
-				return min;
+			if(val.compareTo(min) < 0) {
+				return min.copy();
 			}
-			if(val.getRealFloat() > max) {
-				return max;
+			if(val.compareTo(max) > 0) {
+				return max.copy();
 			}
 		}
-		return (val.getRealFloat() - resValues.get(0).getRealFloat())*factor+min;
+		T res = val.copy();
+		res.sub(resValues.get(0));
+		res.mul(factor);
+		res.add(min);
+		return res;
 	}
 
 	@Override
-	public Img< FloatType > normalize(final RandomAccessibleInterval<T> im, OpService opService) {
+	public Img< T > normalize(final RandomAccessibleInterval<T> im, OpService opService) {
 		HistogramPercentile<T> percentile = new HistogramPercentile<>();
 		resValues = percentile.computePercentiles(im, percentiles, opService);
-		min = destValues[0];
-		max = destValues[1];
-		factor = (max - min) / (resValues.get(1).getRealFloat() - resValues.get(0).getRealFloat());
-		final Img< FloatType > output = new ArrayImgFactory<FloatType>(new FloatType()).create(im);
+		min = im.randomAccess().get().copy();
+		min.setReal(destValues[0]);
+		max = min.copy();
+		max.setReal(destValues[1]);
+		factor = (destValues[1] - destValues[0]) / (resValues.get(1).getRealFloat() - resValues.get(0).getRealFloat());
+		final Img< T > output = new ArrayImgFactory<T>().create(im);
 
 		final RandomAccess< T > in = im.randomAccess();
-		final Cursor< FloatType > out = output.localizingCursor();
+		final Cursor< T > out = output.localizingCursor();
 		while ( out.hasNext() ) {
 			out.fwd();
 			in.setPosition( out );

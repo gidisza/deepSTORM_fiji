@@ -5,6 +5,7 @@ import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.Disposable;
 
@@ -12,48 +13,48 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public interface Network extends Callable< List< RandomAccessibleInterval< FloatType > > >, Disposable {
+public interface Network< T extends RealType< T >> extends Callable< List< RandomAccessibleInterval< T > > >, Disposable {
 
-	public void loadLibrary();
+	void loadLibrary();
 
-	public boolean loadModel( String pathOrURL, String modelName ) throws FileNotFoundException;
+	boolean loadModel( String pathOrURL, String modelName ) throws FileNotFoundException;
 
-	public void preprocess();
+	void preprocess();
 
-	public RandomAccessibleInterval< FloatType >
-			execute( RandomAccessibleInterval< FloatType > tile ) throws Exception;
+	RandomAccessibleInterval< T >
+			execute( RandomAccessibleInterval< T > tile ) throws Exception;
 
-	public Task getStatus();
+	Task getStatus();
 
-	public ImageTensor getInputNode();
+	ImageTensor getInputNode();
 
-	public ImageTensor getOutputNode();
+	ImageTensor getOutputNode();
 
-	public boolean isSupportingGPU();
+	boolean isSupportingGPU();
 
-	public void loadInputNode( String defaultName, Dataset dataset );
+	void loadInputNode( String defaultName, Dataset dataset );
 
-	public void loadOutputNode( String defaultName );
+	void loadOutputNode( String defaultName );
 
-	public void initMapping();
+	void initMapping();
 
-	public boolean isInitialized();
+	boolean isInitialized();
 
-	public void setTiledView( TiledView< FloatType > tiledView );
+	void setTiledView( TiledView< T > tiledView );
 
-	public void cancel();
+	void cancel();
 
 	/**
 	 * Set if singleton dimensions of the output image should be dropped. If the
 	 * tile size in one dimension is only one this could remove an important
 	 * dimension. Default value is true.
 	 */
-	public void setDropSingletonDims( final boolean dropSingletonDims );
+	void setDropSingletonDims( final boolean dropSingletonDims );
 
-	public void setDoDimensionReduction( boolean doDimensionReduction );
+	void setDoDimensionReduction( boolean doDimensionReduction );
 
-	public void setDoDimensionReduction( boolean doDimensionReduction, AxisType axisToRemove );
+	void setDoDimensionReduction( boolean doDimensionReduction, AxisType axisToRemove );
 
-	public void doDimensionReduction();
+	void doDimensionReduction();
 
 }

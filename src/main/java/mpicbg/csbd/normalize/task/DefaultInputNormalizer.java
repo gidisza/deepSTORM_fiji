@@ -5,24 +5,23 @@ import java.util.stream.Collectors;
 
 import mpicbg.csbd.normalize.Normalizer;
 import mpicbg.csbd.normalize.PercentileNormalizer;
-import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
 
 import mpicbg.csbd.task.DefaultTask;
 
-public class DefaultInputNormalizer extends DefaultTask implements InputNormalizer {
+public class DefaultInputNormalizer< T extends RealType< T > & NativeType<T>> extends DefaultTask implements InputNormalizer<T> {
 
-	private Normalizer< FloatType > normalizer = new PercentileNormalizer<>();
+	private Normalizer< T > normalizer = new PercentileNormalizer<T>();
 
 	@Override
-	public List< RandomAccessibleInterval< FloatType > >
-			run(final List< RandomAccessibleInterval< FloatType > > input, OpService opService) {
+	public List<RandomAccessibleInterval<T>> run(List<RandomAccessibleInterval<T>> input, OpService opService) {
 
 		setStarted();
 
-		final List< RandomAccessibleInterval< FloatType > > output =
+		final List< RandomAccessibleInterval<T> > output =
 				input.stream().map( image -> normalizeInput( image, opService) ).collect(
 						Collectors.toList() );
 
@@ -32,15 +31,15 @@ public class DefaultInputNormalizer extends DefaultTask implements InputNormaliz
 
 	}
 
-	protected RandomAccessibleInterval< FloatType >
-			normalizeInput( final RandomAccessibleInterval< FloatType > input, OpService opService ) {
+	protected RandomAccessibleInterval< T >
+			normalizeInput( final RandomAccessibleInterval< T > input, OpService opService ) {
 
 		log( "Normalize .. " );
 
 		return normalizer.normalize( input, opService );
 	}
 
-	public Normalizer<FloatType> getNormalizer() {
+	public Normalizer<T> getNormalizer() {
 		return normalizer;
 	}
 

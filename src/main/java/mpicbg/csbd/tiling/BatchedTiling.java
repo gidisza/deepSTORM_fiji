@@ -33,12 +33,13 @@ import mpicbg.csbd.task.Task;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.list.ListImg;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class BatchedTiling extends DefaultTiling {
+public class BatchedTiling< T extends RealType< T >> extends DefaultTiling<T> {
 
 	protected int batchSize;
 	protected int batchDim;
@@ -59,9 +60,9 @@ public class BatchedTiling extends DefaultTiling {
 	}
 
 	@Override
-	protected AdvancedTiledView< FloatType > createTiledView(
+	protected AdvancedTiledView< T > createTiledView(
 			final Task parent,
-			final RandomAccessibleInterval< FloatType > dataset,
+			final RandomAccessibleInterval< T > dataset,
 			final long[] tileSize,
 			final long[] padding,
 			final AxisType[] types) {
@@ -80,16 +81,16 @@ public class BatchedTiling extends DefaultTiling {
 
 		final long expandedBatchDimSize = batchesNum * batchSize;
 		tileSize[ batchDim ] = batchSize;
-		final RandomAccessibleInterval< FloatType > expandedInput2 =
+		final RandomAccessibleInterval< T > expandedInput2 =
 				expandDimToSize( dataset, batchDim, expandedBatchDimSize );
-		final AdvancedTiledView< FloatType > tiledView2 =
+		final AdvancedTiledView< T > tiledView2 =
 				new AdvancedTiledView<>( expandedInput2, tileSize, padding, types );
 		return tiledView2;
 	}
 
 	@Override
-	protected RandomAccessibleInterval< FloatType >
-			expandToFitBlockSize( RandomAccessibleInterval< FloatType > dataset, long[] tiling, long BlockSize ) {
+	protected RandomAccessibleInterval< T >
+			expandToFitBlockSize( RandomAccessibleInterval< T > dataset, long[] tiling, long BlockSize ) {
 
 		// If there is no channel dimension in the input image, we assume that a channel dimension might be added to the end of the image
 		if ( channelDim < 0 ) {
@@ -106,12 +107,12 @@ public class BatchedTiling extends DefaultTiling {
 	}
 
 	@Override
-	protected RandomAccessibleInterval< FloatType >
+	protected RandomAccessibleInterval< T >
 			arrangeAndCombineTiles(
-					final List< RandomAccessibleInterval< FloatType > > results,
+					final List< RandomAccessibleInterval< T > > results,
 					final long[] grid ) {
 		status.debug( "grid: " + Arrays.toString(grid) );
-		final RandomAccessibleInterval< FloatType > result =
+		final RandomAccessibleInterval< T > result =
 				new GridView<>( new ListImg<>( results, grid ) );
 		return result;
 	}

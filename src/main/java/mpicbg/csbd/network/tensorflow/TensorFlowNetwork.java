@@ -9,6 +9,7 @@ import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.tensorflow.TensorFlowService;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.io.location.Location;
 import org.tensorflow.SavedModelBundle;
@@ -23,7 +24,7 @@ import org.tensorflow.framework.TensorShapeProto;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class TensorFlowNetwork extends DefaultNetwork {
+public class TensorFlowNetwork< T extends RealType< T >> extends DefaultNetwork<T> {
 
 	private SavedModelBundle model;
 	private SignatureDef sig;
@@ -190,13 +191,13 @@ public class TensorFlowNetwork extends DefaultNetwork {
 
 	// TODO this is the tensorflow runner
 	@Override
-	public RandomAccessibleInterval< FloatType >
-			execute( final RandomAccessibleInterval< FloatType > tile ) throws Exception {
+	public RandomAccessibleInterval< T >
+			execute( final RandomAccessibleInterval< T > tile ) throws Exception {
 
 		final Tensor inputTensor =
 				DatasetTensorflowConverter.datasetToTensor( tile, getInputNode().getMapping() );
 		if ( inputTensor != null ) {
-			RandomAccessibleInterval<FloatType> output = null;
+			RandomAccessibleInterval<T> output = null;
 			Tensor outputTensor = TensorFlowRunner.executeGraph(
 					model,
 					inputTensor,

@@ -14,7 +14,7 @@ public class AdvancedTiledView< T > extends TiledView< T > {
 
 	private final Map< AxisType, Long > originalDims;
 	private final AxisType[] originalAxes;
-	private List< RandomAccessibleInterval< FloatType > > processedTiles;
+	private List< RandomAccessibleInterval< T > > processedTiles;
 //	protected int blockMultiple;
 //	protected long blockWidth;
 
@@ -33,7 +33,7 @@ public class AdvancedTiledView< T > extends TiledView< T > {
 		return originalDims;
 	}
 
-	public List< RandomAccessibleInterval< FloatType > > getProcessedTiles() {
+	public List< RandomAccessibleInterval< T > > getProcessedTiles() {
 		return processedTiles;
 	}
 

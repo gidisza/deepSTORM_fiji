@@ -8,6 +8,7 @@ import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.scijava.io.location.Location;
@@ -18,12 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
-public abstract class DefaultNetwork implements Network {
+public abstract class DefaultNetwork< T extends RealType< T >> implements Network<T> {
 
 	protected Task status;
 	protected ImageTensor inputNode = new ImageTensor();
 	protected ImageTensor outputNode = new ImageTensor();
-	protected TiledView< FloatType > tiledView;
+	protected TiledView< T > tiledView;
 	protected boolean supportsGPU = false;
 	protected Integer doneTileCount;
 	protected boolean dropSingletonDims = true;
@@ -55,9 +56,9 @@ public abstract class DefaultNetwork implements Network {
 	public abstract void preprocess();
 
 	@Override
-	public List< RandomAccessibleInterval< FloatType > > call() throws ExecutionException {
+	public List< RandomAccessibleInterval< T > > call() throws ExecutionException {
 
-		final List< RandomAccessibleInterval< FloatType > > results = runModel();
+		final List< RandomAccessibleInterval< T > > results = runModel();
 
 		return results;
 	}
@@ -69,16 +70,16 @@ public abstract class DefaultNetwork implements Network {
 		log( title + ": " + Arrays.toString( dims ) );
 	}
 
-	private List< RandomAccessibleInterval< FloatType > > runModel() throws ExecutionException {
+	private List< RandomAccessibleInterval< T > > runModel() throws ExecutionException {
 
 		final boolean multithreading = false;
 
-		final Cursor< RandomAccessibleInterval< FloatType > > cursor =
+		final Cursor< RandomAccessibleInterval< T > > cursor =
 				Views.iterable( tiledView ).cursor();
 
 		// Loop over the tiles and execute the prediction
-		final List< RandomAccessibleInterval< FloatType > > results = new ArrayList<>();
-		final List< Future< RandomAccessibleInterval< FloatType > > > futures = new ArrayList<>();
+		final List< RandomAccessibleInterval< T > > results = new ArrayList<>();
+		final List< Future< RandomAccessibleInterval< T > > > futures = new ArrayList<>();
 
 		status.setCurrentStep(0);
 		doneTileCount = 0;
@@ -89,9 +90,9 @@ public abstract class DefaultNetwork implements Network {
 		status.setNumSteps(numSteps);
 
 		while ( cursor.hasNext() ) {
-			final RandomAccessibleInterval< FloatType > tile = cursor.next();
+			final RandomAccessibleInterval< T > tile = cursor.next();
 
-			final Future< RandomAccessibleInterval< FloatType > > future =
+			final Future< RandomAccessibleInterval< T > > future =
 					pool.submit( new TileRunner( tile ) );
 
 //			log( "Processing tile " + ( doneTileCount + 1 ) + ".." );
@@ -100,7 +101,7 @@ public abstract class DefaultNetwork implements Network {
 
 			if ( !multithreading ) {
 				try {
-					final RandomAccessibleInterval< FloatType > res = future.get();
+					final RandomAccessibleInterval< T > res = future.get();
 					if ( res == null ) return null;
 					results.add( res );
 					upTileCount();
@@ -112,9 +113,9 @@ public abstract class DefaultNetwork implements Network {
 			}
 		}
 		if ( multithreading ) {
-			for ( final Future< RandomAccessibleInterval< FloatType > > future : futures ) {
+			for ( final Future< RandomAccessibleInterval< T > > future : futures ) {
 				try {
-					final RandomAccessibleInterval< FloatType > res = future.get();
+					final RandomAccessibleInterval< T > res = future.get();
 					if ( res == null ) return null;
 					results.add( res );
 					upTileCount();
@@ -130,8 +131,8 @@ public abstract class DefaultNetwork implements Network {
 	}
 
 	@Override
-	public abstract RandomAccessibleInterval< FloatType >
-			execute( RandomAccessibleInterval< FloatType > tile ) throws Exception;
+	public abstract RandomAccessibleInterval< T >
+			execute( RandomAccessibleInterval< T > tile ) throws Exception;
 
 	@Override
 	public Task getStatus() {
@@ -176,7 +177,7 @@ public abstract class DefaultNetwork implements Network {
 	}
 
 	@Override
-	public void setTiledView( final TiledView< FloatType > tiledView ) {
+	public void setTiledView( final TiledView< T > tiledView ) {
 		this.tiledView = tiledView;
 	}
 
@@ -225,17 +226,17 @@ public abstract class DefaultNetwork implements Network {
 		}
 	}
 
-	class TileRunner implements Callable< RandomAccessibleInterval< FloatType > > {
+	class TileRunner implements Callable< RandomAccessibleInterval< T > > {
 
-		RandomAccessibleInterval< FloatType > tile;
+		RandomAccessibleInterval< T > tile;
 
-		public TileRunner( final RandomAccessibleInterval< FloatType > tile ) {
+		public TileRunner( final RandomAccessibleInterval< T > tile ) {
 			this.tile = tile;
 		}
 
 		@Override
-		public RandomAccessibleInterval< FloatType > call() throws Exception {
-			final RandomAccessibleInterval< FloatType > result = execute( tile );
+		public RandomAccessibleInterval< T > call() throws Exception {
+			final RandomAccessibleInterval< T > result = execute( tile );
 //			ImageJ ij = new ImageJ();
 //			ij.ui().show( result );
 			return result;

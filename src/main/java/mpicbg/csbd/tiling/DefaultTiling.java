@@ -37,6 +37,7 @@ import net.imagej.axis.AxisType;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.list.ListImg;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -45,7 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultTiling implements Tiling {
+public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 
 	protected final int tilesNum;
 	protected int blockMultiple;
@@ -64,7 +65,7 @@ public class DefaultTiling implements Tiling {
 	}
 
 	@Override
-	public AdvancedTiledView< FloatType > preprocess(RandomAccessibleInterval< FloatType > input, Dataset dataset, Task parent) {
+	public AdvancedTiledView< T > preprocess(RandomAccessibleInterval< T > input, Dataset dataset, Task parent) {
 
 	    this.status = parent;
 
@@ -83,12 +84,12 @@ public class DefaultTiling implements Tiling {
 
 			parent.log( "Dividing image into " + arrayProduct(tiling) + " tile(s).." );
 
-			RandomAccessibleInterval< FloatType > expandedInput = expandToFitBlockSize(input, tiling, blockMultiple);
+			RandomAccessibleInterval< T > expandedInput = expandToFitBlockSize(input, tiling, blockMultiple);
 			long[] tileSize = calculateTileSize(expandedInput, tiling);
 
 			parent.log( "Size of single image tile: " + Arrays.toString( tileSize ) );
 
-			final AdvancedTiledView< FloatType > tiledView = createTiledView(parent, expandedInput, tileSize, padding, axes);
+			final AdvancedTiledView< T > tiledView = createTiledView(parent, expandedInput, tileSize, padding, axes);
 			for( int i = 0; i < input.numDimensions(); i++) {
 				tiledView.getOriginalDims().put( dataset.axis( i ).type(), input.dimension( i ));
 			}
@@ -117,7 +118,7 @@ public class DefaultTiling implements Tiling {
 		return rtn;
 	}
 
-	protected long[] computeTiling(RandomAccessibleInterval< FloatType > input, AxisType[] axes, long[] tiling, int nTiles, int blockSize) {
+	protected long[] computeTiling(RandomAccessibleInterval< T > input, AxisType[] axes, long[] tiling, int nTiles, int blockSize) {
 		int currentTiles = 1;
 		for(long tiles : tiling) {
 			currentTiles *= tiles;
@@ -152,8 +153,8 @@ public class DefaultTiling implements Tiling {
 		return padding;
 	}
 
-	protected RandomAccessibleInterval< FloatType >
-			expandToFitBlockSize(RandomAccessibleInterval< FloatType > dataset, long[] tiling, long BlockSize ) {
+	protected RandomAccessibleInterval< T >
+			expandToFitBlockSize(RandomAccessibleInterval< T > dataset, long[] tiling, long BlockSize ) {
 		for ( int i = 0; i < dataset.numDimensions(); i++ ) {
 			dataset = expandDimToSize(
 					dataset, i, ( long ) Math.ceil( dataset.dimension( i )/ tiling[i] / ( double ) blockMultiple ) * blockMultiple * tiling[i] );
@@ -161,7 +162,7 @@ public class DefaultTiling implements Tiling {
 		return dataset;
 	}
 
-	protected long[] calculateTileSize(RandomAccessibleInterval< FloatType > dataset, long[] tiling) {
+	protected long[] calculateTileSize(RandomAccessibleInterval< T > dataset, long[] tiling) {
 		final long[] tileSize = Intervals.dimensionsAsLongArray( dataset );
 		for(int i = 0; i < tileSize.length; i++) {
 			tileSize[i] /= tiling[i];
@@ -169,20 +170,20 @@ public class DefaultTiling implements Tiling {
 		return tileSize;
 	}
 	
-	protected AdvancedTiledView< FloatType > createTiledView(Task parent, RandomAccessibleInterval< FloatType > input, long[] tileSize, long[] padding, AxisType[] types) {
+	protected AdvancedTiledView< T > createTiledView(Task parent, RandomAccessibleInterval< T > input, long[] tileSize, long[] padding, AxisType[] types) {
 		return new AdvancedTiledView<>( input, tileSize, padding, types );
 	}
 
 	@Override
-	public RandomAccessibleInterval< FloatType > postprocess( Task parent, final AdvancedTiledView< FloatType > results, AxisType[] axisTypes ) {
+	public RandomAccessibleInterval< T > postprocess( Task parent, final AdvancedTiledView< T > results, AxisType[] axisTypes ) {
 
 		parent.log( "POSTPROCESSING" );
 		
-		List< RandomAccessibleInterval<FloatType> > resultData = results.getProcessedTiles();
+		List< RandomAccessibleInterval<T> > resultData = results.getProcessedTiles();
 
 		if ( resultData != null && resultData.size() > 0 ) {
 
-			RandomAccessibleInterval<FloatType> firstResult = resultData.get(0);
+			RandomAccessibleInterval<T> firstResult = resultData.get(0);
 
 			parent.log("output axes: " + Arrays.toString(axisTypes));
 
@@ -207,12 +208,12 @@ public class DefaultTiling implements Tiling {
 
 			parent.log( "Merging tiles.." );
 
-			final RandomAccessibleInterval< FloatType > mergedResult = arrangeAndCombineTiles(resultData, grid);
+			final RandomAccessibleInterval< T > mergedResult = arrangeAndCombineTiles(resultData, grid);
 
 			DatasetHelper.debugDim(parent, "merge", mergedResult);
 			parent.log( "Crop to original size.." );
 
-			RandomAccessibleInterval< FloatType > fittedResult = undoExpansion(mergedResult, results.getOriginalDims(), axisTypes);
+			RandomAccessibleInterval< T > fittedResult = undoExpansion(mergedResult, results.getOriginalDims(), axisTypes);
 
             parent.log( "Output axes: " + Arrays.toString( axisTypes ) );
 			DatasetHelper.debugDim(parent, "fittedResult dimensions", fittedResult );
@@ -224,7 +225,7 @@ public class DefaultTiling implements Tiling {
 		return null;
 	}
 	
-	protected RandomAccessibleInterval<FloatType> removePadding( RandomAccessibleInterval< FloatType > result, long[] padding, AxisType[] oldAxes, AxisType[] newAxes ) {
+	protected RandomAccessibleInterval<T> removePadding( RandomAccessibleInterval< T > result, long[] padding, AxisType[] oldAxes, AxisType[] newAxes ) {
 
 		final long[] negPadding = new long[ result.numDimensions() ];
 		for ( int i = 0; i < negPadding.length; i++ ) {
@@ -238,18 +239,18 @@ public class DefaultTiling implements Tiling {
 		
 	}
 
-	protected RandomAccessibleInterval< FloatType >
-			arrangeAndCombineTiles( List< RandomAccessibleInterval< FloatType > > results, long[] grid ) {
+	protected RandomAccessibleInterval< T >
+			arrangeAndCombineTiles( List< RandomAccessibleInterval< T > > results, long[] grid ) {
         status.debug( "grid: " + Arrays.toString(grid) );
 		// Arrange and combine the tiles again
-		final RandomAccessibleInterval< FloatType > result =
+		final RandomAccessibleInterval< T > result =
 				new GridView<>( new ListImg<>( results, grid ) );
 		return result;
 	}
 	
-	protected RandomAccessibleInterval< FloatType >
-	undoExpansion( RandomAccessibleInterval< FloatType > result, Map< AxisType, Long > originalDims, AxisType[] outputAxes ) {
-        RandomAccessibleInterval< FloatType > fittedResult = null;
+	protected RandomAccessibleInterval< T >
+	undoExpansion( RandomAccessibleInterval< T > result, Map< AxisType, Long > originalDims, AxisType[] outputAxes ) {
+        RandomAccessibleInterval< T > fittedResult = null;
         for ( int i = 0; i < result.numDimensions(); i++ ) {
         	AxisType axis = outputAxes[i];
         	//TODO maybe implement this in a more dynamic way
@@ -261,8 +262,8 @@ public class DefaultTiling implements Tiling {
         return fittedResult;
     }
 
-	protected static RandomAccessibleInterval< FloatType > expandDimToSize(
-			final RandomAccessibleInterval< FloatType > im,
+	protected RandomAccessibleInterval< T > expandDimToSize(
+			final RandomAccessibleInterval< T > im,
 			final int d,
 			final long size ) {
 		final int n = im.numDimensions();
