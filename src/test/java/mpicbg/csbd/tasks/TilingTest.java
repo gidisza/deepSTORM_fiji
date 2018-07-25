@@ -24,6 +24,7 @@ import mpicbg.csbd.tiling.DefaultTiling;
 import mpicbg.csbd.tiling.Tiling;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TilingTest extends CSBDeepTest {
@@ -31,7 +32,7 @@ public class TilingTest extends CSBDeepTest {
 	@Test
 	public void testTiling() {
 
-		final Tiling tiling = new DefaultTiling( 8, 32, 32 );
+		final Tiling tiling = new DefaultTiling( 8, 1,32, 32 );
 		final long[] datasetSize = { 10, 50, 100 };
 		final AxisType[] axes = { Axes.Z, Axes.X, Axes.Y };
 		final Task task = new DefaultTask();
@@ -41,7 +42,7 @@ public class TilingTest extends CSBDeepTest {
 		final Dataset dataset = ij.dataset().create( new FloatType(), datasetSize, "", axes );
 		final RandomAccessibleInterval< FloatType > input =
 				( RandomAccessibleInterval< FloatType > ) dataset.getImgPlus();
-		final AdvancedTiledView< FloatType > tiledView = tiling.preprocess( input, dataset, task );
+		final AdvancedTiledView< FloatType > tiledView = tiling.preprocess( input, dataset, getTilingActions(dataset), task );
 
 		tiledView.getProcessedTiles().clear();
 		final Cursor< RandomAccessibleInterval< FloatType > > cursor =
@@ -59,6 +60,18 @@ public class TilingTest extends CSBDeepTest {
 		tiledView.dispose();
 
 		compareDimensions( input, output );
+	}
+
+	protected Tiling.TilingAction[] getTilingActions(Dataset input) {
+		Tiling.TilingAction[] actions = new Tiling.TilingAction[input.numDimensions()];
+		Arrays.fill(actions, Tiling.TilingAction.NO_TILING);
+		for(int i = 0; i < actions.length; i++) {
+			AxisType type = input.axis(i).type();
+			if(type.isSpatial()) {
+				actions[i] = Tiling.TilingAction.TILE_WITH_PADDING;
+			}
+		}
+		return actions;
 	}
 
 //	@Test

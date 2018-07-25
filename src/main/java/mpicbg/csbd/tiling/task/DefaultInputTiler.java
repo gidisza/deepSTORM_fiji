@@ -18,13 +18,13 @@ public class DefaultInputTiler< T extends RealType< T >> extends DefaultTask imp
 	public List< AdvancedTiledView< T > > run(
 			final List< RandomAccessibleInterval< T > > input,
 			final Dataset dataset,
-			final Tiling prediction ) {
+			final Tiling tiling,
+			final Tiling.TilingAction[] tilingActions) {
 
 		setStarted();
 
-		final List< AdvancedTiledView< T > > output =
-				input.stream().map( image -> prediction.preprocess( image, dataset, this ) )//
-						.collect( Collectors.toList() );
+		final List output =
+				input.stream().map( image -> tiling.preprocess( image, dataset, tilingActions, this ) ).collect( Collectors.toList() );
 
 		setFinished();
 

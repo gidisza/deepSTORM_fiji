@@ -16,21 +16,14 @@
  */
 package mpicbg.csbd.normalize;
 
-import java.io.Serializable;
-
-import net.imglib2.Cursor;
-import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.exception.NotPositiveException;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.util.MathArrays;
-import org.apache.commons.math3.util.PivotingStrategyInterface;
 
 
 /**

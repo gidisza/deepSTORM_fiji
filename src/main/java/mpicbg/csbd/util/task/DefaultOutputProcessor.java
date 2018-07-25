@@ -17,13 +17,13 @@ import net.imglib2.view.Views;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultOutputProcessor extends DefaultTask implements OutputProcessor {
+public class DefaultOutputProcessor< T extends RealType< T > & NativeType< T > > extends DefaultTask implements OutputProcessor<T> {
 
 	public static String[] OUTPUT_NAMES = { "result" };
 
 	@Override
 	public List< Dataset > run(
-			final List< RandomAccessibleInterval< FloatType > > result,
+			final List< RandomAccessibleInterval< T > > result,
 			final Dataset dataset,
 			final Network network,
 			final DatasetService datasetService) {
@@ -38,11 +38,11 @@ public class DefaultOutputProcessor extends DefaultTask implements OutputProcess
 	}
 
 	public List< Dataset > _run(
-			final RandomAccessibleInterval<FloatType> result,
+			final RandomAccessibleInterval<T> result,
 			final Dataset dataset,
 			final Network network, DatasetService datasetService) {
 
-		final List< RandomAccessibleInterval< FloatType > > splittedResult =
+		final List< RandomAccessibleInterval< T > > splittedResult =
 				splitByLastNodeDim( result, network );
 
 		final List< Dataset > output = new ArrayList<>();
@@ -67,14 +67,14 @@ public class DefaultOutputProcessor extends DefaultTask implements OutputProcess
 		return output;
 	}
 
-	protected List< RandomAccessibleInterval< FloatType > >
-			splitByLastDim( final RandomAccessibleInterval< FloatType > fittedResult ) {
+	protected List< RandomAccessibleInterval< T > >
+			splitByLastDim( final RandomAccessibleInterval< T > fittedResult ) {
 		final int lastdim = fittedResult.numDimensions() - 1;
 		return splitChannels( fittedResult, lastdim );
 	}
 
-	protected List< RandomAccessibleInterval< FloatType > > splitByLastNodeDim(
-			final RandomAccessibleInterval< FloatType > fittedResult,
+	protected List< RandomAccessibleInterval< T > > splitByLastNodeDim(
+			final RandomAccessibleInterval< T > fittedResult,
 			final Network network ) {
 		int dim;
 		if ( network.getOutputNode().numDimensions() < fittedResult.numDimensions() ) {
@@ -87,11 +87,11 @@ public class DefaultOutputProcessor extends DefaultTask implements OutputProcess
 		return splitChannels( fittedResult, dim );
 	}
 
-	protected static List< RandomAccessibleInterval< FloatType > > splitChannels(
-			final RandomAccessibleInterval< FloatType > img,
+	protected List< RandomAccessibleInterval< T > > splitChannels(
+			final RandomAccessibleInterval< T > img,
 			final int channelDim ) {
 
-		final ArrayList< RandomAccessibleInterval< FloatType > > res = new ArrayList<>();
+		final ArrayList< RandomAccessibleInterval< T > > res = new ArrayList<>();
 
 		if(channelDim >= 0 && img.dimension( channelDim ) > 0) {
 			for ( int i = 0; i < img.dimension( channelDim ); i++ ) {
@@ -104,14 +104,16 @@ public class DefaultOutputProcessor extends DefaultTask implements OutputProcess
 		return res;
 	}
 
-	protected < U extends RealType< U > & NativeType< U > > Dataset wrapIntoDataset(
+	protected Dataset wrapIntoDataset(
 			final String name,
-			final RandomAccessibleInterval<U> img,
+			final RandomAccessibleInterval<T> img,
 			final Network network, DatasetService datasetService) {
 
 		DatasetHelper.logDim(this, "img dim before wrapping into dataset", img);
 
-		//TODO convert back to original format to be able to save and load it (float 32 bit does not load in Fiji)
+		//TODO convert back to original format to be able to save and load it (float 32 bit does not load in Fiji) /- note i think we do that now
+		//TODO how is this done properly?
+
 		final Dataset dataset = datasetService.create(
 				new ImgPlus<>( ImgView.wrap( img, new ArrayImgFactory<>() ) ) );
 		dataset.setName( name );
@@ -121,9 +123,6 @@ public class DefaultOutputProcessor extends DefaultTask implements OutputProcess
 							network.getOutputNode().getDimType( i ) ).get(),
 					i );
 		}
-		// NB: Doesn't work somehow
-//		int compositeChannelCount = input.getCompositeChannelCount();
-//		dataset.setCompositeChannelCount( compositeChannelCount );
 		return dataset;
 	}
 

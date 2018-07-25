@@ -106,7 +106,6 @@
 		</license.copyrightOwners>
 
 		<!-- VERSIONS -->
-		<tensorflow.version>1.8.0</tensorflow.version>
 		<imagej-tensorflow.version>1.0.0</imagej-tensorflow.version>
 	</properties>
 
@@ -124,11 +123,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.tensorflow</groupId>
-			<artifactId>tensorflow</artifactId>
-			<version>${tensorflow.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tensorflow</groupId>
 			<artifactId>proto</artifactId>
 			<version>${tensorflow.version}</version>
 		</dependency>
@@ -136,23 +130,24 @@
         <groupId>org.tensorflow</groupId>
         <artifactId>libtensorflow</artifactId>
         <version>${tensorflow.version}</version>
-    </dependency>
+    </dependency>-->
     <dependency>
         <groupId>org.tensorflow</groupId>
         <artifactId>libtensorflow_jni_gpu</artifactId>
         <version>${tensorflow.version}</version>
-    </dependency>-->
+    </dependency>
 
-    <dependency>
-        <groupId>net.imagej</groupId>
-        <artifactId>imagej-tensorflow</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-tensorflow</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 <!--
 <build>
     <plugins>

@@ -6,6 +6,7 @@ import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
@@ -29,6 +30,7 @@ public class GenericNetworkTest extends CSBDeepTest {
 
 			testDataset(new FloatType(), new long[]{10, 10, 10}, new AxisType[]{Axes.X, Axes.Y, Axes.Z});
 			testDataset(new UnsignedIntType(), new long[]{10, 10, 10}, new AxisType[]{Axes.X, Axes.Y, Axes.Z});
+			testDataset(new ByteType(), new long[]{10, 10, 10}, new AxisType[]{Axes.X, Axes.Y, Axes.Z});
 
 			if (i % 10 == 0)
 				System.out.println(i);

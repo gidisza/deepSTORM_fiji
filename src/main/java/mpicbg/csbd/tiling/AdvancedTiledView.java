@@ -3,14 +3,14 @@ package mpicbg.csbd.tiling;
 import mpicbg.csbd.imglib2.TiledView;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.type.numeric.RealType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AdvancedTiledView< T > extends TiledView< T > {
+public class AdvancedTiledView< T extends RealType< T >> extends TiledView< T > {
 
 	private final Map< AxisType, Long > originalDims;
 	private final AxisType[] originalAxes;
@@ -19,10 +19,10 @@ public class AdvancedTiledView< T > extends TiledView< T > {
 //	protected long blockWidth;
 
 	public AdvancedTiledView(
-			final RandomAccessibleInterval< T > source,
+			final RandomAccessibleInterval<T> source,
 			final long[] blockSize,
 			final long[] overlap,
-			final AxisType[] axes) {
+			final AxisType[] axes, Tiling.TilingAction[] tilingActions) {
 		super( source, blockSize, overlap );
 		processedTiles = new ArrayList<>();
 		originalDims = new HashMap<>();

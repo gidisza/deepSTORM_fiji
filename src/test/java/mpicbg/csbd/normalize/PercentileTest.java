@@ -6,6 +6,7 @@ import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.histogram.Histogram1d;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,7 +17,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class NormalizeTest {
+public class PercentileTest {
 
 	@Test
 	public void testPercentileSortedArray(){
@@ -46,12 +47,26 @@ public class NormalizeTest {
 	}
 
 	@Test
+	public void testMaxPercentilesRandomArray(){
+
+		final long[] dimensions = new long[] { 10, 20, 2 };
+		final double[] data = new double[(int)mult(dimensions)];
+		Random random = new Random();
+		for(int i = 0; i < data.length; i++) {
+			data[i] = random.nextDouble();
+		}
+
+		testPercentiles(dimensions, data, new double[]{0.000000001, 99.99999999});
+
+	}
+
+	@Test
 	public void testPercentileInvertedArrayLong(){
 
 		final long[] dimensions = new long[] { 500, 2000 };
 		final double[] data = new double[(int)mult(dimensions)];
 		for(int i = 0; i < data.length; i++) {
-			data[i] = data.length-i;
+			data[i] = (data.length-i)*0.001;
 		}
 
 		testPercentiles(dimensions, data, new double[]{1.0f, 99.0f});
@@ -61,7 +76,7 @@ public class NormalizeTest {
 	@Test
 	public void testPercentileRandomArrayLong(){
 
-		final long[] dimensions = new long[] { 600, 200, 116 };
+		final long[] dimensions = new long[] { 294, 285, 2, 30 };
 		final double[] data = new double[(int)mult(dimensions)];
 		Random random = new Random();
 		for(int i = 0; i < data.length; i++) {
@@ -141,7 +156,7 @@ public class NormalizeTest {
 		while(cursor.hasNext()) {
 			cursor.fwd();
 			i++;
-			cursor.get().set((float)data[i]);
+			cursor.get().set((float) data[i]);
 		}
 
 		List<FloatType> res1 = normalizer.computePercentiles(img, percentiles, ij.op());

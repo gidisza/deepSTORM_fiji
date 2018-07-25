@@ -28,17 +28,21 @@
  */
 package mpicbg.csbd.tiling;
 
+import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
-
-import mpicbg.csbd.task.Task;
 
 public interface Tiling< T extends RealType< T >> {
 
-	AdvancedTiledView< T > preprocess(RandomAccessibleInterval< T > input, Dataset dataset, Task parent);
+	enum TilingAction {
+		NO_TILING,                  // e.g. Channel
+		TILE_WITH_PADDING,          // e.g. X,Y,Z
+		TILE_WITHOUT_PADDING        // e.g. TIME
+	}
+
+	AdvancedTiledView< T > preprocess(RandomAccessibleInterval< T > input, Dataset dataset, TilingAction[] tilingActions, Task parent);
 	
 	RandomAccessibleInterval< T > postprocess( Task parent, final AdvancedTiledView< T > results, AxisType[] axisTypes );
 	

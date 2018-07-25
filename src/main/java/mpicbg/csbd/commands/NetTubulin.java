@@ -28,8 +28,8 @@
  */
 package mpicbg.csbd.commands;
 
-import mpicbg.csbd.tiling.BatchedTiling;
 import mpicbg.csbd.tiling.DefaultTiling;
+import mpicbg.csbd.tiling.Tiling;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
@@ -64,13 +64,19 @@ public class NetTubulin extends CSBDeepCommand implements Command {
 
 	@Override
 	protected void initTiling() {
+		tiling = new DefaultTiling( nTiles, batchSize, blockMultiple, overlap );
+	}
+
+	@Override
+	protected Tiling.TilingAction[] getTilingActions() {
+		Tiling.TilingAction[] actions = super.getTilingActions();
 		if ( getInput().numDimensions() == 3 ) {
-			final int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex( 0 );
-			final int channelDim = network.getInputNode().getDataset().dimensionIndex( Axes.TIME );
-			tiling = new BatchedTiling( nTiles, BLOCK_MULTIPLE, overlap, batchSize, batchDim, channelDim );
-		} else {
-			tiling = new DefaultTiling( nTiles, BLOCK_MULTIPLE, overlap );
+			int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex( 0 );
+			if(batchDim >= 0) {
+				actions[batchDim] = Tiling.TilingAction.TILE_WITHOUT_PADDING;
+			}
 		}
+		return actions;
 	}
 
 	@Override

@@ -16,7 +16,6 @@
  */
 package mpicbg.csbd.normalize;
 
-import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;

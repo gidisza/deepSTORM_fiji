@@ -51,7 +51,6 @@ import mpicbg.csbd.util.task.InputProcessor;
 import mpicbg.csbd.util.task.OutputProcessor;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
-import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.ops.OpService;
@@ -208,16 +207,19 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		taskManager.finalizeSetup();
 
 		prepareInputAndNetwork();
-		final List< RandomAccessibleInterval< T > > processedInput =
-				inputProcessor.run( getInput() );
 
-		final List< RandomAccessibleInterval< T > > normalizedInput;
+		final Dataset normalizedInput;
 		if(doInputNormalization()) {
 			setupNormalizer();
-			normalizedInput = inputNormalizer.run( processedInput, opService );
+			normalizedInput = inputNormalizer.run( getInput(), opService, datasetService );
 		} else {
-			normalizedInput = processedInput;
+			normalizedInput = getInput();
 		}
+
+		final List< RandomAccessibleInterval< T > > processedInput =
+				inputProcessor.run( normalizedInput );
+
+		System.out.println(processedInput.get(0).randomAccess().get().getClass());
 
 		log( "INPUT NODE: " );
 		network.getInputNode().printMapping();
@@ -227,7 +229,7 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		initTiling();
 		try {
 			final List< AdvancedTiledView< FloatType > > tiledOutput =
-					tryToTileAndRunNetwork( normalizedInput );
+					tryToTileAndRunNetwork( processedInput );
 			final List< RandomAccessibleInterval< FloatType > > output =
 					outputTiler.run( tiledOutput, tiling, getAxesArray( network.getOutputNode() ) );
 			for(AdvancedTiledView obj : tiledOutput) {
@@ -292,7 +294,7 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	}
 
 	protected void initTiling() {
-		tiling = new DefaultTiling( nTiles, blockMultiple, overlap );
+		tiling = new DefaultTiling( nTiles, 1, blockMultiple, overlap );
 	}
 
 	private List< AdvancedTiledView< FloatType > > tryToTileAndRunNetwork(
@@ -303,7 +305,7 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		while ( isOutOfMemory && canHandleOutOfMemory ) {
 			try {
 				final List< AdvancedTiledView< T > > tiledInput =
-						inputTiler.run( normalizedInput, getInput(), tiling );
+						inputTiler.run( normalizedInput, getInput(), tiling, getTilingActions() );
 				tiledOutput = modelExecutor.run( tiledInput, network );
 				isOutOfMemory = false;
 			} catch ( final OutOfMemoryError e ) {
@@ -314,6 +316,18 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		if(isOutOfMemory)
 			throw new OutOfMemoryError("Out of memory exception occurred. Plugin exit.");
 		return tiledOutput;
+	}
+
+	protected Tiling.TilingAction[] getTilingActions() {
+		Tiling.TilingAction[] actions = new Tiling.TilingAction[getInput().numDimensions()];
+		Arrays.fill(actions, Tiling.TilingAction.NO_TILING);
+		for(int i = 0; i < actions.length; i++) {
+			AxisType type = getInput().axis(i).type();
+			if(type.isSpatial()) {
+				actions[i] = Tiling.TilingAction.TILE_WITH_PADDING;
+			}
+		}
+		return actions;
 	}
 
 	public void setMapping( final AxisType[] mapping ) {

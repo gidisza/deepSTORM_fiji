@@ -8,6 +8,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -22,14 +23,19 @@ public class DefaultModelExecutor< T extends RealType< T >> extends DefaultTask 
 
 	@Override
 	public List< AdvancedTiledView< T > >
-			run( final List< AdvancedTiledView< T > > input, final Network network ) {
+			run( final List< AdvancedTiledView< T > > input, final Network network )  throws OutOfMemoryError {
 		setStarted();
 		if(input.size() > 0) {
 			DatasetHelper.logDim(this, "Network input size", input.get(0).randomAccess().get());
 		}
-		pool = Executors.newSingleThreadExecutor();
-		final List< AdvancedTiledView< T > > output =
-				input.stream().map( tile -> run( tile, network ) ).collect( Collectors.toList() );
+		pool = Executors.newWorkStealingPool();
+		final List< AdvancedTiledView< T > > output = new ArrayList<>();
+		for(AdvancedTiledView<T> tile : input) {
+			output.add(run(tile, network));
+		}
+		//TODO why does this not work?
+//		final List< AdvancedTiledView< T > > output =
+//				input.stream().map( tile -> run( tile, network ) ).collect( Collectors.toList() );
 		pool.shutdown();
 		if(output.size() > 0) {
 			DatasetHelper.logDim(this, "Network output size", output.get(0).getProcessedTiles().get(0));
@@ -46,8 +52,8 @@ public class DefaultModelExecutor< T extends RealType< T >> extends DefaultTask 
 
 		try {
 			network.setTiledView( input );
-			input.getProcessedTiles().addAll((Collection<? extends RandomAccessibleInterval<T>>) pool.submit( network ).get());
-		} catch ( final ExecutionException exc ) {
+			input.getProcessedTiles().addAll((List<RandomAccessibleInterval<T>>) pool.submit( network ).get());
+		} catch ( final ExecutionException | IllegalStateException exc ) {
 			exc.printStackTrace();
 			setIdle();
 			throw new OutOfMemoryError();

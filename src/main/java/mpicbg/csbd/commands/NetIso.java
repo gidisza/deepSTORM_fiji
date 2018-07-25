@@ -31,7 +31,8 @@ package mpicbg.csbd.commands;
 import mpicbg.csbd.imglib2.TiledView;
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
-import mpicbg.csbd.tiling.BatchedTiling;
+import mpicbg.csbd.tiling.DefaultTiling;
+import mpicbg.csbd.tiling.Tiling;
 import mpicbg.csbd.util.DatasetHelper;
 import mpicbg.csbd.util.task.DefaultOutputProcessor;
 import mpicbg.csbd.util.task.InputProcessor;
@@ -41,13 +42,19 @@ import net.imagej.DatasetService;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
-import net.imglib2.*;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RealRandomAccessible;
+import net.imglib2.converter.Converters;
+import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.realtransform.Scale;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
@@ -72,7 +79,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
 @Plugin( type = Command.class, menuPath = "Plugins>CSBDeep>Isotropic Reconstruction - Retina", headless = true )
-public class NetIso extends CSBDeepCommand implements Command {
+public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements Command {
 
 	@Parameter( label = "Scale Z", min = "1", max = "15" )
 	protected float scale = 10.2f;
@@ -94,9 +101,21 @@ public class NetIso extends CSBDeepCommand implements Command {
 
 	@Override
 	protected void initTiling() {
-		final int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex( 0 );
-		final int channelDim = network.getInputNode().getDataset().dimensionIndex( Axes.CHANNEL );
-		tiling = new BatchedTiling( nTiles, 4, overlap, batchSize, batchDim, channelDim );
+		int batchMultiple = 4;
+		batchSize = (int) Math.ceil((float) batchSize / (float) batchMultiple) * batchMultiple;
+		tiling = new DefaultTiling( nTiles, batchSize, blockMultiple, overlap );
+	}
+
+	@Override
+	protected Tiling.TilingAction[] getTilingActions() {
+		Tiling.TilingAction[] actions = super.getTilingActions();
+		if ( getInput().numDimensions() >= 3 ) {
+			int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex( 0 );
+			if(batchDim >= 0) {
+				actions[batchDim] = Tiling.TilingAction.TILE_WITHOUT_PADDING;
+			}
+		}
+		return actions;
 	}
 
 	@Override
@@ -116,11 +135,11 @@ public class NetIso extends CSBDeepCommand implements Command {
 
 			setStarted();
 
-			final List< RandomAccessibleInterval< FloatType > > output = new ArrayList<>();
+			final List< RandomAccessibleInterval<FloatType> > output = new ArrayList<>();
 
-			final RandomAccessibleInterval< FloatType > inputRai =
-					( RandomAccessibleInterval< FloatType > ) input.getImgPlus();
+			final RandomAccessibleInterval<FloatType> inputRai = Converters.convert((RandomAccessibleInterval)input.getImgPlus(), new RealFloatConverter<T>(), new FloatType());
 
+			log("Dataset type: " + input.getTypeLabelLong() );
 			DatasetHelper.logDim( this, "Dataset dimensions", inputRai );
 
 			final int dimX = input.dimensionIndex( Axes.X );
@@ -138,6 +157,7 @@ public class NetIso extends CSBDeepCommand implements Command {
 			final RandomAccessibleInterval< FloatType > rotated1 =
 					Views.permute( rotated0, dimY, dimZ );
 
+			//TODO neccessary?
 			final RandomAccessibleInterval< FloatType > rotated0_applied =
 					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated0 ) );
 			final RandomAccessibleInterval< FloatType > rotated1_applied =
@@ -147,6 +167,10 @@ public class NetIso extends CSBDeepCommand implements Command {
 
 			output.add( rotated0_applied );
 			output.add( rotated1_applied );
+
+			ImageJ ij = new ImageJ();
+			ij.ui().show(rotated0_applied);
+			ij.ui().show(rotated1_applied);
 
 			DatasetHelper.logDim( this, "Input #1 (Z-X rotated)", rotated0_applied );
 			DatasetHelper.logDim( this, "Input #2 (Z-X and Z-Y rotated)", rotated1_applied );
@@ -192,11 +216,11 @@ public class NetIso extends CSBDeepCommand implements Command {
 		return true;
 	}
 
-	private class IsoOutputProcessor extends DefaultOutputProcessor {
+	private class IsoOutputProcessor< T extends RealType< T > & NativeType< T >> extends DefaultOutputProcessor<T> {
 
 		@Override
 		public List< Dataset > run(
-				final List< RandomAccessibleInterval< FloatType > > result,
+				final List< RandomAccessibleInterval< T > > result,
 				final Dataset dataset,
 				final Network network,
 				final DatasetService datasetService) {
@@ -204,23 +228,33 @@ public class NetIso extends CSBDeepCommand implements Command {
 
 			final List< Dataset > output = new ArrayList<>();
 
-			final RandomAccessibleInterval< FloatType > _result0 = result.get( 0 );
-			final RandomAccessibleInterval< FloatType > _result1 = result.get( 1 );
+			final RandomAccessibleInterval< T > _result0 = result.get( 0 );
+			final RandomAccessibleInterval< T > _result1 = result.get( 1 );
 
-			final List< RandomAccessibleInterval< FloatType > > result0 =
+			DatasetHelper.logDim( this, "_result0", _result0 );
+			DatasetHelper.logDim( this, "_result1", _result1 );
+
+			ImageJ ij = new ImageJ();
+			ij.ui().show(_result0);
+			ij.ui().show(_result1);
+
+			final List< RandomAccessibleInterval< T > > result0 =
 					splitByLastNodeDim( _result0, network );
-			final List< RandomAccessibleInterval< FloatType > > result1 =
+			final List< RandomAccessibleInterval< T > > result1 =
 					splitByLastNodeDim( _result1, network );
+
+			DatasetHelper.logDim( this, "result0.get(0)", result0.get(0) );
+			DatasetHelper.logDim( this, "result1.get(0)", result1.get(0) );
 
 			for ( int i =
 					0; i + 1 < result0.size() && i + 1 < result1.size() && i / 2 < OUTPUT_NAMES.length; i +=
 							2 ) {
 				//prediction for ZY rotation
-				RandomAccessibleInterval< FloatType > res0_pred =
+				RandomAccessibleInterval< T > res0_pred =
 						Views.stack( result0.get( i ), result0.get( i + 1 ) );
 
 				//prediction for ZX rotation
-				RandomAccessibleInterval< FloatType > res1_pred =
+				RandomAccessibleInterval< T > res1_pred =
 						Views.stack( result1.get( i ), result1.get( i + 1 ) );
 
 				DatasetHelper.logDim( this, "Output #1", res0_pred );
@@ -249,8 +283,9 @@ public class NetIso extends CSBDeepCommand implements Command {
 				log( "Merge output stacks.." );
 
 				// Calculate the geometric mean of the two predictions
-				final RandomAccessibleInterval< FloatType > prediction =
-						ArrayImgs.floats( Intervals.dimensionsAsLongArray( res0_pred ) );
+				//TODO check if this is right
+				final RandomAccessibleInterval< T > prediction = new CellImgFactory<>(res0_pred.randomAccess().get())
+						.create( Intervals.dimensionsAsLongArray( res0_pred ) );
 				pointwiseGeometricMean(
 						res0_pred,
 						res1_pred,
@@ -379,7 +414,7 @@ public class NetIso extends CSBDeepCommand implements Command {
 				e.printStackTrace();
 			}
 		}
-		pool.shutdown();
+//		pool.shutdown();
 	}
 
 	private < U extends RealType< U >, V extends RealType< V >, W extends RealType< W > > void
@@ -398,52 +433,12 @@ public class NetIso extends CSBDeepCommand implements Command {
 
 		futures.clear();
 
-		final Cursor< RandomAccessibleInterval< U > > tileCursorIn1 =
-				Views.iterable( tiledViewIn1 ).cursor();
-		final RandomAccess< RandomAccessibleInterval< V > > tileRandomAccessIn2 =
-				tiledViewIn2.randomAccess();
-		final RandomAccess< RandomAccessibleInterval< W > > tileRandomAccessOut =
-				tiledViewOut.randomAccess();
-
-		while ( tileCursorIn1.hasNext() ) {
-			// Set positions
-			tileCursorIn1.fwd();
-			tileRandomAccessIn2.setPosition( tileCursorIn1 );
-			tileRandomAccessOut.setPosition( tileCursorIn1 );
-
-			// Get tiles
-			final RandomAccessibleInterval< U > tileIn1 = tileCursorIn1.get();
-			final RandomAccessibleInterval< V > tileIn2 = tileRandomAccessIn2.get();
-			final RandomAccessibleInterval< W > tileOut = tileRandomAccessOut.get();
-
-			// Add loop for current tile to pool
-			futures.add( pool.submit( () -> {
-				final Cursor< U > i1 = Views.iterable( tileIn1 ).cursor();
-				final RandomAccess< V > i2 = tileIn2.randomAccess();
-				final RandomAccess< W > o = tileOut.randomAccess();
-				while ( i1.hasNext() ) {
-					i1.fwd();
-					i2.setPosition( i1 );
-					o.setPosition( i1 );
-					o.get().setReal(
-							Math.sqrt( i1.get().getRealFloat() * i2.get().getRealFloat() ) );
-				}
-			} ) );
-		}
-
-		// NB: This code is much nicer but prints to stderr.
-		// This will be fixed after https://github.com/imglib/imglib2/pull/193 is in the release
-
-//		LoopBuilder.setImages( tiledViewIn1, tiledViewIn2, tiledViewOut ).forEachPixel(
-//				( in1Tile, in2Tile, outTile ) -> {
-//					final LoopBuilder< TriConsumer< U, V, W > > loop = LoopBuilder.setImages( in1Tile, in2Tile, outTile );
-//					futures.add( pool.submit( () -> {
-//						loop.forEachPixel(
-//								( i1, i2, o ) -> {
-//									o.setReal( Math.sqrt( i1.getRealFloat() * i2.getRealFloat() ) );
-//								} );
-//					} ) );
-//				} );
+		LoopBuilder.setImages( tiledViewIn1, tiledViewIn2, tiledViewOut ).forEachPixel(
+				( in1Tile, in2Tile, outTile ) -> {
+					final LoopBuilder<LoopBuilder.TriConsumer< U, V, W >> loop = LoopBuilder.setImages( in1Tile, in2Tile, outTile );
+					futures.add( pool.submit( () -> loop.forEachPixel(
+							( i1, i2, o ) -> o.setReal( Math.sqrt( i1.getRealFloat() * i2.getRealFloat() ) ))) );
+				} );
 
 		for ( final Future< ? > f : futures ) {
 			try {
@@ -452,7 +447,7 @@ public class NetIso extends CSBDeepCommand implements Command {
 				e.printStackTrace();
 			}
 		}
-		pool.shutdown();
+//		pool.shutdown();
 	}
 
 	private long[] computeBlockSize( final RandomAccessibleInterval< ? > in ) {
@@ -479,7 +474,7 @@ public class NetIso extends CSBDeepCommand implements Command {
 		// ask the user for a file to open
 //		final File file = ij.ui().chooseFile( null, "open" );
 		final File file =
-				new File( "/home/random/Development/imagej/plugins/CSBDeep-data/net_iso/input-2.tif" );
+				new File( "/home/random/Development/imagej/plugins/CSBDeep-data/net_iso/input-3.tif" );
 
 		if ( file != null && file.exists() ) {
 			// load the dataset

@@ -16,6 +16,7 @@ public interface InputTiler< T extends RealType< T >> extends Task {
 	public List< AdvancedTiledView< T > > run(
 			List< RandomAccessibleInterval< T > > input,
 			Dataset dataset,
-			Tiling prediction );
+			Tiling prediction,
+			final Tiling.TilingAction[] tilingActions );
 
 }

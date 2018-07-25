@@ -207,6 +207,7 @@ public class TensorFlowNetwork< T extends RealType< T >> extends DefaultNetwork<
 			if ( outputTensor != null ) {
 				output = DatasetTensorflowConverter.tensorToDataset(
 						outputTensor,
+						tile.randomAccess().get(),
 						getOutputNode().getMapping(),
 						dropSingletonDims);
 				outputTensor.close();

@@ -38,7 +38,6 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.list.ListImg;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
@@ -48,26 +47,32 @@ import java.util.Map;
 
 public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 
+
 	protected final int tilesNum;
+	protected int batchSize;
 	protected int blockMultiple;
 	protected int overlap;
 	protected Task status;
+	protected TilingAction[] tilingActions;
 
 	public DefaultTiling(
 			final int tilesNum,
+			final int batchSize,
 			final int blockMultiple,
 			final int overlap ) {
 
 		this.tilesNum = tilesNum;
+		this.batchSize = batchSize;
 		this.blockMultiple = blockMultiple;
 		this.overlap = overlap;
 
 	}
 
 	@Override
-	public AdvancedTiledView< T > preprocess(RandomAccessibleInterval< T > input, Dataset dataset, Task parent) {
+	public AdvancedTiledView< T > preprocess(RandomAccessibleInterval< T > input, Dataset dataset, TilingAction[] tilingActions, Task parent) {
 
 	    this.status = parent;
+	    this.tilingActions = tilingActions;
 
 		if ( input != null ) {
 
@@ -78,18 +83,21 @@ public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 
 			long[] tiling = new long[input.numDimensions()];
 			Arrays.fill(tiling, 1);
-			computeTiling(input, axes, tiling, tilesNum, blockMultiple);
-
+			parent.log(Arrays.toString(tiling));
+			computeTiling(input, tiling, tilingActions);
+			parent.log(Arrays.toString(tiling));
 			long[] padding = getPadding(tiling);
-
+			computeBatching(input, tiling, tilingActions);
+			parent.log(Arrays.toString(tiling));
 			parent.log( "Dividing image into " + arrayProduct(tiling) + " tile(s).." );
 
-			RandomAccessibleInterval< T > expandedInput = expandToFitBlockSize(input, tiling, blockMultiple);
+			RandomAccessibleInterval< T > expandedInput = expandToFitBlockSize(input, tiling);
+			expandedInput = expandToFitBatchSize(expandedInput, tiling);
 			long[] tileSize = calculateTileSize(expandedInput, tiling);
 
 			parent.log( "Size of single image tile: " + Arrays.toString( tileSize ) );
 
-			final AdvancedTiledView< T > tiledView = createTiledView(parent, expandedInput, tileSize, padding, axes);
+			final AdvancedTiledView< T > tiledView = createTiledView(parent, expandedInput, tileSize, padding, axes, tilingActions);
 			for( int i = 0; i < input.numDimensions(); i++) {
 				tiledView.getOriginalDims().put( dataset.axis( i ).type(), input.dimension( i ));
 			}
@@ -110,6 +118,28 @@ public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 
 	}
 
+	private void computeBatching(RandomAccessibleInterval<T> input, long[] tiling, TilingAction[] tilingActions) {
+
+		for(int i = 0; i < input.numDimensions(); i++) {
+			if (tilingActions[i] == TilingAction.TILE_WITHOUT_PADDING) {
+
+				long batchDimSize = input.dimension(i);
+
+//				parent.debug( "batchDimSize: " + batchDimSize );
+
+				long batchesNum = ( int ) Math.ceil( ( float ) batchDimSize / ( float ) batchSize );
+
+				// If a smaller batch size is sufficient for the same amount of batches, we can use it
+				batchSize = ( int ) Math.ceil( ( float ) batchDimSize / ( float ) batchesNum );
+
+				tiling[ i ] = batchSize;
+
+			}
+		}
+
+
+	}
+
 	public static long arrayProduct(long[] array) {
 		long rtn = 1;
 		for (long i : array) {
@@ -118,27 +148,27 @@ public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 		return rtn;
 	}
 
-	protected long[] computeTiling(RandomAccessibleInterval< T > input, AxisType[] axes, long[] tiling, int nTiles, int blockSize) {
+	protected long[] computeTiling(RandomAccessibleInterval<T> input, long[] tiling, TilingAction[] tilingActions) {
 		int currentTiles = 1;
 		for(long tiles : tiling) {
 			currentTiles *= tiles;
 		}
-		if(currentTiles >= nTiles) {
+		if(currentTiles >= tilesNum) {
 			return tiling;
 		}else {
 			long[] singleTile = new long[input.numDimensions()];
 			int maxDim = -1;
 			for(int i = 0; i < singleTile.length; i++) {
-				if(axes[i].isSpatial()) {
-					singleTile[i] = (long) Math.ceil((input.dimension(i) / tiling[i] + blockSize) / blockSize) * blockSize;
-					if(singleTile[i] > blockSize && (maxDim < 0 || singleTile[i] > singleTile[maxDim])) {
+				if(tilingActions[i] == TilingAction.TILE_WITH_PADDING) {
+					singleTile[i] = (long) Math.ceil((input.dimension(i) / tiling[i] + blockMultiple) / blockMultiple) * blockMultiple;
+					if(singleTile[i] > blockMultiple && (maxDim < 0 || singleTile[i] > singleTile[maxDim])) {
 						maxDim = i;
 					}
 				}
 			}
 			if(maxDim >= 0) {
 				tiling[maxDim] += 1;
-				return computeTiling(input, axes, tiling, nTiles, blockSize);
+				return computeTiling(input, tiling, tilingActions);
 			}else {
 				return tiling;
 			}
@@ -154,10 +184,23 @@ public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 	}
 
 	protected RandomAccessibleInterval< T >
-			expandToFitBlockSize(RandomAccessibleInterval< T > dataset, long[] tiling, long BlockSize ) {
+			expandToFitBlockSize(RandomAccessibleInterval< T > dataset, long[] tiling ) {
 		for ( int i = 0; i < dataset.numDimensions(); i++ ) {
-			dataset = expandDimToSize(
-					dataset, i, ( long ) Math.ceil( dataset.dimension( i )/ tiling[i] / ( double ) blockMultiple ) * blockMultiple * tiling[i] );
+			if(tilingActions[i] == TilingAction.TILE_WITH_PADDING) {
+				dataset = expandDimToSize(
+						dataset, i, ( long ) Math.ceil( dataset.dimension( i )/ tiling[i] / ( double ) blockMultiple ) * blockMultiple * tiling[i] );
+			}
+		}
+		return dataset;
+	}
+
+	protected RandomAccessibleInterval< T >
+	expandToFitBatchSize(RandomAccessibleInterval< T > dataset, long[] tiling ) {
+		for ( int i = 0; i < dataset.numDimensions(); i++ ) {
+			if(tilingActions[i] == TilingAction.TILE_WITHOUT_PADDING) {
+				dataset = expandDimToSize(
+						dataset, i, ( long ) Math.ceil( dataset.dimension( i )/ tiling[i] / ( double ) batchSize ) * batchSize * tiling[i] );
+			}
 		}
 		return dataset;
 	}
@@ -170,8 +213,8 @@ public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 		return tileSize;
 	}
 	
-	protected AdvancedTiledView< T > createTiledView(Task parent, RandomAccessibleInterval< T > input, long[] tileSize, long[] padding, AxisType[] types) {
-		return new AdvancedTiledView<>( input, tileSize, padding, types );
+	protected AdvancedTiledView< T > createTiledView(Task parent, RandomAccessibleInterval< T > input, long[] tileSize, long[] padding, AxisType[] types, TilingAction[] tilingActions) {
+		return new AdvancedTiledView<>( input, tileSize, padding, types, tilingActions );
 	}
 
 	@Override

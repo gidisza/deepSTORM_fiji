@@ -8,13 +8,14 @@ import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import org.scijava.io.location.Location;
 
 import mpicbg.csbd.network.DefaultNetwork;
 
-public class PseudoNetwork extends DefaultNetwork {
+public class PseudoNetwork< T extends RealType< T >> extends DefaultNetwork<T> {
 
 	private long[] inputShape;
 	private boolean initialized = false;
@@ -90,7 +91,7 @@ public class PseudoNetwork extends DefaultNetwork {
 		}
 	}
 
-	private < T > Dataset
+	private Dataset
 			createEmptyDuplicateWithoutAxis( final Dataset input, final AxisType axisToRemove ) {
 		int numDims = input.numDimensions();
 		if ( input.axis( Axes.Z ) != null ) {
@@ -107,13 +108,14 @@ public class PseudoNetwork extends DefaultNetwork {
 				j++;
 			}
 		}
+		//TODO should not be FloatType but T and should not create ImageJ instance (memory leak)
 		final Dataset result = new ImageJ().dataset().create( new FloatType(), dims, "", axes );
 		return result;
 	}
 
 	@Override
-	public RandomAccessibleInterval< FloatType >
-			execute( final RandomAccessibleInterval< FloatType > tile ) throws Exception {
+	public RandomAccessibleInterval< T >
+			execute( final RandomAccessibleInterval< T > tile ) throws Exception {
 
 		return tile;
 

@@ -28,60 +28,63 @@
  */
 package mpicbg.csbd.normalize;
 
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.AxisType;
+import net.imagej.axis.CalibratedAxis;
 import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
-import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
 
-public class PercentileNormalizer< T extends RealType< T > & NativeType<T>> implements Normalizer< T > {
+public class PercentileNormalizer<T extends RealType<T> & NativeType<T>> implements Normalizer {
 
-	private double[] percentiles = new double[]{3.0, 99.8};
+	private double[] percentiles = new double[]{0.00001, 99.99999};
 	private float[] destValues = new float[]{0, 1};
 	private List<T> resValues;
 	private boolean clip = false;
 
-	protected T min;
-	protected T max;
+	protected float min;
+	protected float max;
 	protected float factor;
 
-	@Override
-	public T normalize( final T val ) {
+	public float normalize( final T val ) {
 		if(clip) {
-			if(val.compareTo(min) < 0) {
-				return min.copy();
+			if(val.getRealFloat() < min) {
+				return min;
 			}
-			if(val.compareTo(max) > 0) {
-				return max.copy();
+			if(val.getRealFloat() > max) {
+				return max;
 			}
 		}
-		T res = val.copy();
-		res.sub(resValues.get(0));
-		res.mul(factor);
-		res.add(min);
-		return res;
+		return (val.getRealFloat() - resValues.get(0).getRealFloat())*factor+min;
 	}
 
 	@Override
-	public Img< T > normalize(final RandomAccessibleInterval<T> im, OpService opService) {
+	public Dataset normalize(final Dataset im, OpService opService, DatasetService datasetService) {
 		HistogramPercentile<T> percentile = new HistogramPercentile<>();
-		resValues = percentile.computePercentiles(im, percentiles, opService);
-		min = im.randomAccess().get().copy();
-		min.setReal(destValues[0]);
-		max = min.copy();
-		max.setReal(destValues[1]);
+		resValues = percentile.computePercentiles((RandomAccessibleInterval<T>) im.getImgPlus(), percentiles, opService);
+		min = destValues[0];
+		max = destValues[1];
 		factor = (destValues[1] - destValues[0]) / (resValues.get(1).getRealFloat() - resValues.get(0).getRealFloat());
-		final Img< T > output = new ArrayImgFactory<T>().create(im);
 
-		final RandomAccess< T > in = im.randomAccess();
-		final Cursor< T > out = output.localizingCursor();
+		long [] dims = new long[im.numDimensions()];
+		im.dimensions(dims);
+		AxisType[] axes = new AxisType[im.numDimensions()];
+		for(int i = 0; i < axes.length; i++) {
+			axes[i] = im.axis(i).type();
+		}
+
+		final Dataset output = datasetService.create(new FloatType(), dims, "normalized input", axes);
+
+		final RandomAccess< T > in = (RandomAccess<T>) im.getImgPlus().randomAccess();
+		final Cursor< FloatType > out = (Cursor<FloatType>) output.getImgPlus().localizingCursor();
 		while ( out.hasNext() ) {
 			out.fwd();
 			in.setPosition( out );
