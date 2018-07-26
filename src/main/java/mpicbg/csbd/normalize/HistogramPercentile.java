@@ -29,16 +29,15 @@
 
 package mpicbg.csbd.normalize;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Pair;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class HistogramPercentile<T extends RealType<T>> implements
 	Percentile<T>

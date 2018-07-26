@@ -29,6 +29,22 @@
 
 package mpicbg.csbd.commands;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalLong;
+
+import javax.swing.*;
+
+import org.scijava.Cancelable;
+import org.scijava.Disposable;
+import org.scijava.Initializable;
+import org.scijava.ItemIO;
+import org.scijava.log.LogService;
+import org.scijava.plugin.Parameter;
+import org.scijava.ui.UIService;
+
 import mpicbg.csbd.network.ImageTensor;
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.network.task.*;
@@ -60,20 +76,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import org.scijava.Cancelable;
-import org.scijava.Disposable;
-import org.scijava.Initializable;
-import org.scijava.ItemIO;
-import org.scijava.log.LogService;
-import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
-
-import javax.swing.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.OptionalLong;
 
 public abstract class CSBDeepCommand<T extends RealType<T>> implements
 	Cancelable, Initializable, Disposable

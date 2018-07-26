@@ -5,17 +5,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.junit.Test;
+
+import mpicbg.csbd.util.task.DefaultInputProcessor;
+import mpicbg.csbd.util.task.InputProcessor;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.real.FloatType;
-
-import org.junit.Test;
-
-import mpicbg.csbd.util.task.DefaultInputProcessor;
-import mpicbg.csbd.util.task.InputProcessor;
 
 public class InputProcessorTest {
 

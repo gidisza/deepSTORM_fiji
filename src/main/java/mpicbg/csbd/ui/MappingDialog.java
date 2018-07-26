@@ -29,12 +29,13 @@
 
 package mpicbg.csbd.ui;
 
-import mpicbg.csbd.network.ImageTensor;
-
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.*;
+
+import mpicbg.csbd.network.ImageTensor;
 
 public class MappingDialog {
 

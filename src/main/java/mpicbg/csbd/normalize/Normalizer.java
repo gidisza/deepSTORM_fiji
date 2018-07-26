@@ -32,10 +32,6 @@ package mpicbg.csbd.normalize;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.ops.OpService;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 
 public interface Normalizer {
 

@@ -4,9 +4,9 @@ package mpicbg.csbd.task;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import mpicbg.csbd.ui.CSBDeepProgress;
-import org.scijava.Initializable;
 import org.scijava.log.Logger;
+
+import mpicbg.csbd.ui.CSBDeepProgress;
 
 public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 

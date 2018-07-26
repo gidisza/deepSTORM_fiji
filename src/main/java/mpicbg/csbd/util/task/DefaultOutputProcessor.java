@@ -1,6 +1,9 @@
 
 package mpicbg.csbd.util.task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.util.DatasetHelper;
@@ -12,11 +15,7 @@ import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DefaultOutputProcessor<T extends RealType<T> & NativeType<T>>
 	extends DefaultTask implements OutputProcessor<T>

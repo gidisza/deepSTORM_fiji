@@ -4,7 +4,6 @@ package mpicbg.csbd.converter;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.LongType;
 
 /**
  * @author Stephan Saalfeld

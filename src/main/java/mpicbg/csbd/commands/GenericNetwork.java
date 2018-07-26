@@ -29,11 +29,8 @@
 
 package mpicbg.csbd.commands;
 
-import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
-import mpicbg.csbd.ui.MappingDialog;
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
-import net.imagej.axis.AxisType;
+import java.io.File;
+
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -41,7 +38,11 @@ import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 import org.scijava.widget.Button;
 
-import java.io.File;
+import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
+import mpicbg.csbd.ui.MappingDialog;
+import net.imagej.Dataset;
+import net.imagej.ImageJ;
+import net.imagej.axis.AxisType;
 
 /**
  */

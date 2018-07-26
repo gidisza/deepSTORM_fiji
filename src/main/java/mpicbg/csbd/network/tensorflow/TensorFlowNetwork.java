@@ -1,17 +1,9 @@
 
 package mpicbg.csbd.network.tensorflow;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import mpicbg.csbd.network.DefaultNetwork;
-import mpicbg.csbd.task.Task;
-import net.imagej.Dataset;
-import net.imagej.DatasetService;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imagej.tensorflow.TensorFlowService;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.scijava.io.location.Location;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
@@ -22,8 +14,18 @@ import org.tensorflow.framework.SignatureDef;
 import org.tensorflow.framework.TensorInfo;
 import org.tensorflow.framework.TensorShapeProto;
 
-import java.io.IOException;
-import java.util.Arrays;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import mpicbg.csbd.network.DefaultNetwork;
+import mpicbg.csbd.task.Task;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.tensorflow.TensorFlowService;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.FloatType;
 
 public class TensorFlowNetwork<T extends RealType<T>> extends
 	DefaultNetwork<T>

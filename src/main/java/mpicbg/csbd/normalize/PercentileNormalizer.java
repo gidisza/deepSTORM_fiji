@@ -29,11 +29,11 @@
 
 package mpicbg.csbd.normalize;
 
+import java.util.List;
+
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
-import net.imagej.ImgPlus;
 import net.imagej.axis.AxisType;
-import net.imagej.axis.CalibratedAxis;
 import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
@@ -41,8 +41,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
-
-import java.util.List;
 
 public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
 	implements Normalizer

@@ -1,6 +1,9 @@
 
 package mpicbg.csbd.util.task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.util.DatasetHelper;
 import net.imagej.Dataset;
@@ -9,11 +12,6 @@ import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.Views;
-import org.scijava.convert.ConvertService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DefaultInputProcessor<T extends RealType<T>> extends DefaultTask
 	implements InputProcessor

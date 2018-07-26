@@ -1,22 +1,22 @@
 
 package mpicbg.csbd.normalize;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+import java.util.Random;
+
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import net.imagej.ImageJ;
 import net.imglib2.Cursor;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.histogram.Histogram1d;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.real.FloatType;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
 
 public class PercentileTest {
 

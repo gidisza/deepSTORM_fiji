@@ -3,6 +3,9 @@ package mpicbg.csbd.tasks;
 
 import java.io.FileNotFoundException;
 
+import org.scijava.io.location.Location;
+
+import mpicbg.csbd.network.DefaultNetwork;
 import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
@@ -11,10 +14,6 @@ import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
-
-import org.scijava.io.location.Location;
-
-import mpicbg.csbd.network.DefaultNetwork;
 
 public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 

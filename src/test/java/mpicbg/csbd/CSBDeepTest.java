@@ -1,6 +1,18 @@
 
 package mpicbg.csbd;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Future;
+
+import org.junit.Test;
+import org.scijava.command.Command;
+import org.scijava.command.CommandModule;
+import org.scijava.module.Module;
+
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
@@ -9,17 +21,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
-import org.junit.Test;
-import org.scijava.command.Command;
-import org.scijava.command.CommandModule;
-import org.scijava.module.Module;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class CSBDeepTest {
 

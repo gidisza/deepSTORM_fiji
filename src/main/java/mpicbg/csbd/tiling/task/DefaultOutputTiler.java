@@ -3,16 +3,13 @@ package mpicbg.csbd.tiling.task;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import net.imagej.axis.AxisType;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.tiling.Tiling;
+import net.imagej.axis.AxisType;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 
 public class DefaultOutputTiler<T extends RealType<T>> extends DefaultTask
 	implements OutputTiler<T>

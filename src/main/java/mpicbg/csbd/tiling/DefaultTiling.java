@@ -29,6 +29,10 @@
 
 package mpicbg.csbd.tiling;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import mpicbg.csbd.imglib2.GridView;
 import mpicbg.csbd.task.Task;
 import mpicbg.csbd.util.DatasetHelper;
@@ -41,10 +45,6 @@ import net.imglib2.img.list.ListImg;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 

@@ -1,15 +1,14 @@
 
 package mpicbg.csbd.network;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import mpicbg.csbd.util.ArrayHelper;
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
-import net.imagej.axis.CalibratedAxis;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 // TODO rename
 public class ImageTensor {

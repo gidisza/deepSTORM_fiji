@@ -1,15 +1,16 @@
 
 package mpicbg.csbd.tasks;
 
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
+import java.io.File;
+
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.io.IOService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import java.io.File;
+import net.imagej.Dataset;
+import net.imagej.ImageJ;
 
 @Plugin(type = Command.class, menuPath = "Plugins>CSBDeep>CSBDeepTest")
 public class TestPlugin implements Command {

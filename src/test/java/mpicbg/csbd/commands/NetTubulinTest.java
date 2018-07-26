@@ -1,6 +1,12 @@
 
 package mpicbg.csbd.commands;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+
+import org.junit.Test;
+
 import mpicbg.csbd.CSBDeepTest;
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
@@ -8,11 +14,6 @@ import net.imagej.axis.AxisType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
-import org.junit.Test;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class NetTubulinTest extends CSBDeepTest {
 

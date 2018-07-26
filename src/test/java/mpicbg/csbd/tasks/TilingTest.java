@@ -3,17 +3,7 @@ package mpicbg.csbd.tasks;
 
 import static org.junit.Assert.assertTrue;
 
-import mpicbg.csbd.imglib2.GridView;
-import mpicbg.csbd.imglib2.TiledView;
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.Cursor;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.list.ListImg;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.Views;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -23,10 +13,13 @@ import mpicbg.csbd.task.Task;
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.tiling.DefaultTiling;
 import mpicbg.csbd.tiling.Tiling;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.Cursor;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 
 public class TilingTest extends CSBDeepTest {
 

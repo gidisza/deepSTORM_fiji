@@ -1,10 +1,10 @@
 
 package mpicbg.csbd.task;
 
-import org.scijava.log.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.scijava.log.Logger;
 
 public class DefaultTaskManager implements TaskManager {
 

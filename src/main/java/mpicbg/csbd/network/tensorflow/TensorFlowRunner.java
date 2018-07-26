@@ -29,12 +29,11 @@
 
 package mpicbg.csbd.network.tensorflow;
 
+import javax.swing.*;
+
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
 import org.tensorflow.framework.TensorInfo;
-
-import javax.swing.*;
-import java.util.Arrays;
 
 public class TensorFlowRunner {
 

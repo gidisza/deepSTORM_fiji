@@ -5,7 +5,6 @@ import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.ops.OpService;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 

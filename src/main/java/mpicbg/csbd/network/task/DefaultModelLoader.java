@@ -1,12 +1,11 @@
 
 package mpicbg.csbd.network.task;
 
-import mpicbg.csbd.network.ImageTensor;
+import java.io.FileNotFoundException;
+
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
 import net.imagej.Dataset;
-
-import java.io.FileNotFoundException;
 
 public class DefaultModelLoader extends DefaultTask implements ModelLoader {
 

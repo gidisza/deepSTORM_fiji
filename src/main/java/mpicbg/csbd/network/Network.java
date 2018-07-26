@@ -1,18 +1,18 @@
 
 package mpicbg.csbd.network;
 
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import org.scijava.Disposable;
+
 import mpicbg.csbd.imglib2.TiledView;
 import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
-import org.scijava.Disposable;
-
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 public interface Network<T extends RealType<T>> extends
 	Callable<List<RandomAccessibleInterval<T>>>, Disposable

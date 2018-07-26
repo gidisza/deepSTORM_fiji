@@ -1,6 +1,14 @@
 
 package mpicbg.csbd.network;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.*;
+
+import org.scijava.io.location.Location;
+
 import mpicbg.csbd.imglib2.TiledView;
 import mpicbg.csbd.task.Task;
 import mpicbg.csbd.util.IOHelper;
@@ -12,13 +20,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
-import org.scijava.io.location.Location;
-
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.*;
 
 public abstract class DefaultNetwork<T extends RealType<T>> implements
 	Network<T>

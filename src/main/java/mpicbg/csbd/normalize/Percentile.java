@@ -29,15 +29,11 @@
 
 package mpicbg.csbd.normalize;
 
-import net.imagej.ImageJ;
-import net.imagej.ops.OpService;
-import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
-
 import java.util.List;
+
+import net.imagej.ops.OpService;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
 
 public interface Percentile<T extends RealType<T>> {
 
