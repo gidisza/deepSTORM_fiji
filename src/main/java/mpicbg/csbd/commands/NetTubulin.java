@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.tiling.DefaultTiling;
@@ -44,12 +45,13 @@ import java.util.OptionalLong;
 
 /**
  */
-@Plugin( type = Command.class, menuPath = "Plugins>CSBDeep>Deconvolution - Microtubules", headless = true )
+@Plugin(type = Command.class,
+	menuPath = "Plugins>CSBDeep>Deconvolution - Microtubules", headless = true)
 public class NetTubulin extends CSBDeepCommand implements Command {
 
 	private static final int BLOCK_MULTIPLE = 4;
 
-	@Parameter( label = "Batch size", min = "1" )
+	@Parameter(label = "Batch size", min = "1")
 	protected int batchSize = 10;
 
 	@Override
@@ -64,15 +66,15 @@ public class NetTubulin extends CSBDeepCommand implements Command {
 
 	@Override
 	protected void initTiling() {
-		tiling = new DefaultTiling( nTiles, batchSize, blockMultiple, overlap );
+		tiling = new DefaultTiling(nTiles, batchSize, blockMultiple, overlap);
 	}
 
 	@Override
 	protected Tiling.TilingAction[] getTilingActions() {
 		Tiling.TilingAction[] actions = super.getTilingActions();
-		if ( getInput().numDimensions() == 3 ) {
-			int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex( 0 );
-			if(batchDim >= 0) {
+		if (getInput().numDimensions() == 3) {
+			int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex(0);
+			if (batchDim >= 0) {
 				actions[batchDim] = Tiling.TilingAction.TILE_WITHOUT_PADDING;
 			}
 		}
@@ -85,53 +87,51 @@ public class NetTubulin extends CSBDeepCommand implements Command {
 		try {
 			try {
 				tryToInitialize();
-				validateInput(
-						getInput(),
-						"3D image with dimension order X-Y-T",
-						OptionalLong.empty(),
-						OptionalLong.empty(),
-						OptionalLong.empty() );
-			} catch ( final IOException e ) {
+				validateInput(getInput(), "3D image with dimension order X-Y-T",
+					OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
+			}
+			catch (final IOException e) {
 				prevException = e;
-				validateInput(
-						getInput(),
-						"2D image with dimension order X-Y",
-						OptionalLong.empty(),
-						OptionalLong.empty() );
+				validateInput(getInput(), "2D image with dimension order X-Y",
+					OptionalLong.empty(), OptionalLong.empty());
 			}
 			final AxisType[] mapping = { Axes.TIME, Axes.Y, Axes.X, Axes.CHANNEL };
-			setMapping( mapping );
+			setMapping(mapping);
 			super.run();
-		} catch ( final IOException e ) {
-			showError( prevException.getMessage() + "\nOR\n" + e.getMessage() );
+		}
+		catch (final IOException e) {
+			showError(prevException.getMessage() + "\nOR\n" + e.getMessage());
 		}
 	}
 
 	@Override
 	protected boolean handleOutOfMemoryError() {
 		batchSize /= 2;
-		if ( batchSize < 1 ) { return false; }
+		if (batchSize < 1) {
+			return false;
+		}
 		return true;
 	}
 
-	public static void main( final String... args ) throws Exception {
+	public static void main(final String... args) throws Exception {
 		// create the ImageJ application context with all available services
 		final ImageJ ij = new ImageJ();
 
-		ij.launch( args );
+		ij.launch(args);
 
 		// ask the user for a file to open
-		final File file = ij.ui().chooseFile( null, "open" );
+		final File file = ij.ui().chooseFile(null, "open");
 
-		if ( file != null && file.exists() ) {
+		if (file != null && file.exists()) {
 			// load the dataset
-			final Dataset dataset = ij.scifio().datasetIO().open( file.getAbsolutePath() );
+			final Dataset dataset = ij.scifio().datasetIO().open(file
+				.getAbsolutePath());
 
 			// show the image
-			ij.ui().show( dataset );
+			ij.ui().show(dataset);
 
 			// invoke the plugin
-			ij.command().run( NetTubulin.class, true );
+			ij.command().run(NetTubulin.class, true);
 		}
 
 	}

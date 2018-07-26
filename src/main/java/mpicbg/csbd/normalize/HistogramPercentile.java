@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.normalize;
 
 import net.imagej.ops.OpService;
@@ -39,28 +40,32 @@ import net.imglib2.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class HistogramPercentile< T extends RealType< T >> implements Percentile< T > {
+public class HistogramPercentile<T extends RealType<T>> implements
+	Percentile<T>
+{
 
 	T min, max;
 
-	public List<T> computePercentiles(RandomAccessibleInterval<T> src, final double[] percentiles, OpService opService) {
+	public List<T> computePercentiles(RandomAccessibleInterval<T> src,
+		final double[] percentiles, OpService opService)
+	{
 
 		List<T> resValues = new ArrayList<>();
 
 		computeMinMax(opService, (IterableInterval<T>) src);
 
-		if(min.compareTo(max) == 0) {
+		if (min.compareTo(max) == 0) {
 			resValues.add(min);
 			resValues.add(max);
 			return resValues;
 		}
 
-		int numBins = (int) Math.pow(2,16);
-		List<HistogramBin> bins = createHistogram(numBins, (IterableInterval<T>) src);
+		int numBins = (int) Math.pow(2, 16);
+		List<HistogramBin> bins = createHistogram(numBins,
+			(IterableInterval<T>) src);
 		long pixelCount = ((IterableInterval<T>) src).size();
 
-		for(double percentile : percentiles) {
+		for (double percentile : percentiles) {
 			resValues.add(getPercentile(percentile, bins, pixelCount));
 		}
 
@@ -69,105 +74,115 @@ public class HistogramPercentile< T extends RealType< T >> implements Percentile
 	}
 
 	private void computeMinMax(OpService opService, IterableInterval<T> src) {
-//		System.out.println("interval size: " + src.size());
-//
-//		long milStart = System.currentTimeMillis();
-//		final Pair<T,T> minMax =
-//				(Pair<T,T>) opService.run(GenericMinMax.class, src);
-//		long timeGeneric = System.currentTimeMillis() - milStart;
-//		milStart = System.currentTimeMillis();
-		final Pair<T,T> minMax = opService.stats().minMax(src);
-//		long timeDefault = System.currentTimeMillis() - milStart;
-//
-//		System.out.println("Generic: " + timeGeneric / 1000.);
-//		System.out.println("Default: " + timeDefault / 1000.);
-//
+		// System.out.println("interval size: " + src.size());
+		//
+		// long milStart = System.currentTimeMillis();
+		// final Pair<T,T> minMax =
+		// (Pair<T,T>) opService.run(GenericMinMax.class, src);
+		// long timeGeneric = System.currentTimeMillis() - milStart;
+		// milStart = System.currentTimeMillis();
+		final Pair<T, T> minMax = opService.stats().minMax(src);
+		// long timeDefault = System.currentTimeMillis() - milStart;
+		//
+		// System.out.println("Generic: " + timeGeneric / 1000.);
+		// System.out.println("Default: " + timeDefault / 1000.);
+		//
 		min = minMax.getA();
 		max = minMax.getB();
 	}
 
-	private List<HistogramBin> createHistogram(int numBins, IterableInterval<T> src) {
+	private List<HistogramBin> createHistogram(int numBins,
+		IterableInterval<T> src)
+	{
 		List<HistogramBin> bins = new ArrayList<>(numBins);
 		double binLength = getBinLength(numBins);
 
-		for (int i = 0; i < numBins; i++) bins.add(new HistogramBin());
+		for (int i = 0; i < numBins; i++)
+			bins.add(new HistogramBin());
 
 		Cursor<T> cursor = src.cursor();
-		while(cursor.hasNext()) {
+		while (cursor.hasNext()) {
 			cursor.fwd();
 			T val = cursor.get();
-			int binId = Math.min(numBins-1, getBin(val, min, binLength));
+			int binId = Math.min(numBins - 1, getBin(val, min, binLength));
 			HistogramBin bin = bins.get(binId);
 			bin.count++;
-			if(bin.min == null) bin.min = val.copy();
-			else if(bin.min.compareTo(val) > 0) bin.min.set(val.copy());
-			if(bin.max == null) bin.max = val.copy();
-			else if(bin.max.compareTo(val) < 0) bin.max.set(val.copy());
+			if (bin.min == null) bin.min = val.copy();
+			else if (bin.min.compareTo(val) > 0) bin.min.set(val.copy());
+			if (bin.max == null) bin.max = val.copy();
+			else if (bin.max.compareTo(val) < 0) bin.max.set(val.copy());
 		}
 		bins.get(0).min = min.copy();
-		bins.get(bins.size()-1).max = max.copy();
+		bins.get(bins.size() - 1).max = max.copy();
 		return bins;
 	}
 
 	private double getBinLength(int numBins) {
-		return (max.getRealDouble() - min.getRealDouble())/(double)numBins;
+		return (max.getRealDouble() - min.getRealDouble()) / (double) numBins;
 	}
 
 	private int getBin(T val, T min, double binLength) {
 		T res = val.copy();
 		res.sub(min);
-		res.mul(1./binLength);
-		return (int)res.getRealFloat();
+		res.mul(1. / binLength);
+		return (int) res.getRealFloat();
 	}
 
-	private T getPercentile(double percentile, List<HistogramBin> bins, long pixelCount) {
+	private T getPercentile(double percentile, List<HistogramBin> bins,
+		long pixelCount)
+	{
 		double border = pixelCount * percentile / 100.;
 		double cur = 0;
 		int i;
 		double percentileMax, percentileMin;
-		if(percentile > 50) {
+		if (percentile > 50) {
 			border = pixelCount - border;
-			for (i = bins.size()-1; i >= 0 && cur < border; i--) {
+			for (i = bins.size() - 1; i >= 0 && cur < border; i--) {
 				cur += bins.get(i).count;
 			}
-			percentileMin = (1-cur / pixelCount) * 100;
-			if(i < bins.size()-1) {
+			percentileMin = (1 - cur / pixelCount) * 100;
+			if (i < bins.size() - 1) {
 				i++;
-				percentileMax = (1-(cur-bins.get(i).count) / pixelCount) * 100;
-			}else {
+				percentileMax = (1 - (cur - bins.get(i).count) / pixelCount) * 100;
+			}
+			else {
 				percentileMax = 100;
 			}
-		} else {
+		}
+		else {
 			for (i = 0; i < bins.size() && cur < border; i++) {
 				cur += bins.get(i).count;
 			}
 			percentileMax = cur / pixelCount * 100;
-			if(i > 0) {
+			if (i > 0) {
 				i--;
-				percentileMin = (cur-bins.get(i).count) / pixelCount * 100;
-			}else {
+				percentileMin = (cur - bins.get(i).count) / pixelCount * 100;
+			}
+			else {
 				percentileMin = 0;
 			}
 		}
 		HistogramBin bin = bins.get(i);
-		if(percentile < percentileMax && percentile > percentileMin) {
+		if (percentile < percentileMax && percentile > percentileMin) {
 			return getY(percentile, percentileMin, bin.min, percentileMax, bin.max);
-		} else {
-			if(percentile < percentileMin) {
+		}
+		else {
+			if (percentile < percentileMin) {
 				HistogramBin prevBin = getPreviousBin(bins, i);
-				if(prevBin != null)
-					return getY(percentile, percentileMin, bin.min, percentileMin-1./(double)pixelCount, prevBin.max);
+				if (prevBin != null) return getY(percentile, percentileMin, bin.min,
+					percentileMin - 1. / (double) pixelCount, prevBin.max);
 				else return bin.min.copy();
-			} else {
+			}
+			else {
 				HistogramBin nextBin = getNextBin(bins, i);
-				if(nextBin != null)
-					return getY(percentile, percentileMax, bin.max, percentileMax+1./(double)pixelCount, nextBin.min);
+				if (nextBin != null) return getY(percentile, percentileMax, bin.max,
+					percentileMax + 1. / (double) pixelCount, nextBin.min);
 				else return bin.max.copy();
 			}
 		}
 	}
 
-	private T getY (double x, double x1, T y1, double x2, T y2) {
+	private T getY(double x, double x1, T y1, double x2, T y2) {
 		double m = (y2.getRealDouble() - y1.getRealDouble()) / (x2 - x1);
 		double n = (y1.getRealDouble() * x2 - y2.getRealDouble() * x1) / (x2 - x1);
 		T mT = y1.copy();
@@ -181,23 +196,24 @@ public class HistogramPercentile< T extends RealType< T >> implements Percentile
 	}
 
 	private HistogramBin getPreviousBin(List<HistogramBin> bins, int i) {
-		while(i > 0) {
-			if(bins.get(--i).count > 0) return bins.get(i);
+		while (i > 0) {
+			if (bins.get(--i).count > 0) return bins.get(i);
 		}
 		return null;
 	}
+
 	private HistogramBin getNextBin(List<HistogramBin> bins, int i) {
-		while(i < bins.size()-1) {
-			if(bins.get(++i).count > 0) return bins.get(i);
+		while (i < bins.size() - 1) {
+			if (bins.get(++i).count > 0) return bins.get(i);
 		}
 		return null;
 	}
 
 	private class HistogramBin {
+
 		int count;
 		T min;
 		T max;
 	}
-
 
 }

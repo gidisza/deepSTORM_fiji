@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.commands;
 
 import java.io.File;
@@ -42,7 +43,8 @@ import org.scijava.plugin.Plugin;
 
 /**
  */
-@Plugin( type = Command.class, menuPath = "Plugins>CSBDeep>Surface Projection - Flywing", headless = true )
+@Plugin(type = Command.class,
+	menuPath = "Plugins>CSBDeep>Surface Projection - Flywing", headless = true)
 public class NetProject extends CSBDeepCommand implements Command {
 
 	@Override
@@ -58,41 +60,39 @@ public class NetProject extends CSBDeepCommand implements Command {
 	@Override
 	public void run() {
 		tryToInitialize();
-		network.setDoDimensionReduction( true, Axes.Z );
+		network.setDoDimensionReduction(true, Axes.Z);
 		try {
-			validateInput(
-					getInput(),
-					"3D grayscale image with dimension order X-Y-Z",
-					OptionalLong.empty(),
-					OptionalLong.empty(),
-					OptionalLong.empty() );
+			validateInput(getInput(), "3D grayscale image with dimension order X-Y-Z",
+				OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
 			super.run();
-		} catch ( final IOException e ) {
-			showError( e.getMessage() );
+		}
+		catch (final IOException e) {
+			showError(e.getMessage());
 		}
 	}
 
-	public static void main( final String... args ) throws Exception {
+	public static void main(final String... args) throws Exception {
 
 		// create the ImageJ application context with all available services
 		final ImageJ ij = new ImageJ();
 
-		ij.launch( args );
+		ij.launch(args);
 
 		// ask the user for a file to open
-		final File file = ij.ui().chooseFile( null, "open" );
+		final File file = ij.ui().chooseFile(null, "open");
 
-		if ( file != null && file.exists() ) {
+		if (file != null && file.exists()) {
 			// load the dataset
-			final Dataset dataset = ij.scifio().datasetIO().open( file.getAbsolutePath() );
+			final Dataset dataset = ij.scifio().datasetIO().open(file
+				.getAbsolutePath());
 
 			// show the image
-			if ( !ij.ui().isHeadless() ) {
-				ij.ui().show( dataset );
+			if (!ij.ui().isHeadless()) {
+				ij.ui().show(dataset);
 			}
 
 			// invoke the plugin
-			ij.command().run( NetProject.class, true );
+			ij.command().run(NetProject.class, true);
 		}
 
 	}

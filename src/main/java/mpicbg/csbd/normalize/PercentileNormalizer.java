@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.normalize;
 
 import net.imagej.Dataset;
@@ -43,10 +44,12 @@ import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
 
-public class PercentileNormalizer<T extends RealType<T> & NativeType<T>> implements Normalizer {
+public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
+	implements Normalizer
+{
 
-	private double[] percentiles = new double[]{0.00001, 99.99999};
-	private float[] destValues = new float[]{0, 1};
+	private double[] percentiles = new double[] { 0.00001, 99.99999 };
+	private float[] destValues = new float[] { 0, 1 };
 	private List<T> resValues;
 	private boolean clip = false;
 
@@ -54,50 +57,59 @@ public class PercentileNormalizer<T extends RealType<T> & NativeType<T>> impleme
 	protected float max;
 	protected float factor;
 
-	public float normalize( final T val ) {
-		if(clip) {
-			if(val.getRealFloat() < min) {
+	public float normalize(final T val) {
+		if (clip) {
+			if (val.getRealFloat() < min) {
 				return min;
 			}
-			if(val.getRealFloat() > max) {
+			if (val.getRealFloat() > max) {
 				return max;
 			}
 		}
-		return (val.getRealFloat() - resValues.get(0).getRealFloat())*factor+min;
+		return (val.getRealFloat() - resValues.get(0).getRealFloat()) * factor +
+			min;
 	}
 
 	@Override
-	public Dataset normalize(final Dataset im, OpService opService, DatasetService datasetService) {
+	public Dataset normalize(final Dataset im, OpService opService,
+		DatasetService datasetService)
+	{
 		HistogramPercentile<T> percentile = new HistogramPercentile<>();
-		resValues = percentile.computePercentiles((RandomAccessibleInterval<T>) im.getImgPlus(), percentiles, opService);
+		resValues = percentile.computePercentiles((RandomAccessibleInterval<T>) im
+			.getImgPlus(), percentiles, opService);
 		min = destValues[0];
 		max = destValues[1];
-		factor = (destValues[1] - destValues[0]) / (resValues.get(1).getRealFloat() - resValues.get(0).getRealFloat());
+		factor = (destValues[1] - destValues[0]) / (resValues.get(1)
+			.getRealFloat() - resValues.get(0).getRealFloat());
 
-		long [] dims = new long[im.numDimensions()];
+		long[] dims = new long[im.numDimensions()];
 		im.dimensions(dims);
 		AxisType[] axes = new AxisType[im.numDimensions()];
-		for(int i = 0; i < axes.length; i++) {
+		for (int i = 0; i < axes.length; i++) {
 			axes[i] = im.axis(i).type();
 		}
 
-		final Dataset output = datasetService.create(new FloatType(), dims, "normalized input", axes);
+		final Dataset output = datasetService.create(new FloatType(), dims,
+			"normalized input", axes);
 
-		final RandomAccess< T > in = (RandomAccess<T>) im.getImgPlus().randomAccess();
-		final Cursor< FloatType > out = (Cursor<FloatType>) output.getImgPlus().localizingCursor();
-		while ( out.hasNext() ) {
+		final RandomAccess<T> in = (RandomAccess<T>) im.getImgPlus().randomAccess();
+		final Cursor<FloatType> out = (Cursor<FloatType>) output.getImgPlus()
+			.localizingCursor();
+		while (out.hasNext()) {
 			out.fwd();
-			in.setPosition( out );
-			out.get().set( normalize( in.get() ) );
+			in.setPosition(out);
+			out.get().set(normalize(in.get()));
 		}
 
 		return output;
 	}
 
 	@Override
-	public void setup(final double[] percentiles, final float[] destValues, boolean clip) {
-		assert(percentiles.length == 2);
-		assert(destValues.length == 2);
+	public void setup(final double[] percentiles, final float[] destValues,
+		boolean clip)
+	{
+		assert (percentiles.length == 2);
+		assert (destValues.length == 2);
 		this.percentiles = percentiles;
 		this.destValues = destValues;
 		this.clip = clip;

@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.CSBDeepTest;
@@ -17,53 +18,45 @@ import static org.junit.Assert.assertTrue;
 
 public class NetProjectTest extends CSBDeepTest {
 
-//	@Ignore
+	// @Ignore
 	@Test
 	public void testNetProject_Float_XYZ() {
-		testDataset(
-				new FloatType(),
-				new long[] { 100, 50, 10 },
-				new AxisType[] { Axes.X, Axes.Y, Axes.Z } );
+		testDataset(new FloatType(), new long[] { 100, 50, 10 }, new AxisType[] {
+			Axes.X, Axes.Y, Axes.Z });
 	}
 
 	@Ignore
 	@Test
 	public void testNetProject_Float_ZXY() {
-		testDataset(
-				new FloatType(),
-				new long[] { 10, 50, 100 },
-				new AxisType[] { Axes.Z, Axes.X, Axes.Y } );
+		testDataset(new FloatType(), new long[] { 10, 50, 100 }, new AxisType[] {
+			Axes.Z, Axes.X, Axes.Y });
 	}
 
 	@Ignore
 	@Test
 	public void testNetProject_Float_XZY() {
-		testDataset(
-				new FloatType(),
-				new long[] { 100, 10, 50 },
-				new AxisType[] { Axes.X, Axes.Z, Axes.Y } );
+		testDataset(new FloatType(), new long[] { 100, 10, 50 }, new AxisType[] {
+			Axes.X, Axes.Z, Axes.Y });
 	}
 
 	@Ignore
 	@Test
 	public void testNetProject_Byte_XZY() {
-		testDataset(
-				new ByteType(),
-				new long[] { 50, 10, 100 },
-				new AxisType[] { Axes.X, Axes.Z, Axes.Y } );
+		testDataset(new ByteType(), new long[] { 50, 10, 100 }, new AxisType[] {
+			Axes.X, Axes.Z, Axes.Y });
 	}
 
-	public < T extends RealType< T > & NativeType< T > > void
-			testDataset( final T type, final long[] dims, final AxisType[] axes ) {
+	public <T extends RealType<T> & NativeType<T>> void testDataset(final T type,
+		final long[] dims, final AxisType[] axes)
+	{
 
 		launchImageJ();
-		final Dataset input = createDataset( type, dims, axes );
-		final List< Dataset > result = runPlugin( NetProject.class, input );
-		assertTrue(
-				"result should contain one dataset bis contains " + result.size(),
-				result.size() == 1 );
-		final Dataset output = result.get( 0 );
-		testResultAxesAndSizeByRemovingAxis( input, output, Axes.Z );
+		final Dataset input = createDataset(type, dims, axes);
+		final List<Dataset> result = runPlugin(NetProject.class, input);
+		assertTrue("result should contain one dataset bis contains " + result
+			.size(), result.size() == 1);
+		final Dataset output = result.get(0);
+		testResultAxesAndSizeByRemovingAxis(input, output, Axes.Z);
 	}
 
 }

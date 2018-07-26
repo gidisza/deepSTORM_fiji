@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
@@ -44,10 +45,10 @@ import java.io.File;
 
 /**
  */
-@Plugin( type = Command.class, menuPath = "Plugins>CSBDeep>Generic networks" )
+@Plugin(type = Command.class, menuPath = "Plugins>CSBDeep>Generic networks")
 public class GenericNetwork extends CSBDeepCommand implements Command {
 
-	@Parameter( visibility = ItemVisibility.MESSAGE )
+	@Parameter(visibility = ItemVisibility.MESSAGE)
 	protected String normtext = "Normalization";
 	@Parameter
 	protected boolean normalizeInput = true;
@@ -59,16 +60,18 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	protected float min = 0;
 	protected float max = 1;
 
-	@Parameter( label = "Clip normalization" )
+	@Parameter(label = "Clip normalization")
 	protected boolean clip = false;
 
-	@Parameter( label = "Import model (.zip)", callback = "modelChanged", initializer = "modelInitialized", persist = false )
+	@Parameter(label = "Import model (.zip)", callback = "modelChanged",
+		initializer = "modelInitialized", persist = false)
 	private File modelFile;
 	private final String modelFileKey = "modelfile-anynetwork";
-	@Parameter( label = "Model name")
+	@Parameter(label = "Model name")
 	private String _modelName;
 
-	@Parameter( label = "Adjust image <-> tensorflow mapping", callback = "openTFMappingDialog" )
+	@Parameter(label = "Adjust image <-> tensorflow mapping",
+		callback = "openTFMappingDialog")
 	private Button changeTFMapping;
 
 	@Parameter
@@ -76,16 +79,16 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	/** Executed whenever the {@link #modelFile} parameter is initialized. */
 	protected void modelInitialized() {
-		final String p_modelfile = prefService.get( String.class, modelFileKey, "" );
-		if ( p_modelfile != "" ) {
-			modelFile = new File( p_modelfile );
+		final String p_modelfile = prefService.get(String.class, modelFileKey, "");
+		if (p_modelfile != "") {
+			modelFile = new File(p_modelfile);
 		}
 	}
 
 	/** Executed whenever the {@link #modelFile} parameter changes. */
 	protected void modelChanged() {
 
-		if ( modelFile != null ) {
+		if (modelFile != null) {
 			savePreferences();
 		}
 
@@ -95,7 +98,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 		prepareInputAndNetwork();
 
-		MappingDialog.create( network.getInputNode(), network.getOutputNode() );
+		MappingDialog.create(network.getInputNode(), network.getOutputNode());
 	}
 
 	@Override
@@ -109,7 +112,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	@Override
 	protected void setupNormalizer() {
-		((DefaultInputNormalizer)inputNormalizer).getNormalizer().setup(new double[]{percentileBottom, percentileTop}, new float[]{min, max}, clip);
+		((DefaultInputNormalizer) inputNormalizer).getNormalizer().setup(
+			new double[] { percentileBottom, percentileTop }, new float[] { min,
+				max }, clip);
 	}
 
 	@Override
@@ -126,49 +131,49 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	}
 
 	private void checkAndResolveDimensionReduction() {
-		for(AxisType axis : network.getInputNode().getNodeAxes()) {
-			if(!network.getOutputNode().getNodeAxes().contains(axis)){
-//				log("Network input node axis " + axis.getLabel() + " not present in output node, will be reduced");
-				network.setDoDimensionReduction( true, axis );
+		for (AxisType axis : network.getInputNode().getNodeAxes()) {
+			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
+				// log("Network input node axis " + axis.getLabel() + " not present in
+				// output node, will be reduced");
+				network.setDoDimensionReduction(true, axis);
 			}
 		}
 		network.doDimensionReduction();
 	}
 
-
 	private void savePreferences() {
-		prefService.put( String.class, modelFileKey, modelFile.getAbsolutePath() );
+		prefService.put(String.class, modelFileKey, modelFile.getAbsolutePath());
 	}
 
 	/**
-	 * This main function serves for development purposes.
-	 * It allows you to run the plugin immediately out of
-	 * your integrated development environment (IDE).
+	 * This main function serves for development purposes. It allows you to run
+	 * the plugin immediately out of your integrated development environment
+	 * (IDE).
 	 *
-	 * @param args
-	 *            whatever, it's ignored
+	 * @param args whatever, it's ignored
 	 * @throws Exception
 	 */
-	public static void main( final String... args ) throws Exception {
+	public static void main(final String... args) throws Exception {
 
 		final ImageJ ij = new ImageJ();
 
-		ij.launch( args );
+		ij.launch(args);
 
 		// ask the user for a file to open
-//		final File file = ij.ui().chooseFile( null, "open" );
-		final File file =
-				new File( "/home/random/Development/imagej/plugins/CSBDeep-data/net_project/input-1.tif" );
+		// final File file = ij.ui().chooseFile( null, "open" );
+		final File file = new File(
+			"/home/random/Development/imagej/plugins/CSBDeep-data/net_project/input-1.tif");
 
-		if ( file != null && file.exists() ) {
+		if (file != null && file.exists()) {
 			// load the dataset
-			final Dataset dataset = ij.scifio().datasetIO().open( file.getAbsolutePath() );
+			final Dataset dataset = ij.scifio().datasetIO().open(file
+				.getAbsolutePath());
 
 			// show the image
-			ij.ui().show( dataset );
+			ij.ui().show(dataset);
 
 			// invoke the plugin
-			ij.command().run( GenericNetwork.class, true );
+			ij.command().run(GenericNetwork.class, true);
 		}
 
 	}

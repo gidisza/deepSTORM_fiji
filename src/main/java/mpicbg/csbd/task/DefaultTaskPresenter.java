@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.task;
 
 import java.awt.event.ActionEvent;
@@ -15,7 +16,9 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 	final boolean headless;
 	boolean initialized = false;
 
-	public DefaultTaskPresenter(final TaskManager taskManager, boolean headless, Logger logger) {
+	public DefaultTaskPresenter(final TaskManager taskManager, boolean headless,
+		Logger logger)
+	{
 		this.headless = headless;
 		this.taskManager = taskManager;
 		this.logger = logger;
@@ -23,16 +26,16 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 
 	@Override
 	public void initialize() {
-		if(!headless) {
+		if (!headless) {
 			progressWindow = CSBDeepProgress.create();
-			progressWindow.getCancelBtn().addActionListener( this );
+			progressWindow.getCancelBtn().addActionListener(this);
 			initialized = true;
 		}
 	}
 
 	@Override
 	public void initializeWithGPUWarning() {
-		if(!headless) {
+		if (!headless) {
 			progressWindow = CSBDeepProgress.createWithGPUWarning();
 			progressWindow.getCancelBtn().addActionListener(this);
 			initialized = true;
@@ -42,10 +45,10 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 	private boolean inUse() {
 		return !headless && initialized;
 	}
-	
+
 	@Override
 	public void close() {
-		if(inUse()) {
+		if (inUse()) {
 			progressWindow.getCancelBtn().removeActionListener(this);
 			progressWindow.dispose();
 		}
@@ -53,88 +56,88 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 
 	@Override
 	public void show() {
-		if(inUse()) {
+		if (inUse()) {
 			progressWindow.display();
 		}
 	}
 
 	@Override
-	public void addTask(final String title ) {
-		if(inUse()) {
-			progressWindow.addTask( title );
+	public void addTask(final String title) {
+		if (inUse()) {
+			progressWindow.addTask(title);
 		}
 	}
 
 	@Override
-	public void setTaskDone(final int index ) {
-		if(inUse()) {
-			progressWindow.setTaskDone( index );
+	public void setTaskDone(final int index) {
+		if (inUse()) {
+			progressWindow.setTaskDone(index);
 		}
 	}
 
 	@Override
-	public void setTaskFailed(final int index ) {
-		if(inUse()) {
-			progressWindow.setTaskFail( index );
+	public void setTaskFailed(final int index) {
+		if (inUse()) {
+			progressWindow.setTaskFail(index);
 		}
 	}
 
 	@Override
-	public void setTaskStarted(final int index ) {
-		if(inUse()) {
-			progressWindow.setTaskStart( index );
+	public void setTaskStarted(final int index) {
+		if (inUse()) {
+			progressWindow.setTaskStart(index);
 		}
 	}
 
 	@Override
-	public void setTaskInProgress(final int index ) {
-		if(inUse()) {
-			progressWindow.setTaskStart( index );
+	public void setTaskInProgress(final int index) {
+		if (inUse()) {
+			progressWindow.setTaskStart(index);
 		}
 	}
 
 	@Override
 	public void setTaskNumSteps(final int index, final int numSteps) {
-		if(inUse()) {
+		if (inUse()) {
 			progressWindow.setTaskNumSteps(index, numSteps);
 		}
 	}
 
 	@Override
 	public void setTaskStep(final int index, final int step) {
-		if(inUse()) {
+		if (inUse()) {
 			progressWindow.setTaskCurrentStep(index, step);
 		}
 	}
 
 	@Override
-	public void debug( final String msg ) {
-		if(inUse()) {
-			progressWindow.addLog( msg );
+	public void debug(final String msg) {
+		if (inUse()) {
+			progressWindow.addLog(msg);
 		}
-		logger.debug( msg );
+		logger.debug(msg);
 	}
 
 	@Override
-	public void log( final String msg ) {
-		if(inUse()) {
-			progressWindow.addLog( msg );
+	public void log(final String msg) {
+		if (inUse()) {
+			progressWindow.addLog(msg);
 		}
-		logger.info( msg );
+		logger.info(msg);
 	}
 
 	@Override
-	public void logError( final String msg ) {
-		if(inUse()) {
-			progressWindow.addError( msg );
+	public void logError(final String msg) {
+		if (inUse()) {
+			progressWindow.addError(msg);
 		}
-		logger.error( msg );
+		logger.error(msg);
 	}
 
 	@Override
-	public void actionPerformed( final ActionEvent e ) {
-		if(inUse()) {
-			if ( e.getSource().equals( progressWindow.getCancelBtn() ) ) {
+	public void actionPerformed(final ActionEvent e) {
+		if (inUse()) {
+			if (e.getSource().equals(progressWindow.getCancelBtn())) {
 				taskManager.cancel();
 			}
 		}

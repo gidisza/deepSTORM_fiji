@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.imglib2.TiledView;
@@ -78,13 +79,17 @@ import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
-@Plugin( type = Command.class, menuPath = "Plugins>CSBDeep>Isotropic Reconstruction - Retina", headless = true )
-public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements Command {
+@Plugin(type = Command.class,
+	menuPath = "Plugins>CSBDeep>Isotropic Reconstruction - Retina",
+	headless = true)
+public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
+	Command
+{
 
-	@Parameter( label = "Scale Z", min = "1", max = "15" )
+	@Parameter(label = "Scale Z", min = "1", max = "15")
 	protected float scale = 10.2f;
 
-	@Parameter( label = "Batch size", min = "1" )
+	@Parameter(label = "Batch size", min = "1")
 	protected int batchSize = 10;
 
 	final ExecutorService pool = Executors.newWorkStealingPool();
@@ -102,16 +107,17 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 	@Override
 	protected void initTiling() {
 		int batchMultiple = 4;
-		batchSize = (int) Math.ceil((float) batchSize / (float) batchMultiple) * batchMultiple;
-		tiling = new DefaultTiling( nTiles, batchSize, blockMultiple, overlap );
+		batchSize = (int) Math.ceil((float) batchSize / (float) batchMultiple) *
+			batchMultiple;
+		tiling = new DefaultTiling(nTiles, batchSize, blockMultiple, overlap);
 	}
 
 	@Override
 	protected Tiling.TilingAction[] getTilingActions() {
 		Tiling.TilingAction[] actions = super.getTilingActions();
-		if ( getInput().numDimensions() >= 3 ) {
-			int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex( 0 );
-			if(batchDim >= 0) {
+		if (getInput().numDimensions() >= 3) {
+			int batchDim = network.getInputNode().getDatasetDimIndexByTFIndex(0);
+			if (batchDim >= 0) {
 				actions[batchDim] = Tiling.TilingAction.TILE_WITHOUT_PADDING;
 			}
 		}
@@ -128,48 +134,53 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 		return new IsoOutputProcessor();
 	}
 
-	private class IsoInputProcessor extends DefaultTask implements InputProcessor {
+	private class IsoInputProcessor extends DefaultTask implements
+		InputProcessor
+	{
 
 		@Override
-		public List< RandomAccessibleInterval< FloatType > > run( final Dataset input ) {
+		public List<RandomAccessibleInterval<FloatType>> run(final Dataset input) {
 
 			setStarted();
 
-			final RandomAccessibleInterval<FloatType> inputRai = Converters.convert((RandomAccessibleInterval)input.getImgPlus(), new RealFloatConverter<T>(), new FloatType());
+			final RandomAccessibleInterval<FloatType> inputRai = Converters.convert(
+				(RandomAccessibleInterval) input.getImgPlus(),
+				new RealFloatConverter<T>(), new FloatType());
 
-			log("Dataset type: " + input.getTypeLabelLong() );
-			DatasetHelper.logDim( this, "Dataset dimensions", inputRai );
+			log("Dataset type: " + input.getTypeLabelLong());
+			DatasetHelper.logDim(this, "Dataset dimensions", inputRai);
 
-			final int dimX = input.dimensionIndex( Axes.X );
-			final int dimY = input.dimensionIndex( Axes.Y );
-			final int dimZ = input.dimensionIndex( Axes.Z );
+			final int dimX = input.dimensionIndex(Axes.X);
+			final int dimY = input.dimensionIndex(Axes.Y);
+			final int dimZ = input.dimensionIndex(Axes.Z);
 
-			final RandomAccessibleInterval< FloatType > upsampled =
-					upsample( inputRai, dimZ, scale );
+			final RandomAccessibleInterval<FloatType> upsampled = upsample(inputRai,
+				dimZ, scale);
 
-			DatasetHelper.logDim( this, "Upsampled", upsampled );
+			DatasetHelper.logDim(this, "Upsampled", upsampled);
 
-			final RandomAccessibleInterval< FloatType > rotated0 =
-					Views.permute( upsampled, dimX, dimZ );
+			final RandomAccessibleInterval<FloatType> rotated0 = Views.permute(
+				upsampled, dimX, dimZ);
 
-			final RandomAccessibleInterval< FloatType > rotated1 =
-					Views.permute( rotated0, dimY, dimZ );
+			final RandomAccessibleInterval<FloatType> rotated1 = Views.permute(
+				rotated0, dimY, dimZ);
 
-//			//TODO neccessary?
-//			final RandomAccessibleInterval< FloatType > rotated0_applied =
-//					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated0 ) );
-//			final RandomAccessibleInterval< FloatType > rotated1_applied =
-//					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated1 ) );
-//			copy( rotated0, rotated0_applied );
-//			copy( rotated1, rotated1_applied );
+			// //TODO neccessary?
+			// final RandomAccessibleInterval< FloatType > rotated0_applied =
+			// ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated0 ) );
+			// final RandomAccessibleInterval< FloatType > rotated1_applied =
+			// ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated1 ) );
+			// copy( rotated0, rotated0_applied );
+			// copy( rotated1, rotated1_applied );
 
-			final List< RandomAccessibleInterval<FloatType> > output = new ArrayList<>();
+			final List<RandomAccessibleInterval<FloatType>> output =
+				new ArrayList<>();
 
-			output.add( rotated0 );
-			output.add( rotated1 );
+			output.add(rotated0);
+			output.add(rotated1);
 
-			DatasetHelper.logDim( this, "Input #1 (Z-X rotated)", rotated0 );
-			DatasetHelper.logDim( this, "Input #2 (Z-X and Z-Y rotated)", rotated1 );
+			DatasetHelper.logDim(this, "Input #1 (Z-X rotated)", rotated0);
+			DatasetHelper.logDim(this, "Input #2 (Z-X and Z-Y rotated)", rotated1);
 
 			setFinished();
 
@@ -183,18 +194,16 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 	public void run() {
 		try {
 			tryToInitialize();
-			validateInput(
-					getInput(),
-					"4D image with dimension order X-Y-C-Z and two channels",
-					OptionalLong.empty(),
-					OptionalLong.empty(),
-					OptionalLong.of( 2 ),
-					OptionalLong.empty() );
+			validateInput(getInput(),
+				"4D image with dimension order X-Y-C-Z and two channels", OptionalLong
+					.empty(), OptionalLong.empty(), OptionalLong.of(2), OptionalLong
+						.empty());
 			final AxisType[] mapping = { Axes.Z, Axes.Y, Axes.X, Axes.CHANNEL };
-			setMapping( mapping );
+			setMapping(mapping);
 			super.run();
-		} catch ( final IOException e ) {
-			showError( e.getMessage() );
+		}
+		catch (final IOException e) {
+			showError(e.getMessage());
 		}
 	}
 
@@ -207,88 +216,87 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 	@Override
 	protected boolean handleOutOfMemoryError() {
 		batchSize /= 2;
-		if ( batchSize < 1 ) { return false; }
+		if (batchSize < 1) {
+			return false;
+		}
 		return true;
 	}
 
-	private class IsoOutputProcessor< T extends RealType< T > & NativeType< T >> extends DefaultOutputProcessor<T> {
+	private class IsoOutputProcessor<T extends RealType<T> & NativeType<T>>
+		extends DefaultOutputProcessor<T>
+	{
 
 		@Override
-		public List< Dataset > run(
-				final List< RandomAccessibleInterval< T > > result,
-				final Dataset dataset,
-				final Network network,
-				final DatasetService datasetService) {
+		public List<Dataset> run(final List<RandomAccessibleInterval<T>> result,
+			final Dataset dataset, final Network network,
+			final DatasetService datasetService)
+		{
 			setStarted();
 
-			final List< Dataset > output = new ArrayList<>();
+			final List<Dataset> output = new ArrayList<>();
 
-			final RandomAccessibleInterval< T > _result0 = result.get( 0 );
-			final RandomAccessibleInterval< T > _result1 = result.get( 1 );
+			final RandomAccessibleInterval<T> _result0 = result.get(0);
+			final RandomAccessibleInterval<T> _result1 = result.get(1);
 
-			DatasetHelper.logDim( this, "_result0", _result0 );
-			DatasetHelper.logDim( this, "_result1", _result1 );
+			DatasetHelper.logDim(this, "_result0", _result0);
+			DatasetHelper.logDim(this, "_result1", _result1);
 
-			final List< RandomAccessibleInterval< T > > result0 =
-					splitByLastNodeDim( _result0, network );
-			final List< RandomAccessibleInterval< T > > result1 =
-					splitByLastNodeDim( _result1, network );
+			final List<RandomAccessibleInterval<T>> result0 = splitByLastNodeDim(
+				_result0, network);
+			final List<RandomAccessibleInterval<T>> result1 = splitByLastNodeDim(
+				_result1, network);
 
-			DatasetHelper.logDim( this, "result0.get(0)", result0.get(0) );
-			DatasetHelper.logDim( this, "result1.get(0)", result1.get(0) );
+			DatasetHelper.logDim(this, "result0.get(0)", result0.get(0));
+			DatasetHelper.logDim(this, "result1.get(0)", result1.get(0));
 
-			for ( int i =
-					0; i + 1 < result0.size() && i + 1 < result1.size() && i / 2 < OUTPUT_NAMES.length; i +=
-							2 ) {
-				//prediction for ZY rotation
-				RandomAccessibleInterval< T > res0_pred =
-						Views.stack( result0.get( i ), result0.get( i + 1 ) );
+			for (int i = 0; i + 1 < result0.size() && i + 1 < result1.size() && i /
+				2 < OUTPUT_NAMES.length; i += 2)
+			{
+				// prediction for ZY rotation
+				RandomAccessibleInterval<T> res0_pred = Views.stack(result0.get(i),
+					result0.get(i + 1));
 
-				//prediction for ZX rotation
-				RandomAccessibleInterval< T > res1_pred =
-						Views.stack( result1.get( i ), result1.get( i + 1 ) );
+				// prediction for ZX rotation
+				RandomAccessibleInterval<T> res1_pred = Views.stack(result1.get(i),
+					result1.get(i + 1));
 
-				DatasetHelper.logDim( this, "Output #1", res0_pred );
-				DatasetHelper.logDim( this, "Output #2", res1_pred );
+				DatasetHelper.logDim(this, "Output #1", res0_pred);
+				DatasetHelper.logDim(this, "Output #2", res1_pred);
 
-				//force the CHANNEL dim back to its original location
-				final int outputChannelDim =
-						network.getOutputNode().getDataset().dimensionIndex( Axes.CHANNEL );
-				for ( int dim = outputChannelDim + 1; dim < res1_pred.numDimensions(); dim++ ) {
-					res0_pred = Views.permute( res0_pred, dim, dim - 1 );
-					res1_pred = Views.permute( res1_pred, dim, dim - 1 );
+				// force the CHANNEL dim back to its original location
+				final int outputChannelDim = network.getOutputNode().getDataset()
+					.dimensionIndex(Axes.CHANNEL);
+				for (int dim = outputChannelDim + 1; dim < res1_pred
+					.numDimensions(); dim++)
+				{
+					res0_pred = Views.permute(res0_pred, dim, dim - 1);
+					res1_pred = Views.permute(res1_pred, dim, dim - 1);
 				}
 
-				final int dimX = dataset.dimensionIndex( Axes.X );
-				final int dimY = dataset.dimensionIndex( Axes.Y );
-				final int dimZ = dataset.dimensionIndex( Axes.Z );
+				final int dimX = dataset.dimensionIndex(Axes.X);
+				final int dimY = dataset.dimensionIndex(Axes.Y);
+				final int dimZ = dataset.dimensionIndex(Axes.Z);
 
 				// rotate output stacks back
-				res0_pred = Views.permute( res0_pred, dimX, dimZ );
-				res1_pred = Views.permute( res1_pred, dimY, dimZ );
-				res1_pred = Views.permute( res1_pred, dimX, dimZ );
+				res0_pred = Views.permute(res0_pred, dimX, dimZ);
+				res1_pred = Views.permute(res1_pred, dimY, dimZ);
+				res1_pred = Views.permute(res1_pred, dimX, dimZ);
 
-				DatasetHelper.logDim( this, "Output #1 (original rotation)", res0_pred );
-				DatasetHelper.logDim( this, "Output #2 (original rotation)", res1_pred );
+				DatasetHelper.logDim(this, "Output #1 (original rotation)", res0_pred);
+				DatasetHelper.logDim(this, "Output #2 (original rotation)", res1_pred);
 
-				log( "Merge output stacks.." );
+				log("Merge output stacks..");
 
 				// Calculate the geometric mean of the two predictions
-				//TODO check if this is right
-				final RandomAccessibleInterval< T > prediction = new CellImgFactory<>(res0_pred.randomAccess().get())
-						.create( Intervals.dimensionsAsLongArray( res0_pred ) );
-				pointwiseGeometricMean(
-						res0_pred,
-						res1_pred,
-						prediction );
-				DatasetHelper.logDim( this, "Merged output", prediction );
+				// TODO check if this is right
+				final RandomAccessibleInterval<T> prediction = new CellImgFactory<>(
+					res0_pred.randomAccess().get()).create(Intervals
+						.dimensionsAsLongArray(res0_pred));
+				pointwiseGeometricMean(res0_pred, res1_pred, prediction);
+				DatasetHelper.logDim(this, "Merged output", prediction);
 
-				output.add(
-						wrapIntoDataset(
-								OUTPUT_NAMES[ i / 2 ],
-								prediction,
-								network,
-								datasetService) );
+				output.add(wrapIntoDataset(OUTPUT_NAMES[i / 2], prediction, network,
+					datasetService));
 			}
 
 			setFinished();
@@ -298,54 +306,44 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 	}
 
 	/**
-	 * Scales the given dimension by the given scale and uses linear
-	 * interpolation for the missing values.
+	 * Scales the given dimension by the given scale and uses linear interpolation
+	 * for the missing values. NOTE: This method will return very fast because the
+	 * scaling is not applied in this method. The scaling is only applied on
+	 * access of pixel values. NOTE: The resulting dimension length will not match
+	 * old_dimension_length * scale. But the min and max of the image are mapped
+	 * to the scaled positions and used to define the new interval.
 	 *
-	 * NOTE: This method will return very fast because the scaling is not
-	 * applied in this method. The scaling is only applied on access of pixel
-	 * values.
-	 *
-	 * NOTE: The resulting dimension length will not match old_dimension_length
-	 * * scale. But the min and max of the image are mapped to the scaled
-	 * positions and used to define the new interval.
-	 *
-	 * @param normalizedInput
-	 *            Input image
-	 * @param dim
-	 *            Dimension number to scale
-	 * @param scale
-	 *            Scale of the dimension
+	 * @param normalizedInput Input image
+	 * @param dim Dimension number to scale
+	 * @param scale Scale of the dimension
 	 * @return The scaled image
 	 */
-	private < U extends NumericType< U > > RandomAccessibleInterval< U > upsample(
-			final RandomAccessibleInterval< U > normalizedInput,
-			final int dim,
-			final float scale ) {
+	private <U extends NumericType<U>> RandomAccessibleInterval<U> upsample(
+		final RandomAccessibleInterval<U> normalizedInput, final int dim,
+		final float scale)
+	{
 		final int n = normalizedInput.numDimensions();
 
 		// Interpolate
-		final RealRandomAccessible< U > interpolated =
-				Views.interpolate(
-						Views.extendBorder( normalizedInput ),
-						new NLinearInterpolatorFactory<>() );
+		final RealRandomAccessible<U> interpolated = Views.interpolate(Views
+			.extendBorder(normalizedInput), new NLinearInterpolatorFactory<>());
 
 		// Affine transformation to scale the Z axis
-		final double[] scales =
-				IntStream.range( 0, n ).mapToDouble( i -> i == dim ? scale : 1 ).toArray();
-		final AffineGet scaling = new Scale( scales );
+		final double[] scales = IntStream.range(0, n).mapToDouble(i -> i == dim
+			? scale : 1).toArray();
+		final AffineGet scaling = new Scale(scales);
 
 		// Scale min and max to create an interval afterwards
-		final double[] targetMin = new double[ n ];
-		final double[] targetMax = new double[ n ];
-		scaling.apply( Intervals.minAsDoubleArray( normalizedInput ), targetMin );
-		scaling.apply( Intervals.maxAsDoubleArray( normalizedInput ), targetMax );
+		final double[] targetMin = new double[n];
+		final double[] targetMax = new double[n];
+		scaling.apply(Intervals.minAsDoubleArray(normalizedInput), targetMin);
+		scaling.apply(Intervals.maxAsDoubleArray(normalizedInput), targetMax);
 
 		// Apply the transformation
-		final RandomAccessible< U > scaled = RealViews.affine( interpolated, scaling );
-		return Views.interval(
-				scaled,
-				Arrays.stream( targetMin ).mapToLong( d -> ( long ) Math.ceil( d ) ).toArray(),
-				Arrays.stream( targetMax ).mapToLong( d -> ( long ) Math.floor( d ) ).toArray() );
+		final RandomAccessible<U> scaled = RealViews.affine(interpolated, scaling);
+		return Views.interval(scaled, Arrays.stream(targetMin).mapToLong(
+			d -> (long) Math.ceil(d)).toArray(), Arrays.stream(targetMax).mapToLong(
+				d -> (long) Math.floor(d)).toArray());
 	}
 
 	/**
@@ -354,101 +352,105 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 	 * @param in
 	 * @param out
 	 */
-	private < U extends Type< U > > void copy(
-			final RandomAccessibleInterval< U > in,
-			final RandomAccessibleInterval< U > out ) {
-		final long[] blockSize = computeBlockSize( in );
+	private <U extends Type<U>> void copy(final RandomAccessibleInterval<U> in,
+		final RandomAccessibleInterval<U> out)
+	{
+		final long[] blockSize = computeBlockSize(in);
 
-		final TiledView< U > tiledViewIn = new TiledView<>( in, blockSize );
-		final TiledView< U > tiledViewOut = new TiledView<>( out, blockSize );
+		final TiledView<U> tiledViewIn = new TiledView<>(in, blockSize);
+		final TiledView<U> tiledViewOut = new TiledView<>(out, blockSize);
 
-//		final ExecutorService pool = Executors.newWorkStealingPool();
-		final List< Future< ? > > futures = new ArrayList<>();
+		// final ExecutorService pool = Executors.newWorkStealingPool();
+		final List<Future<?>> futures = new ArrayList<>();
 
-		LoopBuilder.setImages( tiledViewIn, tiledViewOut ).forEachPixel(
-			( inTile, outTile ) -> {
-				final LoopBuilder<BiConsumer< U, U >> loop = LoopBuilder.setImages( inTile, outTile );
-				futures.add( pool.submit( () -> {
-					loop.forEachPixel( ( i, o ) -> o.set( i ) );
-				} ) );
-			} );
+		LoopBuilder.setImages(tiledViewIn, tiledViewOut).forEachPixel((inTile,
+			outTile) -> {
+			final LoopBuilder<BiConsumer<U, U>> loop = LoopBuilder.setImages(inTile,
+				outTile);
+			futures.add(pool.submit(() -> {
+				loop.forEachPixel((i, o) -> o.set(i));
+			}));
+		});
 
-		for ( final Future< ? > f : futures ) {
+		for (final Future<?> f : futures) {
 			try {
 				f.get();
-			} catch ( InterruptedException | ExecutionException e ) {
+			}
+			catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
-//		pool.shutdown();
+		// pool.shutdown();
 	}
 
-	private < U extends RealType< U >, V extends RealType< V >, W extends RealType< W > > void
-			pointwiseGeometricMean(
-					final RandomAccessibleInterval< U > in1,
-					final RandomAccessibleInterval< V > in2,
-					final RandomAccessibleInterval< W > out ) {
-		final long[] blockSize = computeBlockSize( in1 );
+	private <U extends RealType<U>, V extends RealType<V>, W extends RealType<W>>
+		void pointwiseGeometricMean(final RandomAccessibleInterval<U> in1,
+			final RandomAccessibleInterval<V> in2,
+			final RandomAccessibleInterval<W> out)
+	{
+		final long[] blockSize = computeBlockSize(in1);
 
-		final TiledView< U > tiledViewIn1 = new TiledView<>( in1, blockSize );
-		final TiledView< V > tiledViewIn2 = new TiledView<>( in2, blockSize );
-		final TiledView< W > tiledViewOut = new TiledView<>( out, blockSize );
+		final TiledView<U> tiledViewIn1 = new TiledView<>(in1, blockSize);
+		final TiledView<V> tiledViewIn2 = new TiledView<>(in2, blockSize);
+		final TiledView<W> tiledViewOut = new TiledView<>(out, blockSize);
 
-//		final ExecutorService pool = Executors.newWorkStealingPool();
-		final List< Future< ? > > futures = new ArrayList<>();
+		// final ExecutorService pool = Executors.newWorkStealingPool();
+		final List<Future<?>> futures = new ArrayList<>();
 
 		futures.clear();
 
-		LoopBuilder.setImages( tiledViewIn1, tiledViewIn2, tiledViewOut ).forEachPixel(
-				( in1Tile, in2Tile, outTile ) -> {
-					final LoopBuilder<LoopBuilder.TriConsumer< U, V, W >> loop = LoopBuilder.setImages( in1Tile, in2Tile, outTile );
-					futures.add( pool.submit( () -> loop.forEachPixel(
-							( i1, i2, o ) -> o.setReal( Math.sqrt( i1.getRealFloat() * i2.getRealFloat() ) ))) );
-				} );
+		LoopBuilder.setImages(tiledViewIn1, tiledViewIn2, tiledViewOut)
+			.forEachPixel((in1Tile, in2Tile, outTile) -> {
+				final LoopBuilder<LoopBuilder.TriConsumer<U, V, W>> loop = LoopBuilder
+					.setImages(in1Tile, in2Tile, outTile);
+				futures.add(pool.submit(() -> loop.forEachPixel((i1, i2, o) -> o
+					.setReal(Math.sqrt(i1.getRealFloat() * i2.getRealFloat())))));
+			});
 
-		for ( final Future< ? > f : futures ) {
+		for (final Future<?> f : futures) {
 			try {
 				f.get();
-			} catch ( InterruptedException | ExecutionException e ) {
+			}
+			catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
-//		pool.shutdown();
+		// pool.shutdown();
 	}
 
-	private long[] computeBlockSize( final RandomAccessibleInterval< ? > in ) {
+	private long[] computeBlockSize(final RandomAccessibleInterval<?> in) {
 		final int threads = Runtime.getRuntime().availableProcessors();
 
-		final long[] blockSize = Intervals.dimensionsAsLongArray( in );
+		final long[] blockSize = Intervals.dimensionsAsLongArray(in);
 		int tmpMax = 0;
-		for ( int i = 0; i < blockSize.length; i++ ) {
-			tmpMax = blockSize[ i ] > blockSize[ tmpMax ] ? i : tmpMax;
+		for (int i = 0; i < blockSize.length; i++) {
+			tmpMax = blockSize[i] > blockSize[tmpMax] ? i : tmpMax;
 		}
 		final int max = tmpMax;
-		IntStream.range( 0, blockSize.length ).forEach(
-				( i ) -> blockSize[ i ] = i == max ? ( long ) Math.ceil(
-						blockSize[ i ] * 1.0 / threads ) : blockSize[ i ] );
+		IntStream.range(0, blockSize.length).forEach((i) -> blockSize[i] = i == max
+			? (long) Math.ceil(blockSize[i] * 1.0 / threads) : blockSize[i]);
 		return blockSize;
 	}
 
-	public static void main( final String[] args ) throws IOException {
+	public static void main(final String[] args) throws IOException {
 		// create the ImageJ application context with all available services
 		final ImageJ ij = new ImageJ();
 
-		ij.launch( args );
+		ij.launch(args);
 
 		// ask the user for a file to open
-		final File file = ij.ui().chooseFile( null, "open" );
+		final File file = ij.ui().chooseFile(null, "open");
 
-		if ( file != null && file.exists() ) {
+		if (file != null && file.exists()) {
 			// load the dataset
-			final Dataset dataset = ij.scifio().datasetIO().open( file.getAbsolutePath() );
+			final Dataset dataset = ij.scifio().datasetIO().open(file
+				.getAbsolutePath());
 
 			// show the image
-			ij.ui().show( dataset );
+			ij.ui().show(dataset);
 
 			// invoke the plugin
-			ij.command().run( NetIso.class, true );
+			ij.command().run(NetIso.class, true);
 		}
 	}
 }

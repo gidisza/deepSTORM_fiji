@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.tasks;
 
 import net.imagej.Dataset;
@@ -10,10 +11,10 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 
-@Plugin( type = Command.class, menuPath = "Plugins>CSBDeep>CSBDeepTest" )
+@Plugin(type = Command.class, menuPath = "Plugins>CSBDeep>CSBDeepTest")
 public class TestPlugin implements Command {
 
-	@Parameter( type = ItemIO.INPUT )
+	@Parameter(type = ItemIO.INPUT)
 	private Dataset input;
 
 	@Parameter
@@ -21,43 +22,43 @@ public class TestPlugin implements Command {
 
 	@Parameter
 	private ImageJ ij;
-//
-//	@Parameter( type = ItemIO.OUTPUT )
-//	private List< DatasetView > output = new ArrayList<>();
+	//
+	// @Parameter( type = ItemIO.OUTPUT )
+	// private List< DatasetView > output = new ArrayList<>();
 
 	@Override
 	public void run() {
 		System.out.println("Test");
-//		output.add(input);
-//		Dataset input = imgDispl.getActiveDataset();
-//		try {
-//			io.save(input, "/home/new.tif");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+		// output.add(input);
+		// Dataset input = imgDispl.getActiveDataset();
+		// try {
+		// io.save(input, "/home/new.tif");
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 		ij.ui().show(input);
 	}
 
-	public static void main( final String... args ) throws Exception {
+	public static void main(final String... args) throws Exception {
 		// create the ImageJ application context with all available services
 		final ImageJ ij = new ImageJ();
 
-		ij.launch( args );
+		ij.launch(args);
 
 		// ask the user for a file to open
-//		final File file = ij.ui().chooseFile( null, "open" );
-		final File file =
-				new File( "/home/random/Development/imagej/plugins/CSBDeep-data/net_tubulin/input2.tif" );
+		// final File file = ij.ui().chooseFile( null, "open" );
+		final File file = new File(
+			"/home/random/Development/imagej/plugins/CSBDeep-data/net_tubulin/input2.tif");
 
-		if ( file != null && file.exists() ) {
+		if (file != null && file.exists()) {
 			// load the dataset
-			final Dataset dataset = (Dataset) ij.io().open( file.getAbsolutePath() );
+			final Dataset dataset = (Dataset) ij.io().open(file.getAbsolutePath());
 
 			// show the image
-//			ij.ui().show( dataset );
+			// ij.ui().show( dataset );
 
 			// invoke the plugin
-			ij.command().run( TestPlugin.class, true, "input", dataset);
+			ij.command().run(TestPlugin.class, true, "input", dataset);
 		}
 
 	}

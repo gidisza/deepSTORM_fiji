@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.tiling.task;
 
 import java.util.List;
@@ -11,11 +12,9 @@ import net.imglib2.type.numeric.real.FloatType;
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.tiling.Tiling;
 
-public interface OutputTiler< T extends RealType< T >> extends Task {
+public interface OutputTiler<T extends RealType<T>> extends Task {
 
-	List< RandomAccessibleInterval< T > > run(
-			List< AdvancedTiledView< T > > input,
-			Tiling tiling,
-			AxisType[] axisTypes );
+	List<RandomAccessibleInterval<T>> run(List<AdvancedTiledView<T>> input,
+		Tiling tiling, AxisType[] axisTypes);
 
 }

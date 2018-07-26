@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.util.task;
 
 import mpicbg.csbd.task.DefaultTask;
@@ -14,21 +15,26 @@ import org.scijava.convert.ConvertService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultInputProcessor< T extends RealType< T >> extends DefaultTask implements InputProcessor {
+public class DefaultInputProcessor<T extends RealType<T>> extends DefaultTask
+	implements InputProcessor
+{
 
 	@Override
-	public List< RandomAccessibleInterval< FloatType > > run( final Dataset input ) {
+	public List<RandomAccessibleInterval<FloatType>> run(final Dataset input) {
 
-		final List< RandomAccessibleInterval< FloatType > > output = new ArrayList<>();
+		final List<RandomAccessibleInterval<FloatType>> output = new ArrayList<>();
 
 		setStarted();
 
-		log("Dataset type: " + input.getTypeLabelLong() + ", converting to FloatType." );
-		DatasetHelper.logDim( this, "Dataset dimensions", input );
+		log("Dataset type: " + input.getTypeLabelLong() +
+			", converting to FloatType.");
+		DatasetHelper.logDim(this, "Dataset dimensions", input);
 
-		RandomAccessibleInterval<FloatType> rai = Converters.convert((RandomAccessibleInterval)input.getImgPlus(), new RealFloatConverter<T>(), new FloatType());
+		RandomAccessibleInterval<FloatType> rai = Converters.convert(
+			(RandomAccessibleInterval) input.getImgPlus(),
+			new RealFloatConverter<T>(), new FloatType());
 
-		output.add( rai );
+		output.add(rai);
 
 		setFinished();
 

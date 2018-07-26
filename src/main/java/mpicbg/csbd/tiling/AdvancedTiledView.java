@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.tiling;
 
 import mpicbg.csbd.imglib2.TiledView;
@@ -10,30 +11,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AdvancedTiledView< T extends RealType< T >> extends TiledView< T > {
+public class AdvancedTiledView<T extends RealType<T>> extends TiledView<T> {
 
-	private final Map< AxisType, Long > originalDims;
+	private final Map<AxisType, Long> originalDims;
 	private final AxisType[] originalAxes;
-	private List< RandomAccessibleInterval< T > > processedTiles;
-//	protected int blockMultiple;
-//	protected long blockWidth;
+	private List<RandomAccessibleInterval<T>> processedTiles;
+	// protected int blockMultiple;
+	// protected long blockWidth;
 
-	public AdvancedTiledView(
-			final RandomAccessibleInterval<T> source,
-			final long[] blockSize,
-			final long[] overlap,
-			final AxisType[] axes, Tiling.TilingAction[] tilingActions) {
-		super( source, blockSize, overlap );
+	public AdvancedTiledView(final RandomAccessibleInterval<T> source,
+		final long[] blockSize, final long[] overlap, final AxisType[] axes,
+		Tiling.TilingAction[] tilingActions)
+	{
+		super(source, blockSize, overlap);
 		processedTiles = new ArrayList<>();
 		originalDims = new HashMap<>();
 		this.originalAxes = axes;
 	}
 
-	public Map< AxisType, Long > getOriginalDims() {
+	public Map<AxisType, Long> getOriginalDims() {
 		return originalDims;
 	}
 
-	public List< RandomAccessibleInterval< T > > getProcessedTiles() {
+	public List<RandomAccessibleInterval<T>> getProcessedTiles() {
 		return processedTiles;
 	}
 
@@ -42,8 +42,8 @@ public class AdvancedTiledView< T extends RealType< T >> extends TiledView< T > 
 	}
 
 	public void dispose() {
-//		if(originalDims != null) {
-//			originalDims.clear();
-//		}
+		// if(originalDims != null) {
+		// originalDims.clear();
+		// }
 	}
 }

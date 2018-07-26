@@ -88,17 +88,16 @@ import net.imglib2.view.Views;
  * patching together an <em>n</em>-dimensional {@link RandomAccessibleInterval}
  * of same-sized <em>n</em>-dimensional {@link RandomAccessibleInterval}s.
  *
- * @param <T>
- *            the pixel type
- *
+ * @param <T> the pixel type
  * @author Marcel Wiedenmann (University of Konstanz)
  * @author Christian Dietz (University of Konstanz)
  */
-public class GridView< T > extends AbstractInterval implements RandomAccessibleInterval< T >, IterableInterval< T >, View
+public class GridView<T> extends AbstractInterval implements
+	RandomAccessibleInterval<T>, IterableInterval<T>, View
 {
 	// TODO Implement SubIntervalIterable<T>?
 
-	private final RandomAccessibleInterval< ? extends RandomAccessibleInterval< T > > source;
+	private final RandomAccessibleInterval<? extends RandomAccessibleInterval<T>> source;
 
 	private final long numElements;
 
@@ -106,172 +105,164 @@ public class GridView< T > extends AbstractInterval implements RandomAccessibleI
 
 	private final long[] blockSize;
 
-	private IterableInterval< ? extends RandomAccessibleInterval< T > > sourceAsIterable;
+	private IterableInterval<? extends RandomAccessibleInterval<T>> sourceAsIterable;
 
-	public GridView( final RandomAccessibleInterval< ? extends RandomAccessibleInterval< T > > source )
+	public GridView(
+		final RandomAccessibleInterval<? extends RandomAccessibleInterval<T>> source)
 	{
-		super( source.numDimensions() );
+		super(source.numDimensions());
 		this.source = source;
-		blockSize = new long[ n ];
+		blockSize = new long[n];
 		long numEl = 1;
 		long blockNumEl = 1;
-		final RandomAccessibleInterval< T > block = Util.getTypeFromInterval( source );
-		for ( int d = 0; d < n; ++d )
-		{
-			blockSize[ d ] = block.dimension( d );
-			blockNumEl *= blockSize[ d ];
-			final long dim = source.dimension( d ) * blockSize[ d ];
-			max[ d ] = dim - 1;
+		final RandomAccessibleInterval<T> block = Util.getTypeFromInterval(source);
+		for (int d = 0; d < n; ++d) {
+			blockSize[d] = block.dimension(d);
+			blockNumEl *= blockSize[d];
+			final long dim = source.dimension(d) * blockSize[d];
+			max[d] = dim - 1;
 			numEl *= dim;
 		}
 		numElements = numEl;
 		blockNumElements = blockNumEl;
 	}
 
-	public RandomAccessibleInterval< ? extends RandomAccessibleInterval< T > > getSource()
+	public RandomAccessibleInterval<? extends RandomAccessibleInterval<T>>
+		getSource()
 	{
 		return source;
 	}
 
 	@Override
-	public GridViewRandomAccess< T > randomAccess()
-	{
-		return new GridViewRandomAccess<>( source, blockSize );
+	public GridViewRandomAccess<T> randomAccess() {
+		return new GridViewRandomAccess<>(source, blockSize);
 	}
 
 	@Override
-	public GridViewRandomAccess< T > randomAccess( final Interval interval )
-	{
+	public GridViewRandomAccess<T> randomAccess(final Interval interval) {
 		return randomAccess();
 	}
 
 	@Override
-	public long size()
-	{
+	public long size() {
 		return numElements;
 	}
 
 	@Override
-	public T firstElement()
-	{
-		return Util.getTypeFromInterval( Util.getTypeFromInterval( source ) );
+	public T firstElement() {
+		return Util.getTypeFromInterval(Util.getTypeFromInterval(source));
 	}
 
 	@Override
-	public Object iterationOrder()
-	{
+	public Object iterationOrder() {
 		return this;
 	}
 
 	@Override
-	public GridViewCursor< T > iterator()
-	{
+	public GridViewCursor<T> iterator() {
 		return cursor();
 	}
 
 	@Override
-	public GridViewCursor< T > cursor()
-	{
-		if ( sourceAsIterable == null )
-		{
-			sourceAsIterable = Views.iterable( source );
+	public GridViewCursor<T> cursor() {
+		if (sourceAsIterable == null) {
+			sourceAsIterable = Views.iterable(source);
 		}
-		return new GridViewCursor<>( sourceAsIterable, blockSize, blockNumElements );
+		return new GridViewCursor<>(sourceAsIterable, blockSize, blockNumElements);
 	}
 
 	@Override
-	public GridViewCursor< T > localizingCursor()
-	{
+	public GridViewCursor<T> localizingCursor() {
 		return cursor();
 	}
 
-	public static class GridViewRandomAccess< T > extends Point implements RandomAccess< T >
+	public static class GridViewRandomAccess<T> extends Point implements
+		RandomAccess<T>
 	{
-		private final RandomAccessibleInterval< ? extends RandomAccessibleInterval< T > > source;
 
-		private final RandomAccess< ? extends RandomAccessibleInterval< T > > sourceAccess;
+		private final RandomAccessibleInterval<? extends RandomAccessibleInterval<T>> source;
+
+		private final RandomAccess<? extends RandomAccessibleInterval<T>> sourceAccess;
 
 		private final long[] blockSize;
 
 		// TODO: Replace with faster primitive hashmap (e.g. Koloboke
 		// Collections ) must be BSD or Apache
-		private final HashMap< Long, RandomAccess< T > > blockAccesses;
+		private final HashMap<Long, RandomAccess<T>> blockAccesses;
 
 		private final long[] tempIndex;
 
 		private final long[] tempOffset;
 
-		private RandomAccess< T > tempBlockAccess;
+		private RandomAccess<T> tempBlockAccess;
 
-		public GridViewRandomAccess( final RandomAccessibleInterval< ? extends RandomAccessibleInterval< T > > source, final long[] blockSize )
+		public GridViewRandomAccess(
+			final RandomAccessibleInterval<? extends RandomAccessibleInterval<T>> source,
+			final long[] blockSize)
 		{
-			super( source.numDimensions() );
+			super(source.numDimensions());
 			this.source = source;
 			sourceAccess = source.randomAccess();
 			this.blockSize = blockSize;
 			blockAccesses = new HashMap<>();
-			tempIndex = new long[ n ];
-			tempOffset = new long[ n ];
+			tempIndex = new long[n];
+			tempOffset = new long[n];
 		}
 
-		private GridViewRandomAccess( final GridViewRandomAccess< T > ra )
-		{
-			super( ra.position, true );
+		private GridViewRandomAccess(final GridViewRandomAccess<T> ra) {
+			super(ra.position, true);
 			source = ra.source;
 			sourceAccess = ra.sourceAccess.copyRandomAccess();
 			blockSize = ra.blockSize;
-			blockAccesses = new HashMap<>( ra.blockAccesses.size() );
-			for ( final Map.Entry< Long, RandomAccess< T > > entry : ra.blockAccesses.entrySet() )
+			blockAccesses = new HashMap<>(ra.blockAccesses.size());
+			for (final Map.Entry<Long, RandomAccess<T>> entry : ra.blockAccesses
+				.entrySet())
 			{
-				blockAccesses.put( entry.getKey(), entry.getValue().copyRandomAccess() );
+				blockAccesses.put(entry.getKey(), entry.getValue().copyRandomAccess());
 			}
 			tempIndex = ra.tempIndex.clone();
 			tempOffset = ra.tempOffset.clone();
 		}
 
 		@Override
-		public T get()
-		{
+		public T get() {
 			long flatIndex = 0;
-			for ( int d = n - 1; d >= 0; --d )
-			{
-				final long normalizedPosition = position[ d ] - source.min( d );
-				tempIndex[ d ] = normalizedPosition / blockSize[ d ];
-				tempOffset[ d ] = normalizedPosition % blockSize[ d ];
-				flatIndex = flatIndex * source.dimension( d ) + tempIndex[ d ];
+			for (int d = n - 1; d >= 0; --d) {
+				final long normalizedPosition = position[d] - source.min(d);
+				tempIndex[d] = normalizedPosition / blockSize[d];
+				tempOffset[d] = normalizedPosition % blockSize[d];
+				flatIndex = flatIndex * source.dimension(d) + tempIndex[d];
 			}
 
-			tempBlockAccess = blockAccesses.computeIfAbsent( flatIndex, idx -> {
-				sourceAccess.setPosition( tempIndex );
+			tempBlockAccess = blockAccesses.computeIfAbsent(flatIndex, idx -> {
+				sourceAccess.setPosition(tempIndex);
 				// TODO: [Review] There are more efficient ways than creating a
 				// new view each time. E.g, we could wrap the block's random
 				// access in an own random access that deals with translation
 				// (unfortunately, net.imglib2.view.TranslationRandomAccess has
 				// no public constructor).
-				return Views.zeroMin( sourceAccess.get() ).randomAccess();
-			} );
-			tempBlockAccess.setPosition( tempOffset );
+				return Views.zeroMin(sourceAccess.get()).randomAccess();
+			});
+			tempBlockAccess.setPosition(tempOffset);
 			return tempBlockAccess.get();
 		}
 
 		@Override
-		public GridViewRandomAccess< T > copy()
-		{
-			return new GridViewRandomAccess<>( this );
+		public GridViewRandomAccess<T> copy() {
+			return new GridViewRandomAccess<>(this);
 		}
 
 		@Override
-		public GridViewRandomAccess< T > copyRandomAccess()
-		{
+		public GridViewRandomAccess<T> copyRandomAccess() {
 			return copy();
 		}
 	}
 
-	public static class GridViewCursor< T > extends AbstractCursor< T >
-	{
-		private final IterableInterval< ? extends RandomAccessibleInterval< T > > source;
+	public static class GridViewCursor<T> extends AbstractCursor<T> {
 
-		private final Cursor< ? extends RandomAccessibleInterval< T > > sourceCursor;
+		private final IterableInterval<? extends RandomAccessibleInterval<T>> source;
+
+		private final Cursor<? extends RandomAccessibleInterval<T>> sourceCursor;
 
 		private final long[] blockSize;
 
@@ -279,11 +270,13 @@ public class GridView< T > extends AbstractInterval implements RandomAccessibleI
 
 		private long tempIndex;
 
-		private Cursor< T > tempBlockCursor;
+		private Cursor<T> tempBlockCursor;
 
-		public GridViewCursor( final IterableInterval< ? extends RandomAccessibleInterval< T > > source, final long[] blockSize, final long blockNumElements )
+		public GridViewCursor(
+			final IterableInterval<? extends RandomAccessibleInterval<T>> source,
+			final long[] blockSize, final long blockNumElements)
 		{
-			super( source.numDimensions() );
+			super(source.numDimensions());
 			this.source = source;
 			sourceCursor = source.cursor();
 			this.blockSize = blockSize;
@@ -291,9 +284,8 @@ public class GridView< T > extends AbstractInterval implements RandomAccessibleI
 			incrementBlock();
 		}
 
-		private GridViewCursor( final GridViewCursor< T > cursor )
-		{
-			super( cursor.n );
+		private GridViewCursor(final GridViewCursor<T> cursor) {
+			super(cursor.n);
 			source = cursor.source;
 			sourceCursor = cursor.sourceCursor.copyCursor();
 			blockSize = cursor.blockSize;
@@ -303,16 +295,13 @@ public class GridView< T > extends AbstractInterval implements RandomAccessibleI
 		}
 
 		@Override
-		public T get()
-		{
+		public T get() {
 			return tempBlockCursor.get();
 		}
 
 		@Override
-		public void fwd()
-		{
-			if ( tempIndex >= blockMaxIndex )
-			{
+		public void fwd() {
+			if (tempIndex >= blockMaxIndex) {
 				incrementBlock();
 			}
 			++tempIndex;
@@ -320,63 +309,55 @@ public class GridView< T > extends AbstractInterval implements RandomAccessibleI
 		}
 
 		@Override
-		public void jumpFwd( long steps )
-		{
+		public void jumpFwd(long steps) {
 			tempIndex += steps;
-			if ( tempIndex >= blockMaxIndex )
-			{
+			if (tempIndex >= blockMaxIndex) {
 				steps = tempIndex - blockMaxIndex - 1;
 				incrementBlock();
 				tempIndex += steps;
 			}
-			tempBlockCursor.jumpFwd( steps );
+			tempBlockCursor.jumpFwd(steps);
 		}
 
 		@Override
-		public void reset()
-		{
+		public void reset() {
 			sourceCursor.reset();
 			incrementBlock();
 		}
 
 		@Override
-		public boolean hasNext()
-		{
+		public boolean hasNext() {
 			return tempIndex < blockMaxIndex || sourceCursor.hasNext();
 		}
 
 		@Override
-		public void localize( final long[] position )
-		{
-			sourceCursor.localize( position );
-			for ( int d = 0; d < n; ++d )
-			{
-				position[ d ] = position[ d ] * blockSize[ d ] + tempBlockCursor.getLongPosition( d );
+		public void localize(final long[] position) {
+			sourceCursor.localize(position);
+			for (int d = 0; d < n; ++d) {
+				position[d] = position[d] * blockSize[d] + tempBlockCursor
+					.getLongPosition(d);
 			}
 		}
 
 		@Override
-		public long getLongPosition( final int d )
-		{
-			return sourceCursor.getLongPosition( d ) * blockSize[ d ] + tempBlockCursor.getLongPosition( d );
+		public long getLongPosition(final int d) {
+			return sourceCursor.getLongPosition(d) * blockSize[d] + tempBlockCursor
+				.getLongPosition(d);
 		}
 
 		@Override
-		public GridViewCursor< T > copy()
-		{
-			return new GridViewCursor<>( this );
+		public GridViewCursor<T> copy() {
+			return new GridViewCursor<>(this);
 		}
 
 		@Override
-		public GridViewCursor< T > copyCursor()
-		{
+		public GridViewCursor<T> copyCursor() {
 			return copy();
 		}
 
-		private void incrementBlock()
-		{
+		private void incrementBlock() {
 			tempIndex = -1;
-			tempBlockCursor = Views.iterable( sourceCursor.next() ).cursor();
+			tempBlockCursor = Views.iterable(sourceCursor.next()).cursor();
 		}
 	}
 }

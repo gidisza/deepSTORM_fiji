@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.network;
 
 import mpicbg.csbd.imglib2.TiledView;
@@ -19,12 +20,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
-public abstract class DefaultNetwork< T extends RealType< T >> implements Network<T> {
+public abstract class DefaultNetwork<T extends RealType<T>> implements
+	Network<T>
+{
 
 	protected Task status;
 	protected ImageTensor inputNode = new ImageTensor();
 	protected ImageTensor outputNode = new ImageTensor();
-	protected TiledView< T > tiledView;
+	protected TiledView<T> tiledView;
 	protected boolean supportsGPU = false;
 	protected Integer doneTileCount;
 	protected boolean dropSingletonDims = true;
@@ -39,16 +42,17 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 	@Override
 	public void loadLibrary() {}
 
-	protected abstract boolean loadModel( Location source, String modelName );
+	protected abstract boolean loadModel(Location source, String modelName);
 
 	@Override
-	public boolean loadModel(
-			final String pathOrURL,
-			final String modelName ) throws FileNotFoundException {
+	public boolean loadModel(final String pathOrURL, final String modelName)
+		throws FileNotFoundException
+	{
 
-		final Location source = IOHelper.loadFileOrURL( pathOrURL );
-		status.log("loading model " + modelName + " from source " + source.getURI());
-		return loadModel( source, modelName );
+		final Location source = IOHelper.loadFileOrURL(pathOrURL);
+		status.log("loading model " + modelName + " from source " + source
+			.getURI());
+		return loadModel(source, modelName);
 
 	}
 
@@ -56,70 +60,75 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 	public abstract void preprocess();
 
 	@Override
-	public List< RandomAccessibleInterval< T > > call() throws ExecutionException {
+	public List<RandomAccessibleInterval<T>> call() throws ExecutionException {
 
-		final List< RandomAccessibleInterval< T > > results = runModel();
+		final List<RandomAccessibleInterval<T>> results = runModel();
 
 		return results;
 	}
 
-	protected void
-			printDim( final String title, final RandomAccessibleInterval< FloatType > input ) {
-		final long[] dims = new long[ input.numDimensions() ];
-		input.dimensions( dims );
-		log( title + ": " + Arrays.toString( dims ) );
+	protected void printDim(final String title,
+		final RandomAccessibleInterval<FloatType> input)
+	{
+		final long[] dims = new long[input.numDimensions()];
+		input.dimensions(dims);
+		log(title + ": " + Arrays.toString(dims));
 	}
 
-	private List< RandomAccessibleInterval< T > > runModel() throws ExecutionException {
+	private List<RandomAccessibleInterval<T>> runModel()
+		throws ExecutionException
+	{
 
 		final boolean multithreading = false;
 
-		final Cursor< RandomAccessibleInterval< T > > cursor =
-				Views.iterable( tiledView ).cursor();
+		final Cursor<RandomAccessibleInterval<T>> cursor = Views.iterable(tiledView)
+			.cursor();
 
 		// Loop over the tiles and execute the prediction
-		final List< RandomAccessibleInterval< T > > results = new ArrayList<>();
-		final List< Future< RandomAccessibleInterval< T > > > futures = new ArrayList<>();
+		final List<RandomAccessibleInterval<T>> results = new ArrayList<>();
+		final List<Future<RandomAccessibleInterval<T>>> futures = new ArrayList<>();
 
-//		status.setCurrentStep(0);
-//		doneTileCount = 0;
-//		int numSteps = 1;
-//		for(int i = 0; i < tiledView.numDimensions(); i++) {
-//			numSteps *= tiledView.dimension(i);
-//		}
-//		status.setNumSteps(numSteps);
+		// status.setCurrentStep(0);
+		// doneTileCount = 0;
+		// int numSteps = 1;
+		// for(int i = 0; i < tiledView.numDimensions(); i++) {
+		// numSteps *= tiledView.dimension(i);
+		// }
+		// status.setNumSteps(numSteps);
 
-		while ( cursor.hasNext() ) {
-			final RandomAccessibleInterval< T > tile = cursor.next();
+		while (cursor.hasNext()) {
+			final RandomAccessibleInterval<T> tile = cursor.next();
 
-			final Future< RandomAccessibleInterval< T > > future =
-					pool.submit( new TileRunner( tile ) );
+			final Future<RandomAccessibleInterval<T>> future = pool.submit(
+				new TileRunner(tile));
 
-			log( "Processing tile " + ( doneTileCount + 1 ) + ".." );
+			log("Processing tile " + (doneTileCount + 1) + "..");
 
-			futures.add( future );
+			futures.add(future);
 
-			if ( !multithreading ) {
+			if (!multithreading) {
 				try {
-					final RandomAccessibleInterval< T > res = future.get();
-					if ( res == null ) return null;
-					results.add( res );
+					final RandomAccessibleInterval<T> res = future.get();
+					if (res == null) return null;
+					results.add(res);
 					upTileCount();
-				} catch ( final InterruptedException exc ) {
+				}
+				catch (final InterruptedException exc) {
 					pool.shutdownNow();
 					fail();
 					return null;
 				}
 			}
 		}
-		if ( multithreading ) {
-			for ( final Future< RandomAccessibleInterval< T > > future : futures ) {
+		if (multithreading) {
+			for (final Future<RandomAccessibleInterval<T>> future : futures) {
 				try {
-					final RandomAccessibleInterval< T > res = future.get();
-					if ( res == null ) return null;
-					results.add( res );
+					final RandomAccessibleInterval<T> res = future.get();
+					if (res == null) return null;
+					results.add(res);
 					upTileCount();
-				} catch ( final InterruptedException exc ) {
+				}
+				catch (final InterruptedException exc) {
 					pool.shutdownNow();
 					fail();
 					return null;
@@ -131,8 +140,8 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 	}
 
 	@Override
-	public abstract RandomAccessibleInterval< T >
-			execute( RandomAccessibleInterval< T > tile ) throws Exception;
+	public abstract RandomAccessibleInterval<T> execute(
+		RandomAccessibleInterval<T> tile) throws Exception;
 
 	@Override
 	public Task getStatus() {
@@ -155,14 +164,14 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 	}
 
 	@Override
-	public void loadInputNode( final String defaultName, final Dataset dataset ) {
-		inputNode.initialize( dataset );
-		inputNode.setName( defaultName );
+	public void loadInputNode(final String defaultName, final Dataset dataset) {
+		inputNode.initialize(dataset);
+		inputNode.setName(defaultName);
 	}
 
 	@Override
-	public void loadOutputNode( final String defaultName ) {
-		outputNode.setName( defaultName );
+	public void loadOutputNode(final String defaultName) {
+		outputNode.setName(defaultName);
 	}
 
 	@Override
@@ -183,12 +192,12 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 	}
 
 	@Override
-	public void setTiledView( final TiledView< T > tiledView ) {
+	public void setTiledView(final TiledView<T> tiledView) {
 		this.tiledView = tiledView;
 	}
 
-	protected void log( final String text ) {
-		if(status != null) {
+	protected void log(final String text) {
+		if (status != null) {
 			status.log(text);
 		}
 	}
@@ -208,43 +217,43 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 	 * dimension. Default value is true.
 	 */
 	@Override
-	public void setDropSingletonDims( final boolean dropSingletonDims ) {
+	public void setDropSingletonDims(final boolean dropSingletonDims) {
 		this.dropSingletonDims = dropSingletonDims;
 	}
 
 	@Override
-	public void setDoDimensionReduction( final boolean doDimensionReduction ) {
-		setDoDimensionReduction( doDimensionReduction, Axes.Z );
+	public void setDoDimensionReduction(final boolean doDimensionReduction) {
+		setDoDimensionReduction(doDimensionReduction, Axes.Z);
 	}
 
 	@Override
-	public void setDoDimensionReduction(
-			final boolean doDimensionReduction,
-			final AxisType axisToRemove ) {
+	public void setDoDimensionReduction(final boolean doDimensionReduction,
+		final AxisType axisToRemove)
+	{
 		this.doDimensionReduction = doDimensionReduction;
 		this.axisToRemove = axisToRemove;
 	}
 
 	@Override
 	public void dispose() {
-		if ( pool != null ) {
+		if (pool != null) {
 			pool.shutdown();
 		}
 	}
 
-	class TileRunner implements Callable< RandomAccessibleInterval< T > > {
+	class TileRunner implements Callable<RandomAccessibleInterval<T>> {
 
-		RandomAccessibleInterval< T > tile;
+		RandomAccessibleInterval<T> tile;
 
-		public TileRunner( final RandomAccessibleInterval< T > tile ) {
+		public TileRunner(final RandomAccessibleInterval<T> tile) {
 			this.tile = tile;
 		}
 
 		@Override
-		public RandomAccessibleInterval< T > call() throws Exception {
-			final RandomAccessibleInterval< T > result = execute( tile );
-//			ImageJ ij = new ImageJ();
-//			ij.ui().show( result );
+		public RandomAccessibleInterval<T> call() throws Exception {
+			final RandomAccessibleInterval<T> result = execute(tile);
+			// ImageJ ij = new ImageJ();
+			// ij.ui().show( result );
 			return result;
 		}
 	}

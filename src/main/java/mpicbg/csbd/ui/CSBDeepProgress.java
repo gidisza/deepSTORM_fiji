@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.ui;
 
 import javax.swing.*;
@@ -73,8 +74,9 @@ public class CSBDeepProgress extends JPanel {
 	final JPanel taskContainer;
 	final JFrame frame;
 
-	JLabel noTensorFlow =
-			new JLabel( "<html>Couldn't load tensorflow from library<br />path and will therefore use CPU<br />instead of GPU version.<br />This will affect performance.<br />See wiki for further details.</html>", SwingConstants.RIGHT );
+	JLabel noTensorFlow = new JLabel(
+		"<html>Couldn't load tensorflow from library<br />path and will therefore use CPU<br />instead of GPU version.<br />This will affect performance.<br />See wiki for further details.</html>",
+		SwingConstants.RIGHT);
 
 	private final SimpleAttributeSet red = new SimpleAttributeSet();
 
@@ -88,241 +90,241 @@ public class CSBDeepProgress extends JPanel {
 
 	public CSBDeepProgress(JFrame frame, final boolean usesTF) {
 
-		super( new BorderLayout() );
+		super(new BorderLayout());
 
 		this.frame = frame;
 
-		StyleConstants.setForeground( red, Color.red );
+		StyleConstants.setForeground(red, Color.red);
 
 		taskContainer = new JPanel();
-		taskContainer.setLayout( new BoxLayout(taskContainer, BoxLayout.Y_AXIS ) );
+		taskContainer.setLayout(new BoxLayout(taskContainer, BoxLayout.Y_AXIS));
 
-		taskContainer.setBorder( new EmptyBorder( 0, 0, 0, 123 ) );
+		taskContainer.setBorder(new EmptyBorder(0, 0, 0, 123));
 
-		progressBar = new JProgressBar( 0, 100 );
-		progressBar.setStringPainted( true );
+		progressBar = new JProgressBar(0, 100);
+		progressBar.setStringPainted(true);
 
 		taskOutput = new JTextPane();
-		taskOutput.setAutoscrolls( true );
-		taskOutput.setMinimumSize( new Dimension( 200, 80 ) );
-		taskOutput.setPreferredSize( new Dimension( 200, 80 ) );
-		taskOutput.setMargin( new Insets( 5, 5, 5, 5 ) );
-		taskOutput.setEditable( false );
+		taskOutput.setAutoscrolls(true);
+		taskOutput.setMinimumSize(new Dimension(200, 80));
+		taskOutput.setPreferredSize(new Dimension(200, 80));
+		taskOutput.setMargin(new Insets(5, 5, 5, 5));
+		taskOutput.setEditable(false);
 
-		//WARNINGS
+		// WARNINGS
 		final JPanel notePanel = new JPanel();
-		notePanel.setLayout( new BoxLayout( notePanel, BoxLayout.Y_AXIS ) );
-		notePanel.setMinimumSize( new Dimension( 280, 0 ) );
-		notePanel.setPreferredSize( new Dimension( 280, 0 ) );
-		final Border borderline = BorderFactory.createLineBorder( Color.red );
-		final TitledBorder warningborder =
-				BorderFactory.createTitledBorder( borderline, "Warning" );
-		warningborder.setTitleColor( Color.red );
-		if ( !usesTF ) {
+		notePanel.setLayout(new BoxLayout(notePanel, BoxLayout.Y_AXIS));
+		notePanel.setMinimumSize(new Dimension(280, 0));
+		notePanel.setPreferredSize(new Dimension(280, 0));
+		final Border borderline = BorderFactory.createLineBorder(Color.red);
+		final TitledBorder warningborder = BorderFactory.createTitledBorder(
+			borderline, "Warning");
+		warningborder.setTitleColor(Color.red);
+		if (!usesTF) {
 			final JPanel note1 = new JPanel();
-			note1.setBorder( warningborder );
-			noTensorFlow.setBorder( new EmptyBorder( 2, 5, 5, 5 ) );
-			note1.add( noTensorFlow );
-			note1.setMinimumSize( new Dimension( 280, 100 ) );
-			note1.setMaximumSize(
-					new Dimension( 100000, ( int ) note1.getPreferredSize().getHeight() ) );
-			notePanel.add( note1 );
+			note1.setBorder(warningborder);
+			noTensorFlow.setBorder(new EmptyBorder(2, 5, 5, 5));
+			note1.add(noTensorFlow);
+			note1.setMinimumSize(new Dimension(280, 100));
+			note1.setMaximumSize(new Dimension(100000, (int) note1.getPreferredSize()
+				.getHeight()));
+			notePanel.add(note1);
 		}
-		notePanel.add( Box.createVerticalGlue() );
+		notePanel.add(Box.createVerticalGlue());
 
-		final JPanel topPanel = new JPanel( new BorderLayout() );
-		topPanel.add(taskContainer, BorderLayout.WEST );
-		topPanel.add( notePanel, BorderLayout.EAST );
+		final JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.add(taskContainer, BorderLayout.WEST);
+		topPanel.add(notePanel, BorderLayout.EAST);
 
-		add( topPanel, BorderLayout.PAGE_START );
+		add(topPanel, BorderLayout.PAGE_START);
 
 		final JPanel centerPanel = new JPanel();
-		centerPanel.setLayout( new BoxLayout( centerPanel, BoxLayout.Y_AXIS ) );
-		centerPanel.add( Box.createRigidArea( new Dimension( 0, 10 ) ) );
-		progressBarSpace = Box.createRigidArea( new Dimension( 0, 20 ) );
-		centerPanel.add( progressBarSpace );
-		centerPanel.add( progressBar );
-		centerPanel.add( new JScrollPane( taskOutput ) );
-		add( centerPanel, BorderLayout.CENTER );
-		setBorder( BorderFactory.createEmptyBorder( 20, 20, 20, 20 ) );
+		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		progressBarSpace = Box.createRigidArea(new Dimension(0, 20));
+		centerPanel.add(progressBarSpace);
+		centerPanel.add(progressBar);
+		centerPanel.add(new JScrollPane(taskOutput));
+		add(centerPanel, BorderLayout.CENTER);
+		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-		okButton = new JButton( "Ok" );
-		okButton.setEnabled( false );
-		cancelButton = new JButton( "Cancel" );
+		okButton = new JButton("Ok");
+		okButton.setEnabled(false);
+		cancelButton = new JButton("Cancel");
 
 		resetProgress();
 
-		final JPanel footer = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
-		footer.setBorder( BorderFactory.createEmptyBorder( 15, 0, -5, -3 ) );
-		footer.setAlignmentX( Component.RIGHT_ALIGNMENT );
-		footer.add( cancelButton );
-		footer.add( okButton );
+		final JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		footer.setBorder(BorderFactory.createEmptyBorder(15, 0, -5, -3));
+		footer.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		footer.add(cancelButton);
+		footer.add(okButton);
 
-		add( footer, BorderLayout.SOUTH );
+		add(footer, BorderLayout.SOUTH);
 
 		dispose();
 		repaint();
 
-		getOkBtn().addActionListener( e -> frame.dispose() );
-		setOpaque( true ); //content panes must be opaque
-		frame.setContentPane( this );
+		getOkBtn().addActionListener(e -> frame.dispose());
+		setOpaque(true); // content panes must be opaque
+		frame.setContentPane(this);
 
 	}
 
 	public void display() {
-		//Display the window.
+		// Display the window.
 		frame.pack();
 		frame.setLocationRelativeTo(null);
-		frame.setVisible( true );
+		frame.setVisible(true);
 	}
 
-	public void addTask(final String title ) {
-		final JPanel taskrow = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
-		final JLabel statusLabel = new JLabel( "\u2013", SwingConstants.CENTER );
+	public void addTask(final String title) {
+		final JPanel taskrow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		final JLabel statusLabel = new JLabel("\u2013", SwingConstants.CENTER);
 		final Font font = statusLabel.getFont();
-		statusLabel.setFont( new Font( font.getName(), Font.BOLD, font.getSize() * 2 ) );
-		statusLabel.setPreferredSize( new Dimension( 50, 30 ) );
-		statusLabel.setMinimumSize( new Dimension( 50, 30 ) );
-		statusLabel.setMaximumSize( new Dimension( 50, 30 ) );
+		statusLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize() *
+			2));
+		statusLabel.setPreferredSize(new Dimension(50, 30));
+		statusLabel.setMinimumSize(new Dimension(50, 30));
+		statusLabel.setMaximumSize(new Dimension(50, 30));
 		final GuiTask task = new GuiTask();
 		task.status = statusLabel;
-		task.title = new JLabel( title );
+		task.title = new JLabel(title);
 		task.taskDone = false;
-		tasks.add( task );
-		taskrow.add( task.status );
-		taskrow.add( task.title );
-		taskContainer.add( taskrow );
+		tasks.add(task);
+		taskrow.add(task.status);
+		taskrow.add(task.title);
+		taskContainer.add(taskrow);
 	}
 
 	private void resetProgress() {
-		for ( final GuiTask step : tasks) {
+		for (final GuiTask step : tasks) {
 			step.taskDone = false;
 		}
 		currentTask = -1;
 		currentTaskFailing = false;
-		progressBar.setValue( 0 );
+		progressBar.setValue(0);
 	}
 
-	public void setProgressBarMax( final int value ) {
-		progressBar.setMaximum( value );
+	public void setProgressBarMax(final int value) {
+		progressBar.setMaximum(value);
 	}
 
-	public void setProgressBarValue( final int value ) {
-		progressBar.setValue( value );
+	public void setProgressBarValue(final int value) {
+		progressBar.setValue(value);
 	}
 
 	private void updateGUI() {
 
 		boolean alldone = true;
-		for ( final GuiTask task : tasks) {
-			if ( !task.taskDone) alldone = false;
+		for (final GuiTask task : tasks) {
+			if (!task.taskDone) alldone = false;
 		}
-		okButton.setEnabled( alldone || currentTaskFailing);
-		cancelButton.setEnabled( !alldone && !currentTaskFailing);
+		okButton.setEnabled(alldone || currentTaskFailing);
+		cancelButton.setEnabled(!alldone && !currentTaskFailing);
 
 		invalidate();
 
 	}
 
-	public void setTaskStart(final int task ) {
+	public void setTaskStart(final int task) {
 		currentTask = task;
 		currentTaskFailing = false;
-		setCurrentStepStatus( STATUS_RUNNING );
+		setCurrentStepStatus(STATUS_RUNNING);
 		updateGUI();
 	}
 
-	public void setTaskDone(final int task ) {
+	public void setTaskDone(final int task) {
 		tasks.get(currentTask).taskDone = true;
-		setStepStatus( task, STATUS_DONE );
+		setStepStatus(task, STATUS_DONE);
 		updateGUI();
 	}
 
-	public void setTaskFail(final int task ) {
+	public void setTaskFail(final int task) {
 		currentTaskFailing = true;
-		setStepStatus( task, STATUS_FAIL );
+		setStepStatus(task, STATUS_FAIL);
 		updateGUI();
 	}
 
-	public void setTaskNumSteps(final int task, final int steps ) {
+	public void setTaskNumSteps(final int task, final int steps) {
 		tasks.get(currentTask).numSteps = steps;
 		setProgressBarMax(steps);
 		updateGUI();
 	}
 
-	public void setTaskCurrentStep(final int task, final int step ) {
+	public void setTaskCurrentStep(final int task, final int step) {
 		tasks.get(currentTask).step = step;
 		setProgressBarValue(step);
 		updateGUI();
 	}
 
-	private void setCurrentStepStatus( final int status ) {
-		setStepStatus(currentTask, status );
+	private void setCurrentStepStatus(final int status) {
+		setStepStatus(currentTask, status);
 	}
 
-	private void setStepStatus( final int task, final int status ) {
+	private void setStepStatus(final int task, final int status) {
 
-		if ( status < tasks.size() && task >= 0 ) {
-			final JLabel statuslabel = tasks.get( task ).status;
-			switch ( status ) {
-			case STATUS_IDLE:
-				statuslabel.setText( "\u2013" );
-				statuslabel.setForeground( Color.getHSBColor( 0.6f, 0.f, 0.3f ) );
-				break;
-			case STATUS_RUNNING:
-				statuslabel.setText( "\u2794" );
-				statuslabel.setForeground( Color.getHSBColor( 0.6f, 0.f, 0.3f ) );
-				break;
-			case STATUS_DONE:
-				statuslabel.setText( "\u2713" );
-				statuslabel.setForeground( Color.getHSBColor( 0.3f, 1, 0.6f ) );
-				break;
-			case STATUS_FAIL:
-				statuslabel.setText( "\u2013" );
-				statuslabel.setForeground( Color.red );
-				break;
+		if (status < tasks.size() && task >= 0) {
+			final JLabel statuslabel = tasks.get(task).status;
+			switch (status) {
+				case STATUS_IDLE:
+					statuslabel.setText("\u2013");
+					statuslabel.setForeground(Color.getHSBColor(0.6f, 0.f, 0.3f));
+					break;
+				case STATUS_RUNNING:
+					statuslabel.setText("\u2794");
+					statuslabel.setForeground(Color.getHSBColor(0.6f, 0.f, 0.3f));
+					break;
+				case STATUS_DONE:
+					statuslabel.setText("\u2713");
+					statuslabel.setForeground(Color.getHSBColor(0.3f, 1, 0.6f));
+					break;
+				case STATUS_FAIL:
+					statuslabel.setText("\u2013");
+					statuslabel.setForeground(Color.red);
+					break;
 			}
 		}
 	}
 
-	public void addLog( final String data ) {
-		addLog( data, null );
+	public void addLog(final String data) {
+		addLog(data, null);
 	}
 
-	public void addLog( final String data, final SimpleAttributeSet style ) {
+	public void addLog(final String data, final SimpleAttributeSet style) {
 		final Date date = new Date();
-		final DateFormat df = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
-			taskOutput.getDocument().insertString(
-					taskOutput.getDocument().getLength(),
-					df.format( date ) + " | " + data + "\n",
-					style );
-			taskOutput.setCaretPosition( taskOutput.getDocument().getLength() );
+			taskOutput.getDocument().insertString(taskOutput.getDocument()
+				.getLength(), df.format(date) + " | " + data + "\n", style);
+			taskOutput.setCaretPosition(taskOutput.getDocument().getLength());
 			taskOutput.invalidate();
 			this.invalidate();
-		} catch ( final BadLocationException exc ) {
+		}
+		catch (final BadLocationException exc) {
 			exc.printStackTrace();
 		}
 	}
 
-	public void addError( final String data ) {
-		addLog( data, red );
+	public void addError(final String data) {
+		addLog(data, red);
 	}
 
 	public static CSBDeepProgress create() {
-		return create( true );
+		return create(true);
 	}
 
 	public static CSBDeepProgress createWithGPUWarning() {
-		return create( false );
+		return create(false);
 	}
 
-	private static CSBDeepProgress create( final boolean usesTF ) {
-		//Create and set up the window.
-		final JFrame frame = new JFrame( "CSBDeep progress" );
-//		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+	private static CSBDeepProgress create(final boolean usesTF) {
+		// Create and set up the window.
+		final JFrame frame = new JFrame("CSBDeep progress");
+		// frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
-		//Create and set up the content pane.
-		final CSBDeepProgress newContentPane = new CSBDeepProgress( frame, usesTF );
+		// Create and set up the content pane.
+		final CSBDeepProgress newContentPane = new CSBDeepProgress(frame, usesTF);
 
 		return newContentPane;
 	}

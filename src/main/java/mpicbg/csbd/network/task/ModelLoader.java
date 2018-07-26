@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.network.task;
 
 import mpicbg.csbd.network.Network;
@@ -6,12 +7,7 @@ import net.imagej.Dataset;
 
 public interface ModelLoader extends Task {
 
-	void run(
-			String modelName,
-			Network network,
-			String modelFileUrl,
-			String inputNodeName,
-			String outputNodeName,
-			Dataset input );
+	void run(String modelName, Network network, String modelFileUrl,
+		String inputNodeName, String outputNodeName, Dataset input);
 
 }

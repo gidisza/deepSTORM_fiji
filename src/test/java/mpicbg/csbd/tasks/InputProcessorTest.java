@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.tasks;
 
 import static org.junit.Assert.assertEquals;
@@ -22,20 +23,18 @@ public class InputProcessorTest {
 	public void run() {
 		final ImageJ ij = new ImageJ();
 
-		final Dataset input = ij.dataset().create(
-				new FloatType(),
-				new long[] { 10, 50, 100 },
-				"",
-				new AxisType[] { Axes.Z, Axes.X, Axes.Y } );
+		final Dataset input = ij.dataset().create(new FloatType(), new long[] { 10,
+			50, 100 }, "", new AxisType[] { Axes.Z, Axes.X, Axes.Y });
 
 		final InputProcessor inputProcessor = new DefaultInputProcessor();
 
-		final List< RandomAccessibleInterval< FloatType > > output = inputProcessor.run( input );
+		final List<RandomAccessibleInterval<FloatType>> output = inputProcessor.run(
+			input);
 
-		assertEquals( 1, output.size() );
-		assertEquals( 10, output.get( 0 ).dimension( 0 ) );
-		assertEquals( 50, output.get( 0 ).dimension( 1 ) );
-		assertEquals( 100, output.get( 0 ).dimension( 2 ) );
+		assertEquals(1, output.size());
+		assertEquals(10, output.get(0).dimension(0));
+		assertEquals(50, output.get(0).dimension(1));
+		assertEquals(100, output.get(0).dimension(2));
 
 	}
 

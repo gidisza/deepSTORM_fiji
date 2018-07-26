@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.normalize;
 
 import net.imagej.ImageJ;
@@ -38,8 +39,9 @@ import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
 
-public interface Percentile< T extends RealType< T > > {
+public interface Percentile<T extends RealType<T>> {
 
-	List<T> computePercentiles(final RandomAccessibleInterval<T> im, final double[] percentiles, OpService opService);
+	List<T> computePercentiles(final RandomAccessibleInterval<T> im,
+		final double[] percentiles, OpService opService);
 
 }

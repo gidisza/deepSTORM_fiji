@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.network.ImageTensor;
@@ -74,9 +75,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalLong;
 
-public abstract class CSBDeepCommand< T extends RealType< T > > implements Cancelable, Initializable, Disposable {
+public abstract class CSBDeepCommand<T extends RealType<T>> implements
+	Cancelable, Initializable, Disposable
+{
 
-	@Parameter( type = ItemIO.INPUT, initializer = "processDataset" )
+	@Parameter(type = ItemIO.INPUT, initializer = "processDataset")
 	public Dataset input;
 
 	@Parameter
@@ -94,14 +97,14 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	@Parameter
 	protected OpService opService;
 
-	@Parameter( label = "Number of tiles", min = "1" )
+	@Parameter(label = "Number of tiles", min = "1")
 	protected int nTiles = 8;
 
-	@Parameter( label = "Overlap between tiles", min = "0", stepSize = "16" )
+	@Parameter(label = "Overlap between tiles", min = "0", stepSize = "16")
 	protected int overlap = 32;
 
-	@Parameter( type = ItemIO.OUTPUT )
-	protected List< Dataset > output = new ArrayList<>();
+	@Parameter(type = ItemIO.OUTPUT)
+	protected List<Dataset> output = new ArrayList<>();
 
 	protected String modelFileUrl;
 	protected String modelName;
@@ -134,13 +137,14 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	}
 
 	protected void tryToInitialize() {
-		if(!initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	protected void initNetwork() {
-		network = new TensorFlowNetwork(tensorFlowService, datasetService, modelExecutor);
+		network = new TensorFlowNetwork(tensorFlowService, datasetService,
+			modelExecutor);
 		network.loadLibrary();
 	}
 
@@ -158,10 +162,11 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	protected void initTaskManager() {
 		final TaskForceManager tfm = new TaskForceManager(isHeadless(), log);
 		tfm.initialize();
-		tfm.createTaskForce("Preprocessing", modelLoader, inputMapper, inputProcessor, inputNormalizer );
-		tfm.createTaskForce("Tiling", inputTiler );
-		tfm.createTaskForce("Execution", modelExecutor );
-		tfm.createTaskForce("Postprocessing", outputTiler, outputProcessor );
+		tfm.createTaskForce("Preprocessing", modelLoader, inputMapper,
+			inputProcessor, inputNormalizer);
+		tfm.createTaskForce("Tiling", inputTiler);
+		tfm.createTaskForce("Execution", modelExecutor);
+		tfm.createTaskForce("Postprocessing", outputTiler, outputProcessor);
 		taskManager = tfm;
 	}
 
@@ -199,8 +204,7 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 
 	public void run() {
 
-		if ( noInputData() )
-			return;
+		if (noInputData()) return;
 
 		tryToInitialize();
 
@@ -209,34 +213,37 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		prepareInputAndNetwork();
 
 		final Dataset normalizedInput;
-		if(doInputNormalization()) {
+		if (doInputNormalization()) {
 			setupNormalizer();
-			normalizedInput = inputNormalizer.run( getInput(), opService, datasetService );
-		} else {
+			normalizedInput = inputNormalizer.run(getInput(), opService,
+				datasetService);
+		}
+		else {
 			normalizedInput = getInput();
 		}
 
-		final List< RandomAccessibleInterval< T > > processedInput =
-				inputProcessor.run( normalizedInput );
+		final List<RandomAccessibleInterval<T>> processedInput = inputProcessor.run(
+			normalizedInput);
 
-		log( "INPUT NODE: " );
+		log("INPUT NODE: ");
 		network.getInputNode().printMapping();
-		log( "OUTPUT NODE: " );
+		log("OUTPUT NODE: ");
 		network.getOutputNode().printMapping();
 
 		initTiling();
 		try {
-			final List< AdvancedTiledView< FloatType > > tiledOutput =
-					tryToTileAndRunNetwork( processedInput );
-			final List< RandomAccessibleInterval< FloatType > > output =
-					outputTiler.run( tiledOutput, tiling, getAxesArray( network.getOutputNode() ) );
-			for(AdvancedTiledView obj : tiledOutput) {
+			final List<AdvancedTiledView<FloatType>> tiledOutput =
+				tryToTileAndRunNetwork(processedInput);
+			final List<RandomAccessibleInterval<FloatType>> output = outputTiler.run(
+				tiledOutput, tiling, getAxesArray(network.getOutputNode()));
+			for (AdvancedTiledView obj : tiledOutput) {
 				obj.dispose();
 			}
 			this.output.clear();
-			this.output.addAll( outputProcessor.run( output, getInput(), network, datasetService ) );
+			this.output.addAll(outputProcessor.run(output, getInput(), network,
+				datasetService));
 		}
-		catch(OutOfMemoryError e) {
+		catch (OutOfMemoryError e) {
 			e.printStackTrace();
 		}
 
@@ -245,7 +252,7 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	}
 
 	protected void setupNormalizer() {
-		//do nothing, use normalizer default values
+		// do nothing, use normalizer default values
 	}
 
 	protected boolean doInputNormalization() {
@@ -253,83 +260,83 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	}
 
 	protected void prepareInputAndNetwork() {
-		modelLoader.run(
-				modelName,
-				network,
-				modelFileUrl,
-				inputNodeName,
-				outputNodeName,
-				getInput() );
-		inputMapper.run( getInput(), network );
+		modelLoader.run(modelName, network, modelFileUrl, inputNodeName,
+			outputNodeName, getInput());
+		inputMapper.run(getInput(), network);
 	}
 
 	@Override
 	public void dispose() {
-		if(taskManager != null) {
+		if (taskManager != null) {
 			taskManager.close();
 		}
-		if(network != null) {
+		if (network != null) {
 			network.dispose();
 		}
 	}
 
-	private AxisType[] getAxesArray( final ImageTensor outputNode ) {
+	private AxisType[] getAxesArray(final ImageTensor outputNode) {
 		int numDim = outputNode.numDimensions();
 		boolean addChannel = false;
-		if(numDim < outputNode.getNodeShape().length
-				&& outputNode.getNodeShape()[outputNode.getNodeShape().length-1] > 1) {
+		if (numDim < outputNode.getNodeShape().length && outputNode
+			.getNodeShape()[outputNode.getNodeShape().length - 1] > 1)
+		{
 			addChannel = true;
 			numDim++;
 		}
-		final AxisType[] res = new AxisType[ numDim ];
-		for ( int i = 0; i < outputNode.numDimensions(); i++ ) {
+		final AxisType[] res = new AxisType[numDim];
+		for (int i = 0; i < outputNode.numDimensions(); i++) {
 			res[i] = outputNode.getAxisByDatasetDim(i);
 		}
-		if(addChannel) {
-			res[ res.length - 1 ] = Axes.CHANNEL;
+		if (addChannel) {
+			res[res.length - 1] = Axes.CHANNEL;
 		}
 		return res;
 	}
 
 	protected void initTiling() {
-		tiling = new DefaultTiling( nTiles, 1, blockMultiple, overlap );
+		tiling = new DefaultTiling(nTiles, 1, blockMultiple, overlap);
 	}
 
-	private List< AdvancedTiledView< FloatType > > tryToTileAndRunNetwork(
-			final List< RandomAccessibleInterval< T > > normalizedInput ) throws OutOfMemoryError {
-		List< AdvancedTiledView< FloatType > > tiledOutput = null;
+	private List<AdvancedTiledView<FloatType>> tryToTileAndRunNetwork(
+		final List<RandomAccessibleInterval<T>> normalizedInput)
+		throws OutOfMemoryError
+	{
+		List<AdvancedTiledView<FloatType>> tiledOutput = null;
 		boolean isOutOfMemory = true;
 		boolean canHandleOutOfMemory = true;
-		while ( isOutOfMemory && canHandleOutOfMemory ) {
+		while (isOutOfMemory && canHandleOutOfMemory) {
 			try {
-				final List< AdvancedTiledView< T > > tiledInput =
-						inputTiler.run( normalizedInput, getInput(), tiling, getTilingActions() );
-				tiledOutput = modelExecutor.run( tiledInput, network );
+				final List<AdvancedTiledView<T>> tiledInput = inputTiler.run(
+					normalizedInput, getInput(), tiling, getTilingActions());
+				tiledOutput = modelExecutor.run(tiledInput, network);
 				isOutOfMemory = false;
-			} catch ( final OutOfMemoryError e ) {
+			}
+			catch (final OutOfMemoryError e) {
 				isOutOfMemory = true;
 				canHandleOutOfMemory = tryHandleOutOfMemoryError();
 			}
 		}
-		if(isOutOfMemory)
-			throw new OutOfMemoryError("Out of memory exception occurred. Plugin exit.");
+		if (isOutOfMemory) throw new OutOfMemoryError(
+			"Out of memory exception occurred. Plugin exit.");
 		return tiledOutput;
 	}
 
 	protected Tiling.TilingAction[] getTilingActions() {
-		Tiling.TilingAction[] actions = new Tiling.TilingAction[getInput().numDimensions()];
+		Tiling.TilingAction[] actions = new Tiling.TilingAction[getInput()
+			.numDimensions()];
 		Arrays.fill(actions, Tiling.TilingAction.NO_TILING);
-		for(int i = 0; i < actions.length; i++) {
+		for (int i = 0; i < actions.length; i++) {
 			AxisType type = getInput().axis(i).type();
-			if(type.isSpatial()) {
+			if (type.isSpatial()) {
 				actions[i] = Tiling.TilingAction.TILE_WITH_PADDING;
 			}
 		}
 		return actions;
 	}
 
-	public void setMapping( final AxisType[] mapping ) {
-		inputMapper.setMapping( mapping );
+	public void setMapping(final AxisType[] mapping) {
+		inputMapper.setMapping(mapping);
 	}
 
 	private boolean noInputData() {
@@ -340,48 +347,45 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		// We expect it to be an out of memory exception and
 		// try it again with more tiles.
 		final Task modelExecutorTask = modelExecutor;
-		if ( !handleOutOfMemoryError() ) {
+		if (!handleOutOfMemoryError()) {
 			modelExecutorTask.setFailed();
 			return false;
 		}
 		modelExecutorTask.logError(
-				"Out of memory exception occurred. Trying with " + nTiles + " tiles and overlap " + overlap + "..." );
+			"Out of memory exception occurred. Trying with " + nTiles +
+				" tiles and overlap " + overlap + "...");
 		initTiling();
 		modelExecutorTask.startNewIteration();
-		( ( Task ) inputTiler ).addIteration();
+		((Task) inputTiler).addIteration();
 		return true;
 	}
 
 	protected boolean handleOutOfMemoryError() {
 		nTiles *= 2;
 		// Check if the number of tiles is too large already
-		if ( Arrays.stream(
-				Intervals.dimensionsAsLongArray(
-						getInput() ) ).max().getAsLong() / nTiles < blockMultiple ) {
-			if(overlap == 0) return false;
+		if (Arrays.stream(Intervals.dimensionsAsLongArray(getInput())).max()
+			.getAsLong() / nTiles < blockMultiple)
+		{
+			if (overlap == 0) return false;
 			overlap *= 0.5;
-			if(overlap < 2) overlap = 0;
+			if (overlap < 2) overlap = 0;
 		}
 		return true;
 	}
 
-	protected static void showError( final String errorMsg ) {
-		JOptionPane.showMessageDialog(
-				null,
-				errorMsg,
-				"Error",
-				JOptionPane.ERROR_MESSAGE );
+	protected static void showError(final String errorMsg) {
+		JOptionPane.showMessageDialog(null, errorMsg, "Error",
+			JOptionPane.ERROR_MESSAGE);
 	}
 
 	public Dataset getInput() {
 		return input;
 	}
 
-	public void validateInput(
-			final Dataset dataset,
-			final String formatDesc,
-			final OptionalLong... expectedDims ) throws IOException {
-		DatasetHelper.validate( dataset, formatDesc, expectedDims );
+	public void validateInput(final Dataset dataset, final String formatDesc,
+		final OptionalLong... expectedDims) throws IOException
+	{
+		DatasetHelper.validate(dataset, formatDesc, expectedDims);
 	}
 
 	@Override
@@ -395,15 +399,16 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 	}
 
 	@Override
-	public void cancel( final String reason ) {
-		modelExecutor.cancel( reason );
+	public void cancel(final String reason) {
+		modelExecutor.cancel(reason);
 		dispose();
 	}
 
 	protected void log(final String msg) {
-		if(taskManager != null) {
+		if (taskManager != null) {
 			taskManager.log(msg);
-		}else {
+		}
+		else {
 			System.out.println(msg);
 		}
 	}

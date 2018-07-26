@@ -1,8 +1,9 @@
+
 package mpicbg.csbd.task;
 
 public interface Task {
 
-	void setManager( TaskManager manager );
+	void setManager(TaskManager manager);
 
 	boolean isStarted();
 
@@ -18,13 +19,13 @@ public interface Task {
 
 	void setFinished();
 
-	void setFinished( boolean finished );
+	void setFinished(boolean finished);
 
 	boolean hasMultipleSteps();
 
 	int numSteps();
 
-	void setNumSteps( int steps );
+	void setNumSteps(int steps);
 
 	void nextStep();
 
@@ -36,27 +37,27 @@ public interface Task {
 
 	void startNewIteration();
 
-	void setIterations( int iterations );
+	void setIterations(int iterations);
 
 	void nextIteration();
 
-	void debug( String msg );
+	void debug(String msg);
 
-	void log( String msg );
+	void log(String msg);
 
-	void logError( String msg );
+	void logError(String msg);
 
 	int getCurrentIteration();
 
-	void setCurrentIteration( int currentIteration );
+	void setCurrentIteration(int currentIteration);
 
 	int getCurrentStep();
 
-	void setCurrentStep( int currentStep );
+	void setCurrentStep(int currentStep);
 
 	String getTitle();
 
-	void setTitle( String title );
+	void setTitle(String title);
 
 	void cancel();
 }

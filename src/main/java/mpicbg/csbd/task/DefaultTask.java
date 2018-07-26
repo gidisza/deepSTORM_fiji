@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.task;
 
 public class DefaultTask implements Task {
@@ -13,7 +14,7 @@ public class DefaultTask implements Task {
 	protected String title;
 
 	@Override
-	public void setManager( final TaskManager manager ) {
+	public void setManager(final TaskManager manager) {
 		this.manager = manager;
 	}
 
@@ -33,8 +34,8 @@ public class DefaultTask implements Task {
 	}
 
 	void updateManager() {
-		if ( manager != null ) {
-			manager.update( this );
+		if (manager != null) {
+			manager.update(this);
 		}
 	}
 
@@ -65,11 +66,11 @@ public class DefaultTask implements Task {
 	@Override
 	public void setFinished() {
 		debug(getClassName() + " finished");
-		setFinished( true );
+		setFinished(true);
 	}
 
 	@Override
-	public void setFinished( final boolean finished ) {
+	public void setFinished(final boolean finished) {
 		this.finished = finished;
 		updateManager();
 	}
@@ -85,7 +86,7 @@ public class DefaultTask implements Task {
 	}
 
 	@Override
-	public void setNumSteps( final int steps ) {
+	public void setNumSteps(final int steps) {
 		this.steps = steps;
 		updateManager();
 	}
@@ -117,7 +118,7 @@ public class DefaultTask implements Task {
 	}
 
 	@Override
-	public void setIterations( final int iterations ) {
+	public void setIterations(final int iterations) {
 		this.iterations = iterations;
 		updateManager();
 	}
@@ -125,33 +126,36 @@ public class DefaultTask implements Task {
 	@Override
 	public void nextIteration() {
 		currentIteration++;
-		setFinished( false );
+		setFinished(false);
 	}
 
 	@Override
-	public void debug( final String msg ) {
-		if ( manager != null ) {
-			manager.debug( msg );
-		} else {
-			System.out.println( msg );
+	public void debug(final String msg) {
+		if (manager != null) {
+			manager.debug(msg);
+		}
+		else {
+			System.out.println(msg);
 		}
 	}
 
 	@Override
-	public void log( final String msg ) {
-		if ( manager != null ) {
-			manager.log( msg );
-		} else {
-			System.out.println( msg );
+	public void log(final String msg) {
+		if (manager != null) {
+			manager.log(msg);
+		}
+		else {
+			System.out.println(msg);
 		}
 	}
 
 	@Override
-	public void logError( final String msg ) {
-		if ( manager != null ) {
-			manager.logError( msg );
-		} else {
-			System.out.println( "ERROR: " + msg );
+	public void logError(final String msg) {
+		if (manager != null) {
+			manager.logError(msg);
+		}
+		else {
+			System.out.println("ERROR: " + msg);
 		}
 	}
 
@@ -161,7 +165,7 @@ public class DefaultTask implements Task {
 	}
 
 	@Override
-	public void setCurrentIteration( final int currentIteration ) {
+	public void setCurrentIteration(final int currentIteration) {
 		this.currentIteration = currentIteration;
 		updateManager();
 	}
@@ -172,7 +176,7 @@ public class DefaultTask implements Task {
 	}
 
 	@Override
-	public void setCurrentStep( final int currentStep ) {
+	public void setCurrentStep(final int currentStep) {
 		this.currentStep = currentStep;
 		updateManager();
 	}
@@ -184,7 +188,7 @@ public class DefaultTask implements Task {
 
 	@Override
 	public String getTitle() {
-		if(title == null) return this.getClass().getSimpleName();
+		if (title == null) return this.getClass().getSimpleName();
 		return title;
 	}
 
@@ -193,7 +197,7 @@ public class DefaultTask implements Task {
 	}
 
 	@Override
-	public void setTitle( final String title ) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
 }

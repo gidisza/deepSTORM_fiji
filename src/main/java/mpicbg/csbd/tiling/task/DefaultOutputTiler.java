@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.tiling.task;
 
 import java.util.ArrayList;
@@ -13,24 +14,27 @@ import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.tiling.Tiling;
 
-public class DefaultOutputTiler< T extends RealType< T >> extends DefaultTask implements OutputTiler<T> {
+public class DefaultOutputTiler<T extends RealType<T>> extends DefaultTask
+	implements OutputTiler<T>
+{
 
 	@Override
-	public List< RandomAccessibleInterval< T > > run(
-			final List< AdvancedTiledView< T > > input,
-			final Tiling tiling,
-			final AxisType[] axisTypes ) {
+	public List<RandomAccessibleInterval<T>> run(
+		final List<AdvancedTiledView<T>> input, final Tiling tiling,
+		final AxisType[] axisTypes)
+	{
 
 		setStarted();
 
 		final List<RandomAccessibleInterval<T>> output = new ArrayList<>();
-		for(AdvancedTiledView<T> image : input) {
+		for (AdvancedTiledView<T> image : input) {
 			output.add(tiling.postprocess(this, image, axisTypes));
 		}
 
-//		final List< RandomAccessibleInterval< T > > output =
-//				input.stream().map( image -> tiling.postprocess( this, image, axisTypes ) ).collect(
-//						Collectors.toList() );
+		// final List< RandomAccessibleInterval< T > > output =
+		// input.stream().map( image -> tiling.postprocess( this, image, axisTypes )
+		// ).collect(
+		// Collectors.toList() );
 
 		setFinished();
 

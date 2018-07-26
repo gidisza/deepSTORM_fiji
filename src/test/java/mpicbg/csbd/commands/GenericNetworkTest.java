@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.CSBDeepTest;
@@ -28,34 +29,33 @@ public class GenericNetworkTest extends CSBDeepTest {
 		launchImageJ();
 		for (int i = 0; i < 1; i++) {
 
-			testDataset(new FloatType(), new long[]{10, 10, 10}, new AxisType[]{Axes.X, Axes.Y, Axes.Z});
-			testDataset(new UnsignedIntType(), new long[]{10, 10, 10}, new AxisType[]{Axes.X, Axes.Y, Axes.Z});
-			testDataset(new ByteType(), new long[]{10, 10, 10}, new AxisType[]{Axes.X, Axes.Y, Axes.Z});
+			testDataset(new FloatType(), new long[] { 10, 10, 10 }, new AxisType[] {
+				Axes.X, Axes.Y, Axes.Z });
+			testDataset(new UnsignedIntType(), new long[] { 10, 10, 10 },
+				new AxisType[] { Axes.X, Axes.Y, Axes.Z });
+			testDataset(new ByteType(), new long[] { 10, 10, 10 }, new AxisType[] {
+				Axes.X, Axes.Y, Axes.Z });
 
-			if (i % 10 == 0)
-				System.out.println(i);
+			if (i % 10 == 0) System.out.println(i);
 		}
 
 	}
 
-	public < T extends RealType< T > & NativeType< T > > void
-			testDataset( final T type, final long[] dims, final AxisType[] axes ) {
+	public <T extends RealType<T> & NativeType<T>> void testDataset(final T type,
+		final long[] dims, final AxisType[] axes)
+	{
 
-		final Dataset input = createDataset( type, dims, axes );
-		final Future< CommandModule > future = ij.command().run(
-				GenericNetwork.class,
-				false,
-				"input",
-				input,
-				"modelFile",
-				new File("/home/random/Development/imagej/project/CSBDeep/CSBDeep_python/examples/denoising2D_probabilistic/models/my_model/TF_SavedModel.zip"),
-				"_modelName", "saved_model");
-		assertFalse( "Plugin future is null", future == null );
+		final Dataset input = createDataset(type, dims, axes);
+		final Future<CommandModule> future = ij.command().run(GenericNetwork.class,
+			false, "input", input, "modelFile", new File(
+				"/home/random/Development/imagej/project/CSBDeep/CSBDeep_python/examples/denoising2D_probabilistic/models/my_model/TF_SavedModel.zip"),
+			"_modelName", "saved_model");
+		assertFalse("Plugin future is null", future == null);
 		final Module module = ij.module().waitFor(future);
 		List<Dataset> result = (List<Dataset>) module.getOutput("output");
-		assertEquals( 1, result.size() );
-		final Dataset output = result.get( 0 );
-		testResultAxesAndSize( input, output );
+		assertEquals(1, result.size());
+		final Dataset output = result.get(0);
+		testResultAxesAndSize(input, output);
 	}
 
 }

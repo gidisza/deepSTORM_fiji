@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.network.task;
 
 import mpicbg.csbd.network.Network;
@@ -11,31 +12,31 @@ public class DefaultInputMapper extends DefaultTask implements InputMapper {
 	protected AxisType[] mapping = null;
 
 	@Override
-	public void setMapping( final AxisType[] mapping ) {
+	public void setMapping(final AxisType[] mapping) {
 		this.mapping = mapping;
 	}
 
 	@Override
-	public void run( final Dataset input, final Network network ) {
+	public void run(final Dataset input, final Network network) {
 
 		setStarted();
 
-		DatasetHelper.assignUnknownDimensions( input );
-		if ( network.isInitialized() ) {
+		DatasetHelper.assignUnknownDimensions(input);
+		if (network.isInitialized()) {
 			network.initMapping();
 		}
 
-		if ( mapping != null ) {
-			applyMapping( network );
+		if (mapping != null) {
+			applyMapping(network);
 		}
 
 		setFinished();
 
 	}
 
-	private void applyMapping( final Network network ) {
-		if ( network.getInputNode() != null ) {
-			network.getInputNode().setMapping( mapping );
+	private void applyMapping(final Network network) {
+		if (network.getInputNode() != null) {
+			network.getInputNode().setMapping(mapping);
 		}
 	}
 

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.network.tensorflow;
 
 import mpicbg.csbd.converter.*;
@@ -46,69 +47,88 @@ import org.tensorflow.Tensor;
 
 public class DatasetTensorflowConverter {
 
-	public static < T extends RealType< T >, U extends RealType<U>>  RandomAccessibleInterval< T > tensorToDataset(
-			final Tensor<U> tensor,
-			final T res,
-			final int[] mapping,
-			final boolean dropSingletonDims ) {
+	public static <T extends RealType<T>, U extends RealType<U>>
+		RandomAccessibleInterval<T> tensorToDataset(final Tensor<U> tensor,
+			final T res, final int[] mapping, final boolean dropSingletonDims)
+	{
 
-		final RandomAccessibleInterval< T > outImg;
+		final RandomAccessibleInterval<T> outImg;
 
-		if(tensor.dataType().equals(DataType.DOUBLE)) {
-			if(res instanceof DoubleType) {
-				outImg =  Tensors.imgDouble( (Tensor)tensor, mapping );
-			}else {
-				outImg = Converters.convert((RandomAccessibleInterval<DoubleType>) Tensors.imgDouble( (Tensor)tensor, mapping ), new DoubleRealConverter<T>(), res);
+		if (tensor.dataType().equals(DataType.DOUBLE)) {
+			if (res instanceof DoubleType) {
+				outImg = Tensors.imgDouble((Tensor) tensor, mapping);
 			}
-		}else if(tensor.dataType().equals(DataType.FLOAT)) {
-			if(res instanceof FloatType) {
-				outImg =  Tensors.imgFloat( (Tensor)tensor, mapping );
-			}else {
-				outImg = Converters.convert((RandomAccessibleInterval<FloatType>) Tensors.imgFloat( (Tensor)tensor, mapping ), new FloatRealConverter<T>(), res);
+			else {
+				outImg = Converters.convert(
+					(RandomAccessibleInterval<DoubleType>) Tensors.imgDouble(
+						(Tensor) tensor, mapping), new DoubleRealConverter<T>(), res);
 			}
-		}else if(tensor.dataType().equals(DataType.INT64)) {
-			if(res instanceof LongType) {
-				outImg =  Tensors.imgLong( (Tensor)tensor, mapping );
-			}else {
-				outImg = Converters.convert((RandomAccessibleInterval<LongType>) Tensors.imgLong( (Tensor)tensor, mapping ), new LongRealConverter<T>(), res);
+		}
+		else if (tensor.dataType().equals(DataType.FLOAT)) {
+			if (res instanceof FloatType) {
+				outImg = Tensors.imgFloat((Tensor) tensor, mapping);
 			}
-		}else if(tensor.dataType().equals(DataType.INT32)) {
-			if(res instanceof IntType) {
-				outImg =  Tensors.imgInt( (Tensor)tensor, mapping );
-			}else {
-				outImg = Converters.convert((RandomAccessibleInterval<IntType>) Tensors.imgInt( (Tensor)tensor, mapping ), new IntRealConverter<T>(), res);
+			else {
+				outImg = Converters.convert(
+					(RandomAccessibleInterval<FloatType>) Tensors.imgFloat(
+						(Tensor) tensor, mapping), new FloatRealConverter<T>(), res);
 			}
-		}else if(tensor.dataType().equals(DataType.UINT8)) {
-			if(res instanceof ByteType) {
-				outImg =  Tensors.imgByte( (Tensor)tensor, mapping );
-			}else {
-				outImg = Converters.convert((RandomAccessibleInterval<ByteType>) Tensors.imgByte( (Tensor)tensor, mapping ), new ByteRealConverter<T>(), res);
+		}
+		else if (tensor.dataType().equals(DataType.INT64)) {
+			if (res instanceof LongType) {
+				outImg = Tensors.imgLong((Tensor) tensor, mapping);
 			}
-		}else {
+			else {
+				outImg = Converters.convert((RandomAccessibleInterval<LongType>) Tensors
+					.imgLong((Tensor) tensor, mapping), new LongRealConverter<T>(), res);
+			}
+		}
+		else if (tensor.dataType().equals(DataType.INT32)) {
+			if (res instanceof IntType) {
+				outImg = Tensors.imgInt((Tensor) tensor, mapping);
+			}
+			else {
+				outImg = Converters.convert((RandomAccessibleInterval<IntType>) Tensors
+					.imgInt((Tensor) tensor, mapping), new IntRealConverter<T>(), res);
+			}
+		}
+		else if (tensor.dataType().equals(DataType.UINT8)) {
+			if (res instanceof ByteType) {
+				outImg = Tensors.imgByte((Tensor) tensor, mapping);
+			}
+			else {
+				outImg = Converters.convert((RandomAccessibleInterval<ByteType>) Tensors
+					.imgByte((Tensor) tensor, mapping), new ByteRealConverter<T>(), res);
+			}
+		}
+		else {
 			outImg = null;
 		}
 
-		return dropSingletonDims ? Views.dropSingletonDimensions( outImg ) : outImg;
+		return dropSingletonDims ? Views.dropSingletonDimensions(outImg) : outImg;
 	}
 
-	public static < T extends RealType< T >>  Tensor datasetToTensor(
-			RandomAccessibleInterval< T > image,
-			final int[] mapping ) {
+	public static <T extends RealType<T>> Tensor datasetToTensor(
+		RandomAccessibleInterval<T> image, final int[] mapping)
+	{
 
 		// Add dimensions until it fits the input tensor
-		while ( image.numDimensions() < mapping.length ) {
-			image = Views.addDimension( image, 0, 0 );
+		while (image.numDimensions() < mapping.length) {
+			image = Views.addDimension(image, 0, 0);
 		}
 
 		Tensor tensor;
-		try{
+		try {
 			tensor = Tensors.tensor(image, mapping);
 		}
-		catch(IllegalArgumentException e) {
-			if(image.randomAccess().get() instanceof UnsignedShortType) {
-				tensor = Tensors.tensor(Converters.convert(image, new RealIntConverter<T>(), new IntType()), mapping);
-			}else {
-				tensor = Tensors.tensor(Converters.convert(image, new RealFloatConverter<T>(), new FloatType()), mapping);
+		catch (IllegalArgumentException e) {
+			if (image.randomAccess().get() instanceof UnsignedShortType) {
+				tensor = Tensors.tensor(Converters.convert(image,
+					new RealIntConverter<T>(), new IntType()), mapping);
+			}
+			else {
+				tensor = Tensors.tensor(Converters.convert(image,
+					new RealFloatConverter<T>(), new FloatType()), mapping);
 			}
 		}
 		return tensor;

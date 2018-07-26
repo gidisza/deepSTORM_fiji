@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.network;
 
 import mpicbg.csbd.imglib2.TiledView;
@@ -13,16 +14,19 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public interface Network< T extends RealType< T >> extends Callable< List< RandomAccessibleInterval< T > > >, Disposable {
+public interface Network<T extends RealType<T>> extends
+	Callable<List<RandomAccessibleInterval<T>>>, Disposable
+{
 
 	void loadLibrary();
 
-	boolean loadModel( String pathOrURL, String modelName ) throws FileNotFoundException;
+	boolean loadModel(String pathOrURL, String modelName)
+		throws FileNotFoundException;
 
 	void preprocess();
 
-	RandomAccessibleInterval< T >
-			execute( RandomAccessibleInterval< T > tile ) throws Exception;
+	RandomAccessibleInterval<T> execute(RandomAccessibleInterval<T> tile)
+		throws Exception;
 
 	Task getStatus();
 
@@ -32,9 +36,9 @@ public interface Network< T extends RealType< T >> extends Callable< List< Rando
 
 	boolean isSupportingGPU();
 
-	void loadInputNode( String defaultName, Dataset dataset );
+	void loadInputNode(String defaultName, Dataset dataset);
 
-	void loadOutputNode( String defaultName );
+	void loadOutputNode(String defaultName);
 
 	void initMapping();
 
@@ -42,7 +46,7 @@ public interface Network< T extends RealType< T >> extends Callable< List< Rando
 
 	void resetTileCount();
 
-	void setTiledView(TiledView< T > tiledView );
+	void setTiledView(TiledView<T> tiledView);
 
 	void cancel();
 
@@ -51,11 +55,12 @@ public interface Network< T extends RealType< T >> extends Callable< List< Rando
 	 * tile size in one dimension is only one this could remove an important
 	 * dimension. Default value is true.
 	 */
-	void setDropSingletonDims( final boolean dropSingletonDims );
+	void setDropSingletonDims(final boolean dropSingletonDims);
 
-	void setDoDimensionReduction( boolean doDimensionReduction );
+	void setDoDimensionReduction(boolean doDimensionReduction);
 
-	void setDoDimensionReduction( boolean doDimensionReduction, AxisType axisToRemove );
+	void setDoDimensionReduction(boolean doDimensionReduction,
+		AxisType axisToRemove);
 
 	void doDimensionReduction();
 

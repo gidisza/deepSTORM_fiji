@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package mpicbg.csbd.normalize;
 
 import net.imagej.Dataset;
@@ -38,7 +39,8 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public interface Normalizer {
 
-	Dataset normalize(Dataset im, OpService opService, DatasetService datasetService);
+	Dataset normalize(Dataset im, OpService opService,
+		DatasetService datasetService);
 
 	void setup(double[] percentiles, float[] destValues, boolean clip);
 }

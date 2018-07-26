@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.network.task;
 
 import mpicbg.csbd.network.Network;
@@ -8,9 +9,9 @@ import org.scijava.Cancelable;
 
 import java.util.List;
 
-public interface ModelExecutor< T extends RealType< T >> extends Task, Cancelable {
+public interface ModelExecutor<T extends RealType<T>> extends Task, Cancelable {
 
-	List< AdvancedTiledView< T > >
-			run( List< AdvancedTiledView< T > > input, Network network );
+	List<AdvancedTiledView<T>> run(List<AdvancedTiledView<T>> input,
+		Network network);
 
 }

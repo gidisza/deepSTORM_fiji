@@ -1,3 +1,4 @@
+
 package mpicbg.csbd.network.task;
 
 import mpicbg.csbd.network.ImageTensor;
@@ -10,19 +11,17 @@ import java.io.FileNotFoundException;
 public class DefaultModelLoader extends DefaultTask implements ModelLoader {
 
 	@Override
-	public void run(
-			final String modelName,
-			final Network network,
-			final String modelFileUrl,
-			final String inputNodeName,
-			final String outputNodeName,
-			final Dataset input ) {
+	public void run(final String modelName, final Network network,
+		final String modelFileUrl, final String inputNodeName,
+		final String outputNodeName, final Dataset input)
+	{
 
 		setStarted();
 
-		if ( !network.isInitialized() ) {
-			loadNetwork( modelName, network, modelFileUrl, inputNodeName, outputNodeName, input );
-			if ( !network.isInitialized() ) {
+		if (!network.isInitialized()) {
+			loadNetwork(modelName, network, modelFileUrl, inputNodeName,
+				outputNodeName, input);
+			if (!network.isInitialized()) {
 				setFailed();
 				return;
 			}
@@ -33,20 +32,18 @@ public class DefaultModelLoader extends DefaultTask implements ModelLoader {
 
 	}
 
-	protected void loadNetwork(
-			final String modelName,
-			final Network network,
-			final String modelFileUrl,
-			final String inputNodeName,
-			final String outputNodeName,
-			final Dataset input ) {
+	protected void loadNetwork(final String modelName, final Network network,
+		final String modelFileUrl, final String inputNodeName,
+		final String outputNodeName, final Dataset input)
+	{
 
 		try {
 
-			loadNetworkFile( network, modelFileUrl, modelName );
-			initializeNetwork( network, inputNodeName, input, outputNodeName );
+			loadNetworkFile(network, modelFileUrl, modelName);
+			initializeNetwork(network, inputNodeName, input, outputNodeName);
 
-		} catch ( final FileNotFoundException exc1 ) {
+		}
+		catch (final FileNotFoundException exc1) {
 
 			exc1.printStackTrace();
 
@@ -54,20 +51,19 @@ public class DefaultModelLoader extends DefaultTask implements ModelLoader {
 
 	}
 
-	protected void loadNetworkFile(
-			final Network network,
-			final String modelFileUrl,
-			final String modelName ) throws FileNotFoundException {
-		network.loadModel( modelFileUrl, modelName );
+	protected void loadNetworkFile(final Network network,
+		final String modelFileUrl, final String modelName)
+		throws FileNotFoundException
+	{
+		network.loadModel(modelFileUrl, modelName);
 	}
 
-	protected void initializeNetwork(
-			final Network network,
-			final String inputNodeName,
-			final Dataset input,
-			final String outputNodeName ) {
-		network.loadInputNode( inputNodeName, input );
-		network.loadOutputNode( outputNodeName );
+	protected void initializeNetwork(final Network network,
+		final String inputNodeName, final Dataset input,
+		final String outputNodeName)
+	{
+		network.loadInputNode(inputNodeName, input);
+		network.loadOutputNode(outputNodeName);
 		network.initMapping();
 	}
 
