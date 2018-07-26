@@ -83,12 +83,9 @@ public class DefaultTiling< T extends RealType< T >> implements Tiling<T> {
 
 			long[] tiling = new long[input.numDimensions()];
 			Arrays.fill(tiling, 1);
-			parent.log(Arrays.toString(tiling));
 			computeTiling(input, tiling, tilingActions);
-			parent.log(Arrays.toString(tiling));
 			long[] padding = getPadding(tiling);
 			computeBatching(input, tiling, tilingActions);
-			parent.log(Arrays.toString(tiling));
 			parent.log( "Dividing image into " + arrayProduct(tiling) + " tile(s).." );
 
 			RandomAccessibleInterval< T > expandedInput = expandToFitBlockSize(input, tiling);

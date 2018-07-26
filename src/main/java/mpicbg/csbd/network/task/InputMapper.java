@@ -7,8 +7,8 @@ import net.imagej.axis.AxisType;
 
 public interface InputMapper extends Task {
 
-	public void setMapping( final AxisType[] mapping );
+	void setMapping( final AxisType[] mapping );
 
-	public void run( Dataset input, Network network );
+	void run( Dataset input, Network network );
 
 }

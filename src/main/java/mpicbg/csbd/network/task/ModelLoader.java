@@ -6,7 +6,7 @@ import net.imagej.Dataset;
 
 public interface ModelLoader extends Task {
 
-	public void run(
+	void run(
 			String modelName,
 			Network network,
 			String modelFileUrl,

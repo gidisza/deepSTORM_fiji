@@ -2,31 +2,31 @@ package mpicbg.csbd.task;
 
 public interface TaskPresenter {
 
-	public void initialize();
+	void initialize();
 
-	public void initializeWithGPUWarning();
+	void initializeWithGPUWarning();
 
-	public void addTask(String title );
+	void addTask(String title );
 
-	public void setTaskDone(int index );
+	void setTaskDone(int index );
 
-	public void setTaskFailed(int index );
+	void setTaskFailed(int index );
 
-	public void setTaskStarted(int index );
+	void setTaskStarted(int index );
 
-	public void setTaskInProgress(int index );
+	void setTaskInProgress(int index );
 
-	public void setTaskNumSteps(final int index, final int numSteps);
+	void setTaskNumSteps(final int index, final int numSteps);
 
-	public void setTaskStep(final int index, final int step);
+	void setTaskStep(final int index, final int step);
 
-	public void debug( String msg );
+	void debug( String msg );
 
-	public void log( String msg );
+	void log( String msg );
 
-	public void logError( String msg );
+	void logError( String msg );
 
-	public void close();
+	void close();
 
-	public void show();
+	void show();
 }

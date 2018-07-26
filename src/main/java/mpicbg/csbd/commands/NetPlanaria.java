@@ -84,9 +84,7 @@ public class NetPlanaria extends CSBDeepCommand implements Command {
 		ij.launch( args );
 
 		// ask the user for a file to open
-//		final File file = ij.ui().chooseFile( null, "open" );
-		final File file =
-				new File( "/home/random/Development/imagej/plugins/CSBDeep-data/net_planaria_registered/input.tif" );
+		final File file = ij.ui().chooseFile( null, "open" );
 
 		if ( file != null && file.exists() ) {
 			// load the dataset

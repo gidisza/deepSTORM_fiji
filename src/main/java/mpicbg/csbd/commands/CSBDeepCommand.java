@@ -219,8 +219,6 @@ public abstract class CSBDeepCommand< T extends RealType< T > > implements Cance
 		final List< RandomAccessibleInterval< T > > processedInput =
 				inputProcessor.run( normalizedInput );
 
-		System.out.println(processedInput.get(0).randomAccess().get().getClass());
-
 		log( "INPUT NODE: " );
 		network.getInputNode().printMapping();
 		log( "OUTPUT NODE: " );

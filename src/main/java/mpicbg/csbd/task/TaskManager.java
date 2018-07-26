@@ -2,21 +2,21 @@ package mpicbg.csbd.task;
 
 public interface TaskManager {
 
-	public void initialize();
+	void initialize();
 
-	public void add( Task task );
+	void add( Task task );
 
-	public void cancel();
+	void cancel();
 
-	public void debug( String msg );
+	void debug( String msg );
 
-	public void log( String msg );
+	void log( String msg );
 
-	public void logError( String msg );
+	void logError( String msg );
 
-	public void finalizeSetup();
+	void finalizeSetup();
 
-	public void update( Task task );
+	void update( Task task );
 
-	public void close();
+	void close();
 }

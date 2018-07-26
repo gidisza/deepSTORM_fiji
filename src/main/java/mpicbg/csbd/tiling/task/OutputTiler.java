@@ -13,7 +13,7 @@ import mpicbg.csbd.tiling.Tiling;
 
 public interface OutputTiler< T extends RealType< T >> extends Task {
 
-	public List< RandomAccessibleInterval< T > > run(
+	List< RandomAccessibleInterval< T > > run(
 			List< AdvancedTiledView< T > > input,
 			Tiling tiling,
 			AxisType[] axisTypes );

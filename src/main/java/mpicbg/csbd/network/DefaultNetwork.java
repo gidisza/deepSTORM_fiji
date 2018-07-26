@@ -81,13 +81,13 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 		final List< RandomAccessibleInterval< T > > results = new ArrayList<>();
 		final List< Future< RandomAccessibleInterval< T > > > futures = new ArrayList<>();
 
-		status.setCurrentStep(0);
-		doneTileCount = 0;
-		int numSteps = 1;
-		for(int i = 0; i < tiledView.numDimensions(); i++) {
-			numSteps *= tiledView.dimension(i);
-		}
-		status.setNumSteps(numSteps);
+//		status.setCurrentStep(0);
+//		doneTileCount = 0;
+//		int numSteps = 1;
+//		for(int i = 0; i < tiledView.numDimensions(); i++) {
+//			numSteps *= tiledView.dimension(i);
+//		}
+//		status.setNumSteps(numSteps);
 
 		while ( cursor.hasNext() ) {
 			final RandomAccessibleInterval< T > tile = cursor.next();
@@ -95,7 +95,7 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 			final Future< RandomAccessibleInterval< T > > future =
 					pool.submit( new TileRunner( tile ) );
 
-//			log( "Processing tile " + ( doneTileCount + 1 ) + ".." );
+			log( "Processing tile " + ( doneTileCount + 1 ) + ".." );
 
 			futures.add( future );
 
@@ -170,6 +170,12 @@ public abstract class DefaultNetwork< T extends RealType< T >> implements Networ
 
 	@Override
 	public abstract boolean isInitialized();
+
+	@Override
+	public void resetTileCount() {
+		doneTileCount = 0;
+		status.setCurrentStep(doneTileCount);
+	}
 
 	protected void upTileCount() {
 		doneTileCount++;

@@ -135,8 +135,6 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 
 			setStarted();
 
-			final List< RandomAccessibleInterval<FloatType> > output = new ArrayList<>();
-
 			final RandomAccessibleInterval<FloatType> inputRai = Converters.convert((RandomAccessibleInterval)input.getImgPlus(), new RealFloatConverter<T>(), new FloatType());
 
 			log("Dataset type: " + input.getTypeLabelLong() );
@@ -157,23 +155,21 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 			final RandomAccessibleInterval< FloatType > rotated1 =
 					Views.permute( rotated0, dimY, dimZ );
 
-			//TODO neccessary?
-			final RandomAccessibleInterval< FloatType > rotated0_applied =
-					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated0 ) );
-			final RandomAccessibleInterval< FloatType > rotated1_applied =
-					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated1 ) );
-			copy( rotated0, rotated0_applied );
-			copy( rotated1, rotated1_applied );
+//			//TODO neccessary?
+//			final RandomAccessibleInterval< FloatType > rotated0_applied =
+//					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated0 ) );
+//			final RandomAccessibleInterval< FloatType > rotated1_applied =
+//					ArrayImgs.floats( Intervals.dimensionsAsLongArray( rotated1 ) );
+//			copy( rotated0, rotated0_applied );
+//			copy( rotated1, rotated1_applied );
 
-			output.add( rotated0_applied );
-			output.add( rotated1_applied );
+			final List< RandomAccessibleInterval<FloatType> > output = new ArrayList<>();
 
-			ImageJ ij = new ImageJ();
-			ij.ui().show(rotated0_applied);
-			ij.ui().show(rotated1_applied);
+			output.add( rotated0 );
+			output.add( rotated1 );
 
-			DatasetHelper.logDim( this, "Input #1 (Z-X rotated)", rotated0_applied );
-			DatasetHelper.logDim( this, "Input #2 (Z-X and Z-Y rotated)", rotated1_applied );
+			DatasetHelper.logDim( this, "Input #1 (Z-X rotated)", rotated0 );
+			DatasetHelper.logDim( this, "Input #2 (Z-X and Z-Y rotated)", rotated1 );
 
 			setFinished();
 
@@ -185,7 +181,6 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 
 	@Override
 	public void run() {
-//		network.setDoDimensionReduction( true, Axes.CHANNEL );
 		try {
 			tryToInitialize();
 			validateInput(
@@ -233,10 +228,6 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 
 			DatasetHelper.logDim( this, "_result0", _result0 );
 			DatasetHelper.logDim( this, "_result1", _result1 );
-
-			ImageJ ij = new ImageJ();
-			ij.ui().show(_result0);
-			ij.ui().show(_result1);
 
 			final List< RandomAccessibleInterval< T > > result0 =
 					splitByLastNodeDim( _result0, network );
@@ -373,31 +364,6 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 
 //		final ExecutorService pool = Executors.newWorkStealingPool();
 		final List< Future< ? > > futures = new ArrayList<>();
-//
-//		final Cursor< RandomAccessibleInterval< U > > tileCurser =
-//				Views.iterable( tiledViewIn ).cursor();
-//		final RandomAccess< RandomAccessibleInterval< U > > tileRandomAccess =
-//				tiledViewOut.randomAccess();
-//
-//		while ( tileCurser.hasNext() ) {
-//			// Get current tiles
-//			tileCurser.fwd();
-//			tileRandomAccess.setPosition( tileCurser );
-//			final RandomAccessibleInterval< U > tileIn = tileCurser.get();
-//			final RandomAccessibleInterval< U > tileOut = tileRandomAccess.get();
-//
-//			// Add loop for current tiles to pool
-//			futures.add( pool.submit( () -> {
-//				final Cursor< U > c = Views.iterable( tileIn ).cursor();
-//				final RandomAccess< U > r = tileOut.randomAccess();
-//				while ( c.hasNext() ) {
-//					c.fwd();
-//					r.setPosition( c );
-//					r.get().set( c.get() );
-//				}
-//			} ) );
-//
-//		}
 
 		LoopBuilder.setImages( tiledViewIn, tiledViewOut ).forEachPixel(
 			( inTile, outTile ) -> {
@@ -472,9 +438,7 @@ public class NetIso< T extends RealType< T > > extends CSBDeepCommand implements
 		ij.launch( args );
 
 		// ask the user for a file to open
-//		final File file = ij.ui().chooseFile( null, "open" );
-		final File file =
-				new File( "/home/random/Development/imagej/plugins/CSBDeep-data/net_iso/input-3.tif" );
+		final File file = ij.ui().chooseFile( null, "open" );
 
 		if ( file != null && file.exists() ) {
 			// load the dataset

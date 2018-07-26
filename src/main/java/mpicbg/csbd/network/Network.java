@@ -40,7 +40,9 @@ public interface Network< T extends RealType< T >> extends Callable< List< Rando
 
 	boolean isInitialized();
 
-	void setTiledView( TiledView< T > tiledView );
+	void resetTileCount();
+
+	void setTiledView(TiledView< T > tiledView );
 
 	void cancel();
 

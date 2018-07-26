@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface OutputProcessor< T extends RealType< T >> extends Task {
 
-	public List< Dataset > run(
+	List< Dataset > run(
 			final List< RandomAccessibleInterval< T > > result,
 			final Dataset datasetView,
 			final Network network,

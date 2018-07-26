@@ -25,19 +25,32 @@ public class DefaultModelExecutor< T extends RealType< T >> extends DefaultTask 
 	public List< AdvancedTiledView< T > >
 			run( final List< AdvancedTiledView< T > > input, final Network network )  throws OutOfMemoryError {
 		setStarted();
-		if(input.size() > 0) {
+		if (input.size() > 0) {
 			DatasetHelper.logDim(this, "Network input size", input.get(0).randomAccess().get());
 		}
+
+		setCurrentStep(0);
+		int numSteps = 0;
+		for (AdvancedTiledView<T> tile : input) {
+			int steps = 1;
+			for (int i = 0; i < tile.numDimensions(); i++) {
+				steps *= tile.dimension(i);
+			}
+			numSteps += steps;
+		}
+		network.resetTileCount();
+		setNumSteps(numSteps);
+
 		pool = Executors.newWorkStealingPool();
-		final List< AdvancedTiledView< T > > output = new ArrayList<>();
-		for(AdvancedTiledView<T> tile : input) {
+		final List<AdvancedTiledView<T>> output = new ArrayList<>();
+		for (AdvancedTiledView<T> tile : input) {
 			output.add(run(tile, network));
 		}
 		//TODO why does this not work?
 //		final List< AdvancedTiledView< T > > output =
 //				input.stream().map( tile -> run( tile, network ) ).collect( Collectors.toList() );
 		pool.shutdown();
-		if(output.size() > 0) {
+		if (output.size() > 0) {
 			DatasetHelper.logDim(this, "Network output size", output.get(0).getProcessedTiles().get(0));
 		}
 		setFinished();
