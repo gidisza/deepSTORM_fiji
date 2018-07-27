@@ -29,7 +29,7 @@ public class PercentileTest {
 			data[i] = i;
 		}
 
-		testPercentiles(dimensions, data, new double[] { 3.0f, 97.0f });
+		testPercentiles(dimensions, data, new float[] { 3.0f, 97.0f });
 
 	}
 
@@ -42,7 +42,7 @@ public class PercentileTest {
 			data[i] = data.length - i;
 		}
 
-		testPercentiles(dimensions, data, new double[] { 1.0f, 99.0f });
+		testPercentiles(dimensions, data, new float[] { 1.0f, 99.0f });
 
 	}
 
@@ -56,8 +56,8 @@ public class PercentileTest {
 			data[i] = random.nextDouble();
 		}
 
-		testPercentiles(dimensions, data, new double[] { 0.000000001,
-			99.99999999 });
+		testPercentiles(dimensions, data, new float[] { 0.000000001f,
+			99.99999999f });
 
 	}
 
@@ -70,7 +70,7 @@ public class PercentileTest {
 			data[i] = (data.length - i) * 0.001;
 		}
 
-		testPercentiles(dimensions, data, new double[] { 1.0f, 99.0f });
+		testPercentiles(dimensions, data, new float[] { 1.0f, 99.0f });
 
 	}
 
@@ -84,7 +84,7 @@ public class PercentileTest {
 			data[i] = random.nextDouble();
 		}
 
-		testPercentiles(dimensions, data, new double[] { 1.0f, 97.f });
+		testPercentiles(dimensions, data, new float[] { 1.0f, 97.f });
 
 	}
 
@@ -137,7 +137,7 @@ public class PercentileTest {
 	}
 
 	private void testPercentiles(long[] dimensions, double[] data,
-		double[] percentiles)
+		float[] percentiles)
 	{
 
 		// Get current size of heap in bytes
@@ -169,14 +169,14 @@ public class PercentileTest {
 			cursor.get().set((float) data[i]);
 		}
 
-		List<FloatType> res1 = normalizer.computePercentiles(img, percentiles, ij
+		float[] res1 = normalizer.computePercentiles(img, percentiles, ij
 			.op());
 
 		Percentile percentile = new Percentile();
 		percentile.setData(data);
-		for (int j = 0; j < res1.size(); j++) {
+		for (int j = 0; j < res1.length; j++) {
 			double res2 = percentile.evaluate(percentiles[j]);
-			assertEquals((float) res2, res1.get(j).getRealFloat(), 0.001);
+			assertEquals((float) res2, res1[j], 0.001);
 		}
 
 	}

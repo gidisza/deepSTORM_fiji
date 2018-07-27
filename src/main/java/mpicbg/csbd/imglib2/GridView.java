@@ -67,7 +67,6 @@ package mpicbg.csbd.imglib2;
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-
 /*
  * #%L
  * ImgLib2: a general-purpose, multidimensional image processing library.

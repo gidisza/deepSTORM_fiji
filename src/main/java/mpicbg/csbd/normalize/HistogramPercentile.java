@@ -30,6 +30,7 @@
 package mpicbg.csbd.normalize;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.imagej.ops.OpService;
@@ -45,17 +46,16 @@ public class HistogramPercentile<T extends RealType<T>> implements
 
 	T min, max;
 
-	public List<T> computePercentiles(RandomAccessibleInterval<T> src,
-		final double[] percentiles, OpService opService)
+	public float[] computePercentiles(RandomAccessibleInterval<T> src,
+		final float[] percentiles, OpService opService)
 	{
 
-		List<T> resValues = new ArrayList<>();
+		float[] resValues = new float[percentiles.length];
 
 		computeMinMax(opService, (IterableInterval<T>) src);
 
 		if (min.compareTo(max) == 0) {
-			resValues.add(min);
-			resValues.add(max);
+			Arrays.fill(resValues, min.getRealFloat());
 			return resValues;
 		}
 
@@ -64,8 +64,8 @@ public class HistogramPercentile<T extends RealType<T>> implements
 			(IterableInterval<T>) src);
 		long pixelCount = ((IterableInterval<T>) src).size();
 
-		for (double percentile : percentiles) {
-			resValues.add(getPercentile(percentile, bins, pixelCount));
+		for (int i = 0; i < percentiles.length; i++) {
+			resValues[i] = getPercentile(percentiles[i], bins, pixelCount);
 		}
 
 		return resValues;
@@ -94,7 +94,7 @@ public class HistogramPercentile<T extends RealType<T>> implements
 		IterableInterval<T> src)
 	{
 		List<HistogramBin> bins = new ArrayList<>(numBins);
-		double binLength = getBinLength(numBins);
+		float binLength = getBinLength(numBins);
 
 		for (int i = 0; i < numBins; i++)
 			bins.add(new HistogramBin());
@@ -116,24 +116,24 @@ public class HistogramPercentile<T extends RealType<T>> implements
 		return bins;
 	}
 
-	private double getBinLength(int numBins) {
-		return (max.getRealDouble() - min.getRealDouble()) / (double) numBins;
+	private float getBinLength(int numBins) {
+		return (max.getRealFloat() - min.getRealFloat()) / (float) numBins;
 	}
 
-	private int getBin(T val, T min, double binLength) {
+	private int getBin(T val, T min, float binLength) {
 		T res = val.copy();
 		res.sub(min);
 		res.mul(1. / binLength);
 		return (int) res.getRealFloat();
 	}
 
-	private T getPercentile(double percentile, List<HistogramBin> bins,
+	private float getPercentile(float percentile, List<HistogramBin> bins,
 		long pixelCount)
 	{
-		double border = pixelCount * percentile / 100.;
-		double cur = 0;
+		float border = pixelCount * percentile / 100.f;
+		float cur = 0;
 		int i;
-		double percentileMax, percentileMin;
+		float percentileMax, percentileMin;
 		if (percentile > 50) {
 			border = pixelCount - border;
 			for (i = bins.size() - 1; i >= 0 && cur < border; i--) {
@@ -169,29 +169,22 @@ public class HistogramPercentile<T extends RealType<T>> implements
 			if (percentile < percentileMin) {
 				HistogramBin prevBin = getPreviousBin(bins, i);
 				if (prevBin != null) return getY(percentile, percentileMin, bin.min,
-					percentileMin - 1. / (double) pixelCount, prevBin.max);
-				else return bin.min.copy();
+					percentileMin - 1.f / (float) pixelCount, prevBin.max);
+				else return bin.min.getRealFloat();
 			}
 			else {
 				HistogramBin nextBin = getNextBin(bins, i);
 				if (nextBin != null) return getY(percentile, percentileMax, bin.max,
-					percentileMax + 1. / (double) pixelCount, nextBin.min);
-				else return bin.max.copy();
+					percentileMax + 1.f / (float) pixelCount, nextBin.min);
+				else return bin.max.getRealFloat();
 			}
 		}
 	}
 
-	private T getY(double x, double x1, T y1, double x2, T y2) {
-		double m = (y2.getRealDouble() - y1.getRealDouble()) / (x2 - x1);
-		double n = (y1.getRealDouble() * x2 - y2.getRealDouble() * x1) / (x2 - x1);
-		T mT = y1.copy();
-		mT.setReal(m);
-		T nT = mT.copy();
-		nT.setReal(n);
-		T y = mT.copy();
-		y.mul(x);
-		y.add(nT);
-		return y;
+	private float getY(float x, float x1, T y1, float x2, T y2) {
+		float m = (y2.getRealFloat() - y1.getRealFloat()) / (x2 - x1);
+		float n = (y1.getRealFloat() * x2 - y2.getRealFloat() * x1) / (x2 - x1);
+		return m*x+n;
 	}
 
 	private HistogramBin getPreviousBin(List<HistogramBin> bins, int i) {

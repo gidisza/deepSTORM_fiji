@@ -29,8 +29,6 @@
 
 package mpicbg.csbd.normalize;
 
-import java.util.List;
-
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.axis.AxisType;
@@ -38,6 +36,9 @@ import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -46,26 +47,20 @@ public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
 	implements Normalizer
 {
 
-	private double[] percentiles = new double[] { 0.00001, 99.99999 };
+	private float[] percentiles = new float[] { 3, 99.7f };
 	private float[] destValues = new float[] { 0, 1 };
-	private List<T> resValues;
+	private float[] resValues;
 	private boolean clip = false;
 
 	protected float min;
 	protected float max;
 	protected float factor;
 
-	public float normalize(final T val) {
-		if (clip) {
-			if (val.getRealFloat() < min) {
-				return min;
-			}
-			if (val.getRealFloat() > max) {
-				return max;
-			}
-		}
-		return (val.getRealFloat() - resValues.get(0).getRealFloat()) * factor +
-			min;
+	public float normalize( final T val ) {
+		if ( clip ) { return Math.max(
+				min,
+				Math.min( max, ( val.getRealFloat() - resValues[0] ) * factor + min ) ); }
+		return Math.max( 0, ( val.getRealFloat() - resValues[0] ) * factor + min );
 	}
 
 	@Override
@@ -77,8 +72,7 @@ public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
 			.getImgPlus(), percentiles, opService);
 		min = destValues[0];
 		max = destValues[1];
-		factor = (destValues[1] - destValues[0]) / (resValues.get(1)
-			.getRealFloat() - resValues.get(0).getRealFloat());
+		factor = (destValues[1] - destValues[0]) / (resValues[1] - resValues[0]);
 
 		long[] dims = new long[im.numDimensions()];
 		im.dimensions(dims);
@@ -103,7 +97,7 @@ public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
 	}
 
 	@Override
-	public void setup(final double[] percentiles, final float[] destValues,
+	public void setup(final float[] percentiles, final float[] destValues,
 		boolean clip)
 	{
 		assert (percentiles.length == 2);
@@ -111,6 +105,10 @@ public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
 		this.percentiles = percentiles;
 		this.destValues = destValues;
 		this.clip = clip;
+	}
+
+	public float[] getResValues() {
+		return resValues;
 	}
 
 }

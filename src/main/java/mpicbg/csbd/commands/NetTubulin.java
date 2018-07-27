@@ -47,7 +47,7 @@ import net.imagej.axis.AxisType;
 /**
  */
 @Plugin(type = Command.class,
-	menuPath = "Plugins>CSBDeep>Deconvolution - Microtubules", headless = true)
+	menuPath = "Plugins>CSBDeep>Demo>Deconvolution - Microtubules", headless = true)
 public class NetTubulin extends CSBDeepCommand implements Command {
 
 	private static final int BLOCK_MULTIPLE = 4;

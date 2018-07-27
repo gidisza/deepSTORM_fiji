@@ -46,7 +46,7 @@ import net.imagej.axis.AxisType;
 
 /**
  */
-@Plugin(type = Command.class, menuPath = "Plugins>CSBDeep>Generic networks")
+@Plugin(type = Command.class, menuPath = "Plugins>CSBDeep>Run your network")
 public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	@Parameter(visibility = ItemVisibility.MESSAGE)
@@ -54,9 +54,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	@Parameter
 	protected boolean normalizeInput = true;
 	@Parameter
-	protected double percentileBottom = 3.0;
+	protected float percentileBottom = 3.0f;
 	@Parameter
-	protected double percentileTop = 99.8;
+	protected float percentileTop = 99.8f;
 
 	protected float min = 0;
 	protected float max = 1;
@@ -96,9 +96,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	}
 
 	protected void openTFMappingDialog() {
-
+		System.out.println("openTFMappingDialog");
 		prepareInputAndNetwork();
-
+		System.out.println("prepared network");
 		MappingDialog.create(network.getInputNode(), network.getOutputNode());
 	}
 
@@ -114,7 +114,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	@Override
 	protected void setupNormalizer() {
 		((DefaultInputNormalizer) inputNormalizer).getNormalizer().setup(
-			new double[] { percentileBottom, percentileTop }, new float[] { min,
+			new float[] { percentileBottom, percentileTop }, new float[] { min,
 				max }, clip);
 	}
 

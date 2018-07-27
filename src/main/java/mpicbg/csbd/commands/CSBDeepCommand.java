@@ -224,6 +224,8 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 			normalizedInput = getInput();
 		}
 
+		uiService.show(normalizedInput);
+
 		final List<RandomAccessibleInterval<T>> processedInput = inputProcessor.run(
 			normalizedInput);
 

@@ -80,7 +80,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
 @Plugin(type = Command.class,
-	menuPath = "Plugins>CSBDeep>Isotropic Reconstruction - Retina",
+	menuPath = "Plugins>CSBDeep>Demo>Isotropic Reconstruction - Retina",
 	headless = true)
 public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
 	Command

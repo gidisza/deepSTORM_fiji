@@ -43,7 +43,7 @@ import net.imagej.axis.Axes;
 /**
  */
 @Plugin(type = Command.class,
-	menuPath = "Plugins>CSBDeep>Surface Projection - Flywing", headless = true)
+	menuPath = "Plugins>CSBDeep>Demo>Surface Projection - Flywing", headless = true)
 public class NetProject extends CSBDeepCommand implements Command {
 
 	@Override

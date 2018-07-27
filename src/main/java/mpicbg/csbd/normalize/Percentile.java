@@ -29,15 +29,13 @@
 
 package mpicbg.csbd.normalize;
 
-import java.util.List;
-
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 
 public interface Percentile<T extends RealType<T>> {
 
-	List<T> computePercentiles(final RandomAccessibleInterval<T> im,
-		final double[] percentiles, OpService opService);
+	float[] computePercentiles(final RandomAccessibleInterval<T> im,
+		final float[] percentiles, OpService opService);
 
 }

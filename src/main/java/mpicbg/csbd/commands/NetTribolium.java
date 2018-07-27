@@ -44,7 +44,7 @@ import net.imagej.axis.AxisType;
 /**
  */
 @Plugin(type = Command.class,
-	menuPath = "Plugins>CSBDeep>3D Denoising - Tribolium", headless = true)
+	menuPath = "Plugins>CSBDeep>Demo>3D Denoising - Tribolium", headless = true)
 public class NetTribolium extends CSBDeepCommand implements Command {
 
 	@Override
