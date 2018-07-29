@@ -39,6 +39,7 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Pair;
+import net.imglib2.util.Util;
 
 public class HistogramPercentile<T extends RealType<T>> implements
 	Percentile<T>
@@ -46,30 +47,62 @@ public class HistogramPercentile<T extends RealType<T>> implements
 
 	T min, max;
 
-	public float[] computePercentiles(RandomAccessibleInterval<T> src,
-		final float[] percentiles, OpService opService)
-	{
+//	public float[] computePercentiles2(RandomAccessibleInterval<T> src,
+//		final float[] percentiles, OpService opService)
+//	{
+//
+//		float[] resValues = new float[percentiles.length];
+//
+//		computeMinMax(opService, (IterableInterval<T>) src);
+//
+//		if (min.compareTo(max) == 0) {
+//			Arrays.fill(resValues, min.getRealFloat());
+//			return resValues;
+//		}
+//
+//		int numBins = (int) Math.pow(2, 16);
+//		List<HistogramBin> bins = createHistogram(numBins,
+//			(IterableInterval<T>) src);
+//		long pixelCount = ((IterableInterval<T>) src).size();
+//
+//		for (int i = 0; i < percentiles.length; i++) {
+//			resValues[i] = getPercentile(percentiles[i], bins, pixelCount);
+//		}
+//
+//		return resValues;
+//
+//	}
 
-		float[] resValues = new float[percentiles.length];
-
-		computeMinMax(opService, (IterableInterval<T>) src);
-
-		if (min.compareTo(max) == 0) {
-			Arrays.fill(resValues, min.getRealFloat());
-			return resValues;
+	public float[] computePercentiles(RandomAccessibleInterval<T> src, final float[] percentiles, OpService opService) {
+		final Cursor< T > cursor = ((IterableInterval)src).cursor();
+		int items = 1;
+		int i = 0;
+		for ( ; i < src.numDimensions(); i++ ) {
+			items *= src.dimension( i );
+		}
+		final float[] values = new float[ items ];
+		i = 0;
+		while ( cursor.hasNext() ) {
+			cursor.fwd();
+			values[ i ] = cursor.get().getRealFloat();
+			i++;
 		}
 
-		int numBins = (int) Math.pow(2, 16);
-		List<HistogramBin> bins = createHistogram(numBins,
-			(IterableInterval<T>) src);
-		long pixelCount = ((IterableInterval<T>) src).size();
+		Util.quicksort( values );
 
-		for (int i = 0; i < percentiles.length; i++) {
-			resValues[i] = getPercentile(percentiles[i], bins, pixelCount);
+		final float[] res = new float[ percentiles.length ];
+		for ( i = 0; i < percentiles.length; i++ ) {
+			res[ i ] = values[ Math.min(
+					values.length - 1,
+					Math.max( 0, Math.round( ( values.length - 1 ) * percentiles[ i ] / 100.f ) ) ) ];
 		}
 
-		return resValues;
+//		float[] res2 = computePercentiles2(src, percentiles, opService);
+//		for(int j = 0; j < res2.length; j++) {
+//			System.out.println(res[j] + " " + res2[j]);
+//		}
 
+		return res;
 	}
 
 	private void computeMinMax(OpService opService, IterableInterval<T> src) {
