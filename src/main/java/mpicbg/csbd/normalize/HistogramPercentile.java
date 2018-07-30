@@ -30,7 +30,6 @@
 package mpicbg.csbd.normalize;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.imagej.ops.OpService;

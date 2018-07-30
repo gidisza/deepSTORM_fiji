@@ -3,20 +3,17 @@ package mpicbg.csbd.normalize;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
 import java.util.Random;
 
-import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessibleInterval;
 import org.junit.Test;
 
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imglib2.Cursor;
+import net.imglib2.IterableInterval;
+import net.imglib2.RandomAccess;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.img.Img;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.real.FloatType;
 
 public class NormalizeTest {

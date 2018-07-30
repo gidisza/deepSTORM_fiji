@@ -3,7 +3,6 @@ package mpicbg.csbd.normalize;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
