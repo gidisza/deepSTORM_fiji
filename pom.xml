@@ -13,7 +13,7 @@
 
 	<groupId>mpicbg.csbd</groupId>
 	<artifactId>CSBDeep</artifactId>
-	<version>0.2</version>
+	<version>0.2.1</version>
 
 	<name>CSBDeep</name>
 	<description>CSBDeep: CNNs for image restoration of fluorescence microscopy.</description>
@@ -114,6 +114,10 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej</artifactId>

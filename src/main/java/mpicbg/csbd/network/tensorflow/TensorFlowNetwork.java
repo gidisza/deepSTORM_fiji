@@ -36,7 +36,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	private final TensorFlowService tensorFlowService;
 	private final DatasetService datasetService;
 	private TensorInfo inputTensorInfo, outputTensorInfo;
-
+	private boolean foundJNI = true;
 	// Same as
 	// tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY
 	// in Python. Perhaps this should be an exported constant in TensorFlow's Java
@@ -52,14 +52,25 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		this.tensorFlowService = tensorFlowService;
 		this.datasetService = datasetService;
 		log("imagej-tensorflow version: " + tensorFlowService.getVersion());
-		log("tensorflow version: " + TensorFlow.version());
+		try {
+			log("tensorflow version: " + TensorFlow.version());
+		}
+		catch (final UnsatisfiedLinkError e){
+			foundJNI = false;
+			logError("Couldn't load tensorflow library.");
+			logError("By default, CSBDeep will load the tensorflow CPU library. " +
+					"If you added a libtensorflow-jni.jar file to Fiji.app/lib/linux64 " +
+					"to get GPU support, make sure you have the matching CUDA and cuDNN " +
+					"versions installed. If you want to use the CPU library, make sure " +
+					"the GPU tensorflow library file is removed from the lib folder.");
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void loadLibrary() {
 		log("The current library path is: LD_LIBRARY_PATH=" + System.getenv(
 			"LD_LIBRARY_PATH"));
-		boolean foundJNI;
 
 		log("Loading tensorflow jni from library path...");
 		try {

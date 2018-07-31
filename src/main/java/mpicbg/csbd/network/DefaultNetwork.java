@@ -203,6 +203,12 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 		}
 	}
 
+	protected void logError(final String text) {
+		if (status != null) {
+			status.logError(text);
+		}
+	}
+
 	void fail() {
 		status.setFailed();
 	}

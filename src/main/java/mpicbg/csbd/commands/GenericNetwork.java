@@ -30,6 +30,9 @@
 package mpicbg.csbd.commands;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
@@ -68,8 +71,8 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		initializer = "modelInitialized", persist = false)
 	private File modelFile;
 	private final String modelFileKey = "modelfile-anynetwork";
-	@Parameter(label = "Model name")
-	private String _modelName;
+
+	private String cacheName = "generic";
 
 	@Parameter(label = "Adjust image <-> tensorflow mapping",
 		callback = "openTFMappingDialog")
@@ -83,6 +86,20 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		final String p_modelfile = prefService.get(String.class, modelFileKey, "");
 		if (p_modelfile != "") {
 			modelFile = new File(p_modelfile);
+			updateCacheName();
+		}
+	}
+
+	private void updateCacheName() {
+		try {
+			FileInputStream fis = new FileInputStream(modelFile);
+			String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+			cacheName = "generic_" + md5;
+			savePreferences();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -90,6 +107,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	protected void modelChanged() {
 
 		if (modelFile != null) {
+			updateCacheName();
 			savePreferences();
 		}
 
@@ -126,7 +144,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	@Override
 	protected void prepareInputAndNetwork() {
 		modelFileUrl = modelFile.getAbsolutePath();
-		modelName = _modelName;
+		modelName = cacheName;
 		super.prepareInputAndNetwork();
 		checkAndResolveDimensionReduction();
 	}
