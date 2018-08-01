@@ -37,6 +37,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	private final DatasetService datasetService;
 	private TensorInfo inputTensorInfo, outputTensorInfo;
 	private boolean foundJNI = true;
+	private boolean gpuSupport = false;
 	// Same as
 	// tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY
 	// in Python. Perhaps this should be an exported constant in TensorFlow's Java
@@ -68,19 +69,17 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	}
 
 	@Override
-	public void loadLibrary() {
+	public void testGPUSupport() {
 		log("The current library path is: LD_LIBRARY_PATH=" + System.getenv(
 			"LD_LIBRARY_PATH"));
-
-		log("Loading tensorflow jni from library path...");
 		try {
 			System.loadLibrary("tensorflow_jni");
-			foundJNI = true;
+			gpuSupport = true;
 		}
 		catch (final UnsatisfiedLinkError e) {
-			foundJNI = false;
+			gpuSupport = false;
 		}
-		if (!foundJNI) {
+		if (!gpuSupport) {
 			log("Couldn't load tensorflow GPU support.");
 			log(
 				"If the problem is CUDA related, make sure CUDA and cuDNN are in the LD_LIBRARY_PATH.");
@@ -173,6 +172,16 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		generateMapping();
 	}
 
+	@Override
+	public boolean libraryLoaded() {
+		return foundJNI;
+	}
+
+	@Override
+	public boolean supportsGPU() {
+		return gpuSupport;
+	}
+
 	private void generateMapping() {
 		inputNode.generateMapping();
 		outputNode.generateMapping();
@@ -194,7 +203,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		final AxisType axisToRemove)
 	{
 		int numDims = input.numDimensions();
-		if (input.axis(Axes.Z) != null) {
+		if (input.axis(axisToRemove) != null) {
 			numDims--;
 		}
 		final long[] dims = new long[numDims];

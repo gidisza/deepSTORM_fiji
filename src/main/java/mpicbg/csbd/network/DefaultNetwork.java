@@ -41,7 +41,7 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	}
 
 	@Override
-	public void loadLibrary() {}
+	public void testGPUSupport() {}
 
 	protected abstract boolean loadModel(Location source, String modelName);
 
@@ -157,11 +157,6 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	@Override
 	public ImageTensor getOutputNode() {
 		return outputNode;
-	}
-
-	@Override
-	public boolean isSupportingGPU() {
-		return supportsGPU;
 	}
 
 	@Override

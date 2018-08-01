@@ -34,7 +34,7 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 	}
 
 	@Override
-	public void loadLibrary() {}
+	public void testGPUSupport() {}
 
 	@Override
 	public void loadInputNode(final String defaultName, final Dataset dataset) {
@@ -58,6 +58,11 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 	public void preprocess() {
 		initMapping();
 		calculateMapping();
+	}
+
+	@Override
+	public boolean supportsGPU() {
+		return false;
 	}
 
 	@Override
@@ -133,6 +138,11 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 
 	@Override
 	public void doDimensionReduction() {}
+
+	@Override
+	public boolean libraryLoaded() {
+		return true;
+	}
 
 	public long[] getInputShape() {
 		return inputShape;

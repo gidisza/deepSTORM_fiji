@@ -144,10 +144,15 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 		}
 	}
 
-	protected void initNetwork() {
+	protected boolean initNetwork() {
 		network = new TensorFlowNetwork(tensorFlowService, datasetService,
 			modelExecutor);
-		network.loadLibrary();
+		if(network.libraryLoaded()) {
+			network.testGPUSupport();
+		}else {
+			return false;
+		}
+		return true;
 	}
 
 	private void initTasks() {

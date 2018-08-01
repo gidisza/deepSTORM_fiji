@@ -83,31 +83,32 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	/** Executed whenever the {@link #modelFile} parameter is initialized. */
 	protected void modelInitialized() {
+		System.out.println("modelInitialized");
 		final String p_modelfile = prefService.get(String.class, modelFileKey, "");
 		if (p_modelfile != "") {
 			modelFile = new File(p_modelfile);
-			updateCacheName();
 		}
 	}
 
 	private void updateCacheName() {
-		try {
-			FileInputStream fis = new FileInputStream(modelFile);
-			String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-			cacheName = "generic_" + md5;
-			savePreferences();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(modelFile != null) {
+			if(modelFile.exists()){
+				try {
+					FileInputStream fis = new FileInputStream(modelFile);
+					String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+					cacheName = "generic_" + md5;
+					savePreferences();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
 	/** Executed whenever the {@link #modelFile} parameter changes. */
 	protected void modelChanged() {
-
+		System.out.println("modelChanged");
 		if (modelFile != null) {
-			updateCacheName();
 			savePreferences();
 		}
 
@@ -115,6 +116,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	protected void openTFMappingDialog() {
 		System.out.println("openTFMappingDialog");
+		updateCacheName();
+		savePreferences();
+		tryToInitialize();
 		prepareInputAndNetwork();
 		System.out.println("prepared network");
 		MappingDialog.create(network.getInputNode(), network.getOutputNode());
@@ -122,6 +126,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	@Override
 	public void run() {
+		updateCacheName();
 		savePreferences();
 		tryToInitialize();
 		prepareInputAndNetwork();
@@ -179,7 +184,8 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		ij.launch(args);
 
 		// ask the user for a file to open
-		 final File file = ij.ui().chooseFile( null, "open" );
+//		 final File file = ij.ui().chooseFile( null, "open" );
+		final File file = new File("/home/random/Development/imagej/project/CSBDeep/tests/generic_test2/denoise2D/input.tif");
 
 		if (file != null && file.exists()) {
 			// load the dataset

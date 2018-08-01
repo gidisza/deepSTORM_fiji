@@ -18,12 +18,14 @@ public interface Network<T extends RealType<T>> extends
 	Callable<List<RandomAccessibleInterval<T>>>, Disposable
 {
 
-	void loadLibrary();
+	void testGPUSupport();
 
 	boolean loadModel(String pathOrURL, String modelName)
 		throws FileNotFoundException;
 
 	void preprocess();
+
+	boolean supportsGPU();
 
 	RandomAccessibleInterval<T> execute(RandomAccessibleInterval<T> tile)
 		throws Exception;
@@ -33,8 +35,6 @@ public interface Network<T extends RealType<T>> extends
 	ImageTensor getInputNode();
 
 	ImageTensor getOutputNode();
-
-	boolean isSupportingGPU();
 
 	void loadInputNode(String defaultName, Dataset dataset);
 
@@ -64,4 +64,5 @@ public interface Network<T extends RealType<T>> extends
 
 	void doDimensionReduction();
 
+	boolean libraryLoaded();
 }

@@ -48,8 +48,7 @@ public class GenericNetworkTest extends CSBDeepTest {
 		final Dataset input = createDataset(type, dims, axes);
 		final Future<CommandModule> future = ij.command().run(GenericNetwork.class,
 			false, "input", input, "modelFile", new File(
-				"/home/random/Development/imagej/project/CSBDeep/CSBDeep_python/examples/denoising2D_probabilistic/models/my_model/TF_SavedModel.zip"),
-			"_modelName", "saved_model");
+				"/home/random/Development/imagej/project/CSBDeep/CSBDeep_python/examples/denoising2D_probabilistic/models/my_model/TF_SavedModel.zip"));
 		assertFalse("Plugin future is null", future == null);
 		final Module module = ij.module().waitFor(future);
 		List<Dataset> result = (List<Dataset>) module.getOutput("output");
