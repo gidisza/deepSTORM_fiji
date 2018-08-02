@@ -29,10 +29,20 @@ public class DefaultTaskManager implements TaskManager {
 	}
 
 	@Override
-	public void cancel() {
+	public boolean isCanceled() {
+		return false;
+	}
+
+	@Override
+	public void cancel(String reason) {
 		for (final Task task : tasks) {
-			task.cancel();
+			task.cancel(reason);
 		}
+	}
+
+	@Override
+	public String getCancelReason() {
+		return null;
 	}
 
 	@Override

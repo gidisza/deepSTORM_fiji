@@ -53,9 +53,9 @@ public class TaskForce extends DefaultTask {
 	}
 
 	@Override
-	public void cancel() {
+	public void cancel(String reason) {
 		for (final Task task : tasks) {
-			task.cancel();
+			task.cancel(reason);
 		}
 	}
 

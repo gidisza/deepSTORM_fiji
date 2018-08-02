@@ -182,8 +182,18 @@ public class DefaultTask implements Task {
 	}
 
 	@Override
-	public void cancel() {
+	public boolean isCanceled() {
+		return false;
+	}
 
+	@Override
+	public void cancel(String reason) {
+
+	}
+
+	@Override
+	public String getCancelReason() {
+		return null;
 	}
 
 	@Override

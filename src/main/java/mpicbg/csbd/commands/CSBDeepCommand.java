@@ -29,22 +29,6 @@
 
 package mpicbg.csbd.commands;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.OptionalLong;
-
-import javax.swing.*;
-
-import org.scijava.Cancelable;
-import org.scijava.Disposable;
-import org.scijava.Initializable;
-import org.scijava.ItemIO;
-import org.scijava.log.LogService;
-import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
-
 import mpicbg.csbd.network.ImageTensor;
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.network.task.*;
@@ -76,6 +60,24 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import org.scijava.Cancelable;
+import org.scijava.Disposable;
+import org.scijava.Initializable;
+import org.scijava.ItemIO;
+import org.scijava.log.LogService;
+import org.scijava.plugin.Parameter;
+import org.scijava.ui.UIService;
+
+import javax.swing.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalLong;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public abstract class CSBDeepCommand<T extends RealType<T>> implements
 	Cancelable, Initializable, Disposable
@@ -129,6 +131,9 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 	protected OutputProcessor outputProcessor;
 
 	private boolean initialized = false;
+
+	private ExecutorService pool = null;
+	private Future<?> future;
 
 	@Override
 	public void initialize() {
@@ -213,48 +218,60 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 
 		if (noInputData()) return;
 
-		tryToInitialize();
+		pool = Executors.newSingleThreadExecutor();
 
-		taskManager.finalizeSetup();
+		future = pool.submit(() -> {
+			tryToInitialize();
 
-		prepareInputAndNetwork();
+			taskManager.finalizeSetup();
 
-		final Dataset normalizedInput;
-		if (doInputNormalization()) {
-			setupNormalizer();
-			normalizedInput = inputNormalizer.run(getInput(), opService,
-				datasetService);
-		}
-		else {
-			normalizedInput = getInput();
-		}
+			prepareInputAndNetwork();
 
-		final List<RandomAccessibleInterval<T>> processedInput = inputProcessor.run(
-			normalizedInput);
-
-		log("INPUT NODE: ");
-		network.getInputNode().printMapping();
-		log("OUTPUT NODE: ");
-		network.getOutputNode().printMapping();
-
-		initTiling();
-		try {
-			final List<AdvancedTiledView<FloatType>> tiledOutput =
-				tryToTileAndRunNetwork(processedInput);
-			final List<RandomAccessibleInterval<FloatType>> output = outputTiler.run(
-				tiledOutput, tiling, getAxesArray(network.getOutputNode()));
-			for (AdvancedTiledView obj : tiledOutput) {
-				obj.dispose();
+			final Dataset normalizedInput;
+			if (doInputNormalization()) {
+				setupNormalizer();
+				normalizedInput = inputNormalizer.run(getInput(), opService,
+						datasetService);
+			} else {
+				normalizedInput = getInput();
 			}
-			this.output.clear();
-			this.output.addAll(outputProcessor.run(output, getInput(), network,
-				datasetService));
-		}
-		catch (OutOfMemoryError e) {
+
+			final List<RandomAccessibleInterval<T>> processedInput = inputProcessor.run(
+					normalizedInput);
+
+			log("INPUT NODE: ");
+			network.getInputNode().printMapping();
+			log("OUTPUT NODE: ");
+			network.getOutputNode().printMapping();
+
+			initTiling();
+			try {
+				final List<AdvancedTiledView<FloatType>> tiledOutput =
+						tryToTileAndRunNetwork(processedInput);
+				if(tiledOutput != null) {
+					final List<RandomAccessibleInterval<FloatType>> output = outputTiler.run(
+							tiledOutput, tiling, getAxesArray(network.getOutputNode()));
+					for (AdvancedTiledView obj : tiledOutput) {
+						obj.dispose();
+					}
+					this.output.clear();
+					this.output.addAll(outputProcessor.run(output, getInput(), network,
+							datasetService));
+				}
+			} catch (OutOfMemoryError e) {
+				e.printStackTrace();
+			}
+
+			dispose();
+		});
+
+		try {
+			if(future != null) future.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-
-		dispose();
 
 	}
 
@@ -280,6 +297,7 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 		if (network != null) {
 			network.dispose();
 		}
+		pool = null;
 	}
 
 	private AxisType[] getAxesArray(final ImageTensor outputNode) {
@@ -310,23 +328,38 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 		throws OutOfMemoryError
 	{
 		List<AdvancedTiledView<FloatType>> tiledOutput = null;
+
 		boolean isOutOfMemory = true;
 		boolean canHandleOutOfMemory = true;
+
 		while (isOutOfMemory && canHandleOutOfMemory) {
 			try {
 				final List<AdvancedTiledView<T>> tiledInput = inputTiler.run(
-					normalizedInput, getInput(), tiling, getTilingActions());
-				tiledOutput = modelExecutor.run(tiledInput, network);
+					normalizedInput, getAxesArray(getInput()), tiling, getTilingActions());
+				if(tiledInput != null) {
+					tiledOutput = modelExecutor.run(tiledInput, network);
+				}
 				isOutOfMemory = false;
+
 			}
 			catch (final OutOfMemoryError e) {
 				isOutOfMemory = true;
 				canHandleOutOfMemory = tryHandleOutOfMemoryError();
 			}
 		}
+
 		if (isOutOfMemory) throw new OutOfMemoryError(
 			"Out of memory exception occurred. Plugin exit.");
+
 		return tiledOutput;
+	}
+
+	private AxisType[] getAxesArray(Dataset input) {
+		AxisType[] res = new AxisType[input.numDimensions()];
+		for (int i = 0; i < input.numDimensions(); i++) {
+			res[i] = input.axis(i).type();
+		}
+		return res;
 	}
 
 	protected Tiling.TilingAction[] getTilingActions() {
@@ -407,7 +440,12 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 
 	@Override
 	public void cancel(final String reason) {
-		modelExecutor.cancel(reason);
+		if(future != null) {
+			future.cancel(true);
+		}
+		if(pool != null) {
+			pool.shutdownNow();
+		}
 		dispose();
 	}
 

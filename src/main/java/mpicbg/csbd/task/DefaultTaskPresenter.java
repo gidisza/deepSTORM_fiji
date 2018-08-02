@@ -138,7 +138,7 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 	public void actionPerformed(final ActionEvent e) {
 		if (inUse()) {
 			if (e.getSource().equals(progressWindow.getCancelBtn())) {
-				taskManager.cancel();
+				taskManager.cancel("Canceled");
 			}
 		}
 	}

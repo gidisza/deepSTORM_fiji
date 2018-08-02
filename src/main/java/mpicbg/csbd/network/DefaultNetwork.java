@@ -189,8 +189,18 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	}
 
 	@Override
-	public void cancel() {
+	public void cancel(String reason) {
 		pool.shutdownNow();
+	}
+
+	@Override
+	public boolean isCanceled() {
+		return false;
+	}
+
+	@Override
+	public String getCancelReason() {
+		return null;
 	}
 
 	/**

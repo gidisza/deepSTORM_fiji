@@ -38,7 +38,7 @@ public class TilingTest extends CSBDeepTest {
 		final RandomAccessibleInterval<FloatType> input =
 			(RandomAccessibleInterval<FloatType>) dataset.getImgPlus();
 		final AdvancedTiledView<FloatType> tiledView = tiling.preprocess(input,
-			dataset, getTilingActions(dataset), task);
+				axes, getTilingActions(dataset), task);
 
 		tiledView.getProcessedTiles().clear();
 		final Cursor<RandomAccessibleInterval<FloatType>> cursor = Views.iterable(

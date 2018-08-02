@@ -21,7 +21,7 @@ import java.util.concurrent.Future;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class MultipleGenericNetworksTest extends CSBDeepTest {
+public class GenericNetworksMultipleCallsTest extends CSBDeepTest {
 
 	@Test
 	public void testMultipleGenericNetworks() {

@@ -141,15 +141,15 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		MappingDialog.create(network.getInputNode(), network.getOutputNode());
 	}
 
-//	@Override
-//	public void run() {
-////		updateCacheName();
-////		savePreferences();
-////		tryToInitialize();
-////		prepareInputAndNetwork();
-////		checkAndResolveDimensionReduction();
-//		super.run();
-//	}
+	@Override
+	public void run() {
+		updateCacheName();
+		savePreferences();
+		tryToInitialize();
+		prepareInputAndNetwork();
+		checkAndResolveDimensionReduction();
+		super.run();
+	}
 
 	@Override
 	protected void setupNormalizer() {
@@ -168,7 +168,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		modelFileUrl = modelFile.getAbsolutePath();
 		modelName = cacheName;
 		super.prepareInputAndNetwork();
-//		checkAndResolveDimensionReduction();
+		checkAndResolveDimensionReduction();
 	}
 
 	private void checkAndResolveDimensionReduction() {

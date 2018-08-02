@@ -43,10 +43,9 @@ public interface Tiling<T extends RealType<T>> {
 			TILE_WITHOUT_PADDING // e.g. TIME
 	}
 
-	AdvancedTiledView<T> preprocess(RandomAccessibleInterval<T> input,
-		Dataset dataset, TilingAction[] tilingActions, Task parent);
+	AdvancedTiledView<T> preprocess(RandomAccessibleInterval<T> input, AxisType[] axes, TilingAction[] tilingActions, Task parent);
 
 	RandomAccessibleInterval<T> postprocess(Task parent,
-		final AdvancedTiledView<T> results, AxisType[] axisTypes);
+	                                        final AdvancedTiledView<T> results, AxisType[] axisTypes);
 
 }

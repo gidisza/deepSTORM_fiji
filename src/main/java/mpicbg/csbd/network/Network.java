@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.scijava.Cancelable;
 import org.scijava.Disposable;
 
 import mpicbg.csbd.imglib2.TiledView;
@@ -15,7 +16,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 
 public interface Network<T extends RealType<T>> extends
-	Callable<List<RandomAccessibleInterval<T>>>, Disposable
+	Callable<List<RandomAccessibleInterval<T>>>, Disposable, Cancelable
 {
 
 	void testGPUSupport();
@@ -47,8 +48,6 @@ public interface Network<T extends RealType<T>> extends
 	void resetTileCount();
 
 	void setTiledView(TiledView<T> tiledView);
-
-	void cancel();
 
 	/**
 	 * Set if singleton dimensions of the output image should be dropped. If the

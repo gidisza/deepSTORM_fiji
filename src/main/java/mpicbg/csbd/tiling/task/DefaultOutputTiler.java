@@ -24,14 +24,13 @@ public class DefaultOutputTiler<T extends RealType<T>> extends DefaultTask
 		setStarted();
 
 		final List<RandomAccessibleInterval<T>> output = new ArrayList<>();
-		for (AdvancedTiledView<T> image : input) {
-			output.add(tiling.postprocess(this, image, axisTypes));
-		}
 
-		// final List< RandomAccessibleInterval< T > > output =
-		// input.stream().map( image -> tiling.postprocess( this, image, axisTypes )
-		// ).collect(
-		// Collectors.toList() );
+		if(input != null) {
+			for (AdvancedTiledView<T> image : input) {
+				output.add(tiling.postprocess(this, image, axisTypes));
+			}
+
+		}
 
 		setFinished();
 

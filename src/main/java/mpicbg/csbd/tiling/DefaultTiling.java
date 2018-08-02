@@ -67,19 +67,13 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 	}
 
 	@Override
-	public AdvancedTiledView<T> preprocess(RandomAccessibleInterval<T> input,
-		Dataset dataset, TilingAction[] tilingActions, Task parent)
+	public AdvancedTiledView<T> preprocess(RandomAccessibleInterval<T> input, AxisType[] axes, TilingAction[] tilingActions, Task parent)
 	{
 
 		this.status = parent;
 		this.tilingActions = tilingActions;
 
 		if (input != null) {
-
-			AxisType[] axes = new AxisType[input.numDimensions()];
-			for (int i = 0; i < axes.length; i++) {
-				axes[i] = dataset.axis(i).type();
-			}
 
 			long[] tiling = new long[input.numDimensions()];
 			Arrays.fill(tiling, 1);
@@ -98,7 +92,7 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 			final AdvancedTiledView<T> tiledView = createTiledView(parent,
 				expandedInput, tileSize, padding, axes, tilingActions);
 			for (int i = 0; i < input.numDimensions(); i++) {
-				tiledView.getOriginalDims().put(dataset.axis(i).type(), input.dimension(
+				tiledView.getOriginalDims().put(axes[i], input.dimension(
 					i));
 			}
 

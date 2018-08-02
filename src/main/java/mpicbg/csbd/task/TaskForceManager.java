@@ -19,9 +19,9 @@ public class TaskForceManager extends DefaultTaskManager {
 	public void add(final Task task) {}
 
 	@Override
-	public void cancel() {
+	public void cancel(String reason) {
 		for (final Task task : taskForces) {
-			task.cancel();
+			task.cancel(reason);
 		}
 	}
 

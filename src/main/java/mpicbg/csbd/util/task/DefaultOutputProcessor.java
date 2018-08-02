@@ -117,10 +117,8 @@ public class DefaultOutputProcessor<T extends RealType<T> & NativeType<T>>
 
 		// TODO convert back to original format to be able to save and load it
 		// (float 32 bit does not load in Fiji) /- note i think we do that now
-		// TODO how is this done properly?
 
-		final Dataset dataset = datasetService.create(new ImgPlus<>(ImgView.wrap(
-			img, new ArrayImgFactory<>())));
+		final Dataset dataset = datasetService.create(img);
 		dataset.setName(name);
 		for (int i = 0; i < dataset.numDimensions(); i++) {
 			dataset.setAxis(network.getInputNode().getDataset().axis(network

@@ -1,13 +1,13 @@
 
 package mpicbg.csbd.task;
 
-public interface TaskManager {
+import org.scijava.Cancelable;
+
+public interface TaskManager extends Cancelable {
 
 	void initialize();
 
 	void add(Task task);
-
-	void cancel();
 
 	void debug(String msg);
 

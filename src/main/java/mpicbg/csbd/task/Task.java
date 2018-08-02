@@ -1,7 +1,9 @@
 
 package mpicbg.csbd.task;
 
-public interface Task {
+import org.scijava.Cancelable;
+
+public interface Task extends Cancelable {
 
 	void setManager(TaskManager manager);
 
@@ -59,5 +61,4 @@ public interface Task {
 
 	void setTitle(String title);
 
-	void cancel();
 }
