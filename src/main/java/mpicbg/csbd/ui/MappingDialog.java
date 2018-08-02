@@ -157,7 +157,6 @@ public class MappingDialog {
 				JOptionPane.OK_CANCEL_OPTION);
 
 			if (result == JOptionPane.OK_OPTION) {
-				inputNode.printMapping();
 				for (int i = 0; i < inputDrops.size(); i++) {
 					// System.out.println(
 					// "selected index for tf index " + i + ": " + inputDrops.get(
@@ -165,6 +164,8 @@ public class MappingDialog {
 					inputNode.setNodeAxisByKnownAxesIndex(i, inputDrops.get(i)
 						.getSelectedIndex());
 				}
+				inputNode.generateMapping();
+				inputNode.printMapping();
 				// for ( int i = 0; i < outputDrops.size(); i++ ) {
 				// outputNode.setNodeAxisByKnownAxesIndex( i, outputDrops.get( i
 				// ).getSelectedIndex() );

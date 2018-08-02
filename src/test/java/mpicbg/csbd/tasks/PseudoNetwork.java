@@ -3,6 +3,7 @@ package mpicbg.csbd.tasks;
 
 import java.io.FileNotFoundException;
 
+import mpicbg.csbd.network.ImageTensor;
 import org.scijava.io.location.Location;
 
 import mpicbg.csbd.network.DefaultNetwork;
@@ -38,12 +39,14 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 
 	@Override
 	public void loadInputNode(final String defaultName, final Dataset dataset) {
+		inputNode = new ImageTensor();
 		inputNode.setName("input");
 		inputNode.initializeNodeMapping();
 	}
 
 	@Override
 	public void loadOutputNode(final String defaultName) {
+		outputNode = new ImageTensor();
 		outputNode.setName("output");
 		outputNode.initializeNodeMapping();
 	}

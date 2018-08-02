@@ -26,15 +26,15 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 {
 
 	protected Task status;
-	protected ImageTensor inputNode = new ImageTensor();
-	protected ImageTensor outputNode = new ImageTensor();
+	protected ImageTensor inputNode;
+	protected ImageTensor outputNode;
 	protected TiledView<T> tiledView;
 	protected boolean supportsGPU = false;
 	protected Integer doneTileCount;
 	protected boolean dropSingletonDims = true;
 	protected boolean doDimensionReduction = false;
 	protected AxisType axisToRemove;
-	ExecutorService pool = Executors.newSingleThreadExecutor();
+	ExecutorService pool;
 
 	public DefaultNetwork(Task associatedTask) {
 		this.status = associatedTask;
@@ -61,24 +61,11 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	public abstract void preprocess();
 
 	@Override
-	public List<RandomAccessibleInterval<T>> call() throws ExecutionException {
-
-		final List<RandomAccessibleInterval<T>> results = runModel();
-
-		return results;
-	}
-
-	protected void printDim(final String title,
-		final RandomAccessibleInterval<FloatType> input)
-	{
-		final long[] dims = new long[input.numDimensions()];
-		input.dimensions(dims);
-		log(title + ": " + Arrays.toString(dims));
-	}
-
-	private List<RandomAccessibleInterval<T>> runModel()
+	public List<RandomAccessibleInterval<T>> call()
 		throws ExecutionException
 	{
+
+		pool = Executors.newSingleThreadExecutor();
 
 		final boolean multithreading = false;
 
@@ -89,19 +76,10 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 		final List<RandomAccessibleInterval<T>> results = new ArrayList<>();
 		final List<Future<RandomAccessibleInterval<T>>> futures = new ArrayList<>();
 
-		// status.setCurrentStep(0);
-		// doneTileCount = 0;
-		// int numSteps = 1;
-		// for(int i = 0; i < tiledView.numDimensions(); i++) {
-		// numSteps *= tiledView.dimension(i);
-		// }
-		// status.setNumSteps(numSteps);
-
 		while (cursor.hasNext()) {
 			final RandomAccessibleInterval<T> tile = cursor.next();
 
-			final Future<RandomAccessibleInterval<T>> future = pool.submit(
-				new TileRunner(tile));
+			final Future<RandomAccessibleInterval<T>> future = pool.submit(() -> execute(tile));
 
 			log("Processing tile " + (doneTileCount + 1) + "..");
 
@@ -161,12 +139,14 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 
 	@Override
 	public void loadInputNode(final String defaultName, final Dataset dataset) {
+		inputNode = new ImageTensor();
 		inputNode.initialize(dataset);
 		inputNode.setName(defaultName);
 	}
 
 	@Override
 	public void loadOutputNode(final String defaultName) {
+		outputNode = new ImageTensor();
 		outputNode.setName(defaultName);
 	}
 
@@ -240,23 +220,7 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	public void dispose() {
 		if (pool != null) {
 			pool.shutdown();
-		}
-	}
-
-	class TileRunner implements Callable<RandomAccessibleInterval<T>> {
-
-		RandomAccessibleInterval<T> tile;
-
-		public TileRunner(final RandomAccessibleInterval<T> tile) {
-			this.tile = tile;
-		}
-
-		@Override
-		public RandomAccessibleInterval<T> call() throws Exception {
-			final RandomAccessibleInterval<T> result = execute(tile);
-			// ImageJ ij = new ImageJ();
-			// ij.ui().show( result );
-			return result;
+			pool = null;
 		}
 	}
 }

@@ -283,6 +283,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		super.dispose();
 		if (model != null) {
 			model.close();
+			model = null;
 		}
 	}
 

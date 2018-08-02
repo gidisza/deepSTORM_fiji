@@ -81,12 +81,20 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	@Parameter
 	private PrefService prefService;
 
+	private boolean modelChangeCallbackCalled = false;
+
 	/** Executed whenever the {@link #modelFile} parameter is initialized. */
 	protected void modelInitialized() {
 		System.out.println("modelInitialized");
 		final String p_modelfile = prefService.get(String.class, modelFileKey, "");
 		if (p_modelfile != "") {
 			modelFile = new File(p_modelfile);
+			if(modelFile != null) {
+				updateCacheName();
+				savePreferences();
+				tryToInitialize();
+				prepareInputAndNetwork();
+			}
 		}
 	}
 
@@ -107,32 +115,41 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	/** Executed whenever the {@link #modelFile} parameter changes. */
 	protected void modelChanged() {
-		System.out.println("modelChanged");
-		if (modelFile != null) {
-			savePreferences();
+		if(!modelChangeCallbackCalled) {
+			modelChangeCallbackCalled = true;
+			System.out.println("modelChanged");
+			if(network.isInitialized()) {
+				network.dispose();
+			}
+			if (modelFile != null) {
+				updateCacheName();
+				savePreferences();
+				tryToInitialize();
+				prepareInputAndNetwork();
+			}
+			modelChangeCallbackCalled = false;
 		}
-
 	}
 
 	protected void openTFMappingDialog() {
 		System.out.println("openTFMappingDialog");
-		updateCacheName();
-		savePreferences();
-		tryToInitialize();
-		prepareInputAndNetwork();
-		System.out.println("prepared network");
+//		updateCacheName();
+//		savePreferences();
+//		tryToInitialize();
+//		prepareInputAndNetwork();
+//		System.out.println("prepared network");
 		MappingDialog.create(network.getInputNode(), network.getOutputNode());
 	}
 
-	@Override
-	public void run() {
-		updateCacheName();
-		savePreferences();
-		tryToInitialize();
-		prepareInputAndNetwork();
-		checkAndResolveDimensionReduction();
-		super.run();
-	}
+//	@Override
+//	public void run() {
+////		updateCacheName();
+////		savePreferences();
+////		tryToInitialize();
+////		prepareInputAndNetwork();
+////		checkAndResolveDimensionReduction();
+//		super.run();
+//	}
 
 	@Override
 	protected void setupNormalizer() {
@@ -151,7 +168,7 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		modelFileUrl = modelFile.getAbsolutePath();
 		modelName = cacheName;
 		super.prepareInputAndNetwork();
-		checkAndResolveDimensionReduction();
+//		checkAndResolveDimensionReduction();
 	}
 
 	private void checkAndResolveDimensionReduction() {

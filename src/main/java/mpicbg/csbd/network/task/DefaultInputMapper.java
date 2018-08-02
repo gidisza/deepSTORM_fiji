@@ -1,11 +1,13 @@
 
 package mpicbg.csbd.network.task;
 
+import mpicbg.csbd.network.ImageTensor;
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.util.DatasetHelper;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
+import net.imglib2.view.Views;
 
 public class DefaultInputMapper extends DefaultTask implements InputMapper {
 
@@ -22,22 +24,17 @@ public class DefaultInputMapper extends DefaultTask implements InputMapper {
 		setStarted();
 
 		DatasetHelper.assignUnknownDimensions(input);
+
 		if (network.isInitialized()) {
 			network.initMapping();
 		}
 
-		if (mapping != null) {
-			applyMapping(network);
+		if (mapping != null && network.getInputNode() != null) {
+			network.getInputNode().setMapping(mapping);
 		}
 
 		setFinished();
 
-	}
-
-	private void applyMapping(final Network network) {
-		if (network.getInputNode() != null) {
-			network.getInputNode().setMapping(mapping);
-		}
 	}
 
 }

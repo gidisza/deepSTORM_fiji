@@ -38,8 +38,10 @@ public class DefaultModelLoader extends DefaultTask implements ModelLoader {
 
 		try {
 
-			loadNetworkFile(network, modelFileUrl, modelName);
-			initializeNetwork(network, inputNodeName, input, outputNodeName);
+			network.loadModel(modelFileUrl, modelName);
+			network.loadInputNode(inputNodeName, input);
+			network.loadOutputNode(outputNodeName);
+			network.initMapping();
 
 		}
 		catch (final FileNotFoundException exc1) {
@@ -48,22 +50,6 @@ public class DefaultModelLoader extends DefaultTask implements ModelLoader {
 
 		}
 
-	}
-
-	protected void loadNetworkFile(final Network network,
-		final String modelFileUrl, final String modelName)
-		throws FileNotFoundException
-	{
-		network.loadModel(modelFileUrl, modelName);
-	}
-
-	protected void initializeNetwork(final Network network,
-		final String inputNodeName, final Dataset input,
-		final String outputNodeName)
-	{
-		network.loadInputNode(inputNodeName, input);
-		network.loadOutputNode(outputNodeName);
-		network.initMapping();
 	}
 
 }
