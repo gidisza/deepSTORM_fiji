@@ -33,15 +33,6 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 		}
 	}
 
-	@Override
-	public void initializeWithGPUWarning() {
-		if (!headless) {
-			progressWindow = CSBDeepProgress.createWithGPUWarning();
-			progressWindow.getCancelBtn().addActionListener(this);
-			initialized = true;
-		}
-	}
-
 	private boolean inUse() {
 		return !headless && initialized;
 	}
@@ -58,6 +49,13 @@ public class DefaultTaskPresenter implements TaskPresenter, ActionListener {
 	public void show() {
 		if (inUse()) {
 			progressWindow.display();
+		}
+	}
+
+	@Override
+	public void showGPUWarning() {
+		if (inUse()) {
+			progressWindow.showGPUWarning();
 		}
 	}
 

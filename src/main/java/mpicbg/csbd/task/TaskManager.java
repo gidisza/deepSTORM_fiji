@@ -20,4 +20,6 @@ public interface TaskManager extends Cancelable {
 	void update(Task task);
 
 	void close();
+
+	void noGPUFound();
 }

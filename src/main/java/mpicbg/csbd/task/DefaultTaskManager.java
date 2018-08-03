@@ -22,6 +22,11 @@ public class DefaultTaskManager implements TaskManager {
 	}
 
 	@Override
+	public void noGPUFound() {
+		taskPresenter.showGPUWarning();
+	}
+
+	@Override
 	public void add(final Task task) {
 		tasks.add(task);
 		task.setManager(this);

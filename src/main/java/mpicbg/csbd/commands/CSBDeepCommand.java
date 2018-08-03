@@ -156,6 +156,7 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 			modelExecutor);
 		if(network.libraryLoaded()) {
 			network.testGPUSupport();
+			if(!network.supportsGPU()) taskManager.noGPUFound();
 		}else {
 			return false;
 		}

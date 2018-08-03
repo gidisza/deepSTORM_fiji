@@ -74,6 +74,8 @@ public class CSBDeepProgress extends JPanel {
 	final JPanel taskContainer;
 	final JFrame frame;
 
+	private JPanel note1;
+
 	JLabel noTensorFlow = new JLabel(
 		"<html>Couldn't load tensorflow from library<br />path and will therefore use CPU<br />instead of GPU version.<br />This will affect performance.<br />See wiki for further details.</html>",
 		SwingConstants.RIGHT);
@@ -88,7 +90,7 @@ public class CSBDeepProgress extends JPanel {
 		return okButton;
 	}
 
-	public CSBDeepProgress(JFrame frame, final boolean usesTF) {
+	public CSBDeepProgress(JFrame frame) {
 
 		super(new BorderLayout());
 
@@ -120,16 +122,16 @@ public class CSBDeepProgress extends JPanel {
 		final TitledBorder warningborder = BorderFactory.createTitledBorder(
 			borderline, "Warning");
 		warningborder.setTitleColor(Color.red);
-		if (!usesTF) {
-			final JPanel note1 = new JPanel();
-			note1.setBorder(warningborder);
-			noTensorFlow.setBorder(new EmptyBorder(2, 5, 5, 5));
-			note1.add(noTensorFlow);
-			note1.setMinimumSize(new Dimension(280, 100));
-			note1.setMaximumSize(new Dimension(100000, (int) note1.getPreferredSize()
-				.getHeight()));
-			notePanel.add(note1);
-		}
+		note1 = new JPanel();
+		note1.setBorder(warningborder);
+		noTensorFlow.setBorder(new EmptyBorder(2, 5, 5, 5));
+		note1.add(noTensorFlow);
+		note1.setMinimumSize(new Dimension(280, 100));
+		note1.setMaximumSize(new Dimension(100000, (int) note1.getPreferredSize()
+			.getHeight()));
+		notePanel.add(note1);
+		note1.setVisible(false);
+
 		notePanel.add(Box.createVerticalGlue());
 
 		final JPanel topPanel = new JPanel(new BorderLayout());
@@ -306,25 +308,21 @@ public class CSBDeepProgress extends JPanel {
 		}
 	}
 
+	public void showGPUWarning() {
+		note1.setVisible(true);
+	}
+
 	public void addError(final String data) {
 		addLog(data, red);
 	}
 
 	public static CSBDeepProgress create() {
-		return create(true);
-	}
-
-	public static CSBDeepProgress createWithGPUWarning() {
-		return create(false);
-	}
-
-	private static CSBDeepProgress create(final boolean usesTF) {
 		// Create and set up the window.
 		final JFrame frame = new JFrame("CSBDeep progress");
 		// frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
 		// Create and set up the content pane.
-		final CSBDeepProgress newContentPane = new CSBDeepProgress(frame, usesTF);
+		final CSBDeepProgress newContentPane = new CSBDeepProgress(frame);
 
 		return newContentPane;
 	}

@@ -5,8 +5,6 @@ public interface TaskPresenter {
 
 	void initialize();
 
-	void initializeWithGPUWarning();
-
 	void addTask(String title);
 
 	void setTaskDone(int index);
@@ -30,4 +28,6 @@ public interface TaskPresenter {
 	void close();
 
 	void show();
+
+	void showGPUWarning();
 }
