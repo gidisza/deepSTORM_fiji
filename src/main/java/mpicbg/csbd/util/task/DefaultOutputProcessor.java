@@ -3,12 +3,16 @@ package mpicbg.csbd.util.task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.util.DatasetHelper;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.axis.Axes;
+import net.imagej.axis.CalibratedAxis;
+import net.imagej.axis.DefaultLinearAxis;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -40,22 +44,14 @@ public class DefaultOutputProcessor<T extends RealType<T> & NativeType<T>>
 		final Dataset dataset, final Network network, DatasetService datasetService)
 	{
 
-		final List<RandomAccessibleInterval<T>> splittedResult = splitByLastNodeDim(
-			result, network);
-
 		final List<Dataset> output = new ArrayList<>();
 
 		if (result != null) {
-			for (int i = 0; i < splittedResult.size() &&
-				i < OUTPUT_NAMES.length; i++)
-			{
-				log("Displaying " + OUTPUT_NAMES[i] + " image..");
-				output.add(wrapIntoDataset(OUTPUT_NAMES[i], splittedResult.get(i),
-					network, datasetService));
-			}
-			if (!output.isEmpty()) {
-				return output;
-			}
+
+			log("Displaying " + OUTPUT_NAMES[0] + " image..");
+			output.add(wrapIntoDataset(OUTPUT_NAMES[0], result,
+				network, datasetService));
+			return output;
 		}
 
 		setFailed();
@@ -118,8 +114,13 @@ public class DefaultOutputProcessor<T extends RealType<T> & NativeType<T>>
 		final Dataset dataset = datasetService.create(img);
 		dataset.setName(name);
 		for (int i = 0; i < dataset.numDimensions(); i++) {
-			dataset.setAxis(network.getInputNode().getDataset().axis(network
-				.getOutputNode().getDimType(i)).get(), i);
+			Optional<CalibratedAxis> axis = network.getInputNode().getDataset().axis(network
+					.getOutputNode().getDimType(i));
+			if( !axis.isPresent() ){
+				dataset.setAxis(new DefaultLinearAxis(Axes.CHANNEL), i);
+			}else {
+				dataset.setAxis(axis.get(), i);
+			}
 		}
 		return dataset;
 	}

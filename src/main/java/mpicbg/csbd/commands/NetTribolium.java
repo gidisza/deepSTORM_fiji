@@ -29,23 +29,28 @@
 
 package mpicbg.csbd.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.OptionalLong;
-
-import org.scijava.command.Command;
-import org.scijava.plugin.Plugin;
-
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import org.scijava.command.Command;
+import org.scijava.plugin.Plugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.OptionalLong;
 
 /**
  */
 @Plugin(type = Command.class,
 	menuPath = "Plugins>CSBDeep>Demo>3D Denoising - Tribolium", headless = true)
 public class NetTribolium extends CSBDeepCommand implements Command {
+
+//	@Parameter
+//	CommandService commandService;
+//
+//	@Parameter
+//	ModuleService moduleService;
 
 	@Override
 	public void initialize() {
@@ -72,6 +77,9 @@ public class NetTribolium extends CSBDeepCommand implements Command {
 			}
 			setMapping(mapping);
 			super.run();
+//			Future<CommandModule> resFuture = commandService.run(GenericNetwork.class, true, "input", getInput(), "modelFileUrl", modelFileUrl, "modelName", "net_tribolium");
+//			final Module module = moduleService.waitFor(resFuture);
+//			output.addAll((Collection) module.getOutput("output"));
 		}
 		catch (final IOException e) {
 			showError(e.getMessage());

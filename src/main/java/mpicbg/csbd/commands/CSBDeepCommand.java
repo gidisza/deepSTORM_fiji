@@ -41,10 +41,7 @@ import java.util.concurrent.Future;
 
 import javax.swing.*;
 
-import org.scijava.Cancelable;
-import org.scijava.Disposable;
-import org.scijava.Initializable;
-import org.scijava.ItemIO;
+import org.scijava.*;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;

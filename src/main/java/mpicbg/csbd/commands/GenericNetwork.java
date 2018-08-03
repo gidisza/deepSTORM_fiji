@@ -193,7 +193,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	@Override
 	protected void prepareInputAndNetwork() {
-		modelFileUrl = modelFile.getAbsolutePath();
+		if(modelFile != null) {
+			modelFileUrl = modelFile.getAbsolutePath();
+		}
 		modelName = cacheName;
 		super.prepareInputAndNetwork();
 		checkAndResolveDimensionReduction();
@@ -212,7 +214,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	}
 
 	private void savePreferences() {
-		prefService.put(String.class, modelFileKey, modelFile.getAbsolutePath());
+		if(modelFile != null) {
+			prefService.put(String.class, modelFileKey, modelFile.getAbsolutePath());
+		}
 	}
 
 	/**

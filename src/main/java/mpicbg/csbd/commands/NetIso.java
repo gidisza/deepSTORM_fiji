@@ -241,63 +241,42 @@ public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
 			DatasetHelper.logDim(this, "_result0", _result0);
 			DatasetHelper.logDim(this, "_result1", _result1);
 
-			final List<RandomAccessibleInterval<T>> result0 = splitByLastNodeDim(
-				_result0, network);
-			final List<RandomAccessibleInterval<T>> result1 = splitByLastNodeDim(
-				_result1, network);
+			DatasetHelper.logDim(this, "result0.get(0)", _result0);
+			DatasetHelper.logDim(this, "result1.get(0)", _result1);
 
-			DatasetHelper.logDim(this, "result0.get(0)", result0.get(0));
-			DatasetHelper.logDim(this, "result1.get(0)", result1.get(0));
+			// prediction for ZY rotation
+			RandomAccessibleInterval<T> res0_pred = _result0;
 
-			for (int i = 0; i + 1 < result0.size() && i + 1 < result1.size() && i /
-				2 < OUTPUT_NAMES.length; i += 2)
-			{
-				// prediction for ZY rotation
-				RandomAccessibleInterval<T> res0_pred = Views.stack(result0.get(i),
-					result0.get(i + 1));
+			// prediction for ZX rotation
+			RandomAccessibleInterval<T> res1_pred = _result1;
 
-				// prediction for ZX rotation
-				RandomAccessibleInterval<T> res1_pred = Views.stack(result1.get(i),
-					result1.get(i + 1));
+			DatasetHelper.logDim(this, "Output #1", res0_pred);
+			DatasetHelper.logDim(this, "Output #2", res1_pred);
 
-				DatasetHelper.logDim(this, "Output #1", res0_pred);
-				DatasetHelper.logDim(this, "Output #2", res1_pred);
+			final int dimX = dataset.dimensionIndex(Axes.X);
+			final int dimY = dataset.dimensionIndex(Axes.Y);
+			final int dimZ = dataset.dimensionIndex(Axes.Z);
 
-				// force the CHANNEL dim back to its original location
-				final int outputChannelDim = network.getOutputNode().getDataset()
-					.dimensionIndex(Axes.CHANNEL);
-				for (int dim = outputChannelDim + 1; dim < res1_pred
-					.numDimensions(); dim++)
-				{
-					res0_pred = Views.permute(res0_pred, dim, dim - 1);
-					res1_pred = Views.permute(res1_pred, dim, dim - 1);
-				}
+			// rotate output stacks back
+			res0_pred = Views.permute(res0_pred, dimX, dimZ);
+			res1_pred = Views.permute(res1_pred, dimY, dimZ);
+			res1_pred = Views.permute(res1_pred, dimX, dimZ);
 
-				final int dimX = dataset.dimensionIndex(Axes.X);
-				final int dimY = dataset.dimensionIndex(Axes.Y);
-				final int dimZ = dataset.dimensionIndex(Axes.Z);
+			DatasetHelper.logDim(this, "Output #1 (original rotation)", res0_pred);
+			DatasetHelper.logDim(this, "Output #2 (original rotation)", res1_pred);
 
-				// rotate output stacks back
-				res0_pred = Views.permute(res0_pred, dimX, dimZ);
-				res1_pred = Views.permute(res1_pred, dimY, dimZ);
-				res1_pred = Views.permute(res1_pred, dimX, dimZ);
+			log("Merge output stacks..");
 
-				DatasetHelper.logDim(this, "Output #1 (original rotation)", res0_pred);
-				DatasetHelper.logDim(this, "Output #2 (original rotation)", res1_pred);
+			// Calculate the geometric mean of the two predictions
+			// TODO check if this is right
+			final RandomAccessibleInterval<T> prediction = new CellImgFactory<>(
+				res0_pred.randomAccess().get()).create(Intervals
+					.dimensionsAsLongArray(res0_pred));
+			pointwiseGeometricMean(res0_pred, res1_pred, prediction);
+			DatasetHelper.logDim(this, "Merged output", prediction);
 
-				log("Merge output stacks..");
-
-				// Calculate the geometric mean of the two predictions
-				// TODO check if this is right
-				final RandomAccessibleInterval<T> prediction = new CellImgFactory<>(
-					res0_pred.randomAccess().get()).create(Intervals
-						.dimensionsAsLongArray(res0_pred));
-				pointwiseGeometricMean(res0_pred, res1_pred, prediction);
-				DatasetHelper.logDim(this, "Merged output", prediction);
-
-				output.add(wrapIntoDataset(OUTPUT_NAMES[i / 2], prediction, network,
-					datasetService));
-			}
+			output.add(wrapIntoDataset(OUTPUT_NAMES[0], prediction, network,
+				datasetService));
 
 			setFinished();
 
