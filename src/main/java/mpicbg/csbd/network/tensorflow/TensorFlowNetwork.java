@@ -20,7 +20,6 @@ import mpicbg.csbd.network.DefaultNetwork;
 import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
-import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.tensorflow.TensorFlowService;
 import net.imglib2.RandomAccessibleInterval;
@@ -137,7 +136,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 				DEFAULT_SERVING_SIGNATURE_DEF_KEY);
 		}
 		catch (final InvalidProtocolBufferException e) {
-			// e.printStackTrace();
+			 e.printStackTrace();
 		}
 		return true;
 	}
@@ -281,11 +280,8 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (model != null) {
-			model.close();
-		}
-		model = null;
 		sig = null;
+		model = null;
 		inputTensorInfo = null;
 		outputTensorInfo = null;
 		foundJNI = true;

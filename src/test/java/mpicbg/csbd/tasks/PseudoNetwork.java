@@ -3,10 +3,10 @@ package mpicbg.csbd.tasks;
 
 import java.io.FileNotFoundException;
 
-import mpicbg.csbd.network.ImageTensor;
 import org.scijava.io.location.Location;
 
 import mpicbg.csbd.network.DefaultNetwork;
+import mpicbg.csbd.network.ImageTensor;
 import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;

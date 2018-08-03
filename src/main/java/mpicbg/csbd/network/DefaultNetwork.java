@@ -3,7 +3,6 @@ package mpicbg.csbd.network;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -18,7 +17,6 @@ import net.imagej.axis.AxisType;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
 public abstract class DefaultNetwork<T extends RealType<T>> implements
@@ -51,7 +49,7 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	{
 
 		final Location source = IOHelper.loadFileOrURL(pathOrURL);
-		status.log("loading model " + modelName + " from source " + source
+		log("loading model " + modelName + " from source " + source
 			.getURI());
 		return loadModel(source, modelName);
 
@@ -175,12 +173,16 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	protected void log(final String text) {
 		if (status != null) {
 			status.log(text);
+		}else {
+			System.out.println("[INFO] " + text);
 		}
 	}
 
 	protected void logError(final String text) {
 		if (status != null) {
 			status.logError(text);
+		}else {
+			System.out.println("[ERROR] " + text);
 		}
 	}
 
@@ -230,7 +232,9 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	public void dispose() {
 		if (pool != null) {
 			pool.shutdown();
-			pool = null;
 		}
+		pool = null;
+		doDimensionReduction = false;
+		axisToRemove = null;
 	}
 }

@@ -36,7 +36,6 @@ import java.util.Map;
 import mpicbg.csbd.imglib2.GridView;
 import mpicbg.csbd.task.Task;
 import mpicbg.csbd.util.DatasetHelper;
-import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.FinalInterval;

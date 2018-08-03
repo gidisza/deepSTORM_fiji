@@ -29,6 +29,26 @@
 
 package mpicbg.csbd.commands;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalLong;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import javax.swing.*;
+
+import org.scijava.Cancelable;
+import org.scijava.Disposable;
+import org.scijava.Initializable;
+import org.scijava.ItemIO;
+import org.scijava.log.LogService;
+import org.scijava.plugin.Parameter;
+import org.scijava.ui.UIService;
+
 import mpicbg.csbd.network.ImageTensor;
 import mpicbg.csbd.network.Network;
 import mpicbg.csbd.network.task.*;
@@ -60,24 +80,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import org.scijava.Cancelable;
-import org.scijava.Disposable;
-import org.scijava.Initializable;
-import org.scijava.ItemIO;
-import org.scijava.log.LogService;
-import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
-
-import javax.swing.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.OptionalLong;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public abstract class CSBDeepCommand<T extends RealType<T>> implements
 	Cancelable, Initializable, Disposable
@@ -130,7 +132,7 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 	protected OutputTiler outputTiler;
 	protected OutputProcessor outputProcessor;
 
-	private boolean initialized = false;
+	protected boolean initialized = false;
 
 	private ExecutorService pool = null;
 	private Future<?> future;
@@ -160,7 +162,7 @@ public abstract class CSBDeepCommand<T extends RealType<T>> implements
 		return true;
 	}
 
-	private void initTasks() {
+	protected void initTasks() {
 		inputMapper = initInputMapper();
 		inputProcessor = initInputProcessor();
 		inputNormalizer = initInputNormalizer();

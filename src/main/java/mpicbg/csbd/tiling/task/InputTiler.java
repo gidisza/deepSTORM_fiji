@@ -6,7 +6,6 @@ import java.util.List;
 import mpicbg.csbd.task.Task;
 import mpicbg.csbd.tiling.AdvancedTiledView;
 import mpicbg.csbd.tiling.Tiling;
-import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;

@@ -1,25 +1,22 @@
 
 package mpicbg.csbd.commands;
 
-import mpicbg.csbd.CSBDeepTest;
-import net.imagej.Dataset;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
-import net.imglib2.type.numeric.real.FloatType;
-import org.junit.Test;
-import org.scijava.command.CommandModule;
-import org.scijava.module.Module;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import org.junit.Test;
+import org.scijava.command.CommandModule;
+import org.scijava.module.Module;
+
+import mpicbg.csbd.CSBDeepTest;
+import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.type.numeric.real.FloatType;
 
 public class GenericNetworksMultipleCallsTest extends CSBDeepTest {
 

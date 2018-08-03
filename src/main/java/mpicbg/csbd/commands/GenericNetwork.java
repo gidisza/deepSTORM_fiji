@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * CSBDeep: CNNs for image restoration of fluorescence microscopy.
  * %%
@@ -29,11 +29,11 @@
 
 package mpicbg.csbd.commands;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
+import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
+import mpicbg.csbd.ui.MappingDialog;
+import net.imagej.Dataset;
+import net.imagej.ImageJ;
+import net.imagej.axis.AxisType;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -41,11 +41,13 @@ import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
 import org.scijava.widget.Button;
 
-import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
-import mpicbg.csbd.ui.MappingDialog;
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
-import net.imagej.axis.AxisType;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  */
@@ -83,6 +85,9 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 
 	private boolean modelChangeCallbackCalled = false;
 
+	private ExecutorService pool = null;
+	private Future<?> modelLoadingFuture = null;
+
 	/** Executed whenever the {@link #modelFile} parameter is initialized. */
 	protected void modelInitialized() {
 		System.out.println("modelInitialized");
@@ -118,31 +123,53 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 		if(!modelChangeCallbackCalled) {
 			modelChangeCallbackCalled = true;
 			System.out.println("modelChanged");
-			if(network.isInitialized()) {
-				network.dispose();
-			}
-			if (modelFile != null) {
+			restartPool();
+			modelLoadingFuture = pool.submit(() -> {
 				updateCacheName();
 				savePreferences();
-				tryToInitialize();
+				if (initialized) {
+					network.dispose();
+				} else {
+					tryToInitialize();
+				}
 				prepareInputAndNetwork();
+				modelChangeCallbackCalled = false;
+			});
+		}
+	}
+
+	private void restartPool() {
+		if(pool != null) {
+			pool.shutdownNow();
+		}
+		pool = Executors.newSingleThreadExecutor();
+	}
+
+	private void finishModelLoading() {
+		if(modelLoadingFuture != null) {
+			try {
+				modelLoadingFuture.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
 			}
-			modelChangeCallbackCalled = false;
+		}
+		if(pool != null) {
+			pool.shutdown();
+			pool = null;
 		}
 	}
 
 	protected void openTFMappingDialog() {
 		System.out.println("openTFMappingDialog");
-//		updateCacheName();
-//		savePreferences();
-//		tryToInitialize();
-//		prepareInputAndNetwork();
-//		System.out.println("prepared network");
+		finishModelLoading();
 		MappingDialog.create(network.getInputNode(), network.getOutputNode());
 	}
 
 	@Override
 	public void run() {
+		finishModelLoading();
 		updateCacheName();
 		savePreferences();
 		tryToInitialize();
@@ -172,7 +199,8 @@ public class GenericNetwork extends CSBDeepCommand implements Command {
 	}
 
 	private void checkAndResolveDimensionReduction() {
-		for (AxisType axis : network.getInputNode().getNodeAxes()) {
+		for (int i = 0; i < getInput().numDimensions(); i++) {
+			AxisType axis = getInput().axis(i).type();
 			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
 				// log("Network input node axis " + axis.getLabel() + " not present in
 				// output node, will be reduced");
