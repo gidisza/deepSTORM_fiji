@@ -1,15 +1,10 @@
 package mpicbg.csbd.network;
 
-import mpicbg.csbd.network.tensorflow.TensorFlowNetwork;
-import net.imagej.ImageJ;
 import org.junit.Test;
 
+import net.imagej.ImageJ;
+
 public class TensorflowTest {
-
-    @Test
-    public void testNetworkAndModelLoader() {
-
-    }
 
     @Test
     public void testTensorflowService() {

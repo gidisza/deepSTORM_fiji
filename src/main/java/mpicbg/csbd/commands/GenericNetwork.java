@@ -29,18 +29,6 @@
 
 package mpicbg.csbd.commands;
 
-import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
-import mpicbg.csbd.ui.MappingDialog;
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
-import net.imagej.axis.AxisType;
-import org.scijava.ItemVisibility;
-import org.scijava.command.Command;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.prefs.PrefService;
-import org.scijava.widget.Button;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,6 +36,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.scijava.ItemVisibility;
+import org.scijava.command.Command;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.prefs.PrefService;
+import org.scijava.widget.Button;
+
+import mpicbg.csbd.normalize.task.DefaultInputNormalizer;
+import mpicbg.csbd.ui.MappingDialog;
+import net.imagej.Dataset;
+import net.imagej.ImageJ;
+import net.imagej.axis.AxisType;
 
 /**
  */
