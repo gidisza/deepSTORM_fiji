@@ -7,7 +7,7 @@
 # @Boolean(label="Normalize input", required=false, value=true) normalizeInput
 # @Float(label="Bottom percentile", required=false, value=0.03, stepSize=0.001) percentileBottom
 # @Float(label="Top percentile", required=false, value=0.998, stepSize=0.001) percentileTop
-# @Boolean(label="Clamp", required=false, value=false) clamp
+# @Boolean(label="Clip", required=false, value=false) clip
 # @DatasetIOService io
 # @CommandService command
 # @ModuleService module
@@ -30,9 +30,8 @@ def runNetwork(inputPath, outputPath):
 		"normalizeInput", normalizeInput,
 		"percentileBottom", percentileBottom,
 		"percentileTop", percentileTop,
-		"clamp", clamp,
-		"modelFile", modelFile,
-		"_modelName", _modelName))
+		"clip", clip,
+		"modelFile", modelFile))
 	mymod = module.waitFor(future)
 	myoutput = mymod.getOutput("output")
 	print(future)
@@ -41,7 +40,6 @@ def runNetwork(inputPath, outputPath):
 	imp = myoutput[0]
 	print(imp)
 	io.save(imp, outputPath);
-	#print("[ERROR] could not save file to", outputPath)
 
 if(input.endswith(".tif")):
 	if(output.endswith(".tif")):
@@ -59,7 +57,7 @@ else:
 	if not(input.endswith("/")):
 		input += "/"
 	if(output == input):
-		print("ERROR: plase provide an output directory that is not the same as the input directory")
+		print("ERROR: please provide an output directory that is not the same as the input directory")
 		sys.exit()
 	directory = File(input);
 	listOfFilesInFolder = directory.listFiles();
