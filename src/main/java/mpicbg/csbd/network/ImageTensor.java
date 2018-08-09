@@ -68,8 +68,12 @@ public class ImageTensor {
 		return name;
 	}
 
-	public int[] getMapping() {
+	public int[] getMappingIndices() {
 		return ArrayHelper.toIntArray(finalMapping);
+	}
+
+	public AxisType[] getMapping() {
+		return nodeAxes.toArray(new AxisType[0]);
 	}
 
 	public void generateMapping() {

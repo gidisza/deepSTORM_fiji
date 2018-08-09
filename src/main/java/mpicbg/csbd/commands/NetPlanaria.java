@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.OptionalLong;
 
+import mpicbg.csbd.util.DatasetHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
@@ -45,23 +46,15 @@ import net.imagej.axis.AxisType;
  */
 @Plugin(type = Command.class,
 	menuPath = "Plugins>CSBDeep>Demo>3D Denoising - Planaria", headless = true)
-public class NetPlanaria extends CSBDeepCommand implements Command {
+public class NetPlanaria extends GenericNetwork implements Command {
 
-	@Override
-	public void initialize() {
-
-		super.initialize();
-
-		modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-planaria.zip";
-		modelName = "net_planaria";
-
-	}
+	private String modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-planaria.zip";
 
 	@Override
 	public void run() {
 		try {
 			tryToInitialize();
-			validateInput(getInput(), "3D grayscale image with dimension order X-Y-Z",
+			DatasetHelper.validate(getInput(), "3D grayscale image with dimension order X-Y-Z",
 				OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
 
 			final AxisType[] mapping = { Axes.TIME, Axes.Z, Axes.Y, Axes.X,

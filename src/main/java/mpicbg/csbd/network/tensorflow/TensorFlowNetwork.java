@@ -198,7 +198,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		}
 	}
 
-	private <T> Dataset createEmptyDuplicateWithoutAxis(final Dataset input,
+	private Dataset createEmptyDuplicateWithoutAxis(final Dataset input,
 		final AxisType axisToRemove)
 	{
 		int numDims = input.numDimensions();
@@ -228,7 +228,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	{
 
 		final Tensor inputTensor = DatasetTensorflowConverter.datasetToTensor(tile,
-			getInputNode().getMapping());
+			getInputNode().getMappingIndices());
 		if (inputTensor != null) {
 			RandomAccessibleInterval<T> output = null;
 			Tensor outputTensor = TensorFlowRunner.executeGraph(model, inputTensor,
@@ -236,7 +236,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 
 			if (outputTensor != null) {
 				output = DatasetTensorflowConverter.tensorToDataset(outputTensor, tile
-					.randomAccess().get(), getOutputNode().getMapping(),
+					.randomAccess().get(), getOutputNode().getMappingIndices(),
 					dropSingletonDims);
 				outputTensor.close();
 			}

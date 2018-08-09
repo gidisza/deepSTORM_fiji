@@ -82,7 +82,7 @@ import net.imglib2.view.Views;
 @Plugin(type = Command.class,
 	menuPath = "Plugins>CSBDeep>Demo>Isotropic Reconstruction - Retina",
 	headless = true)
-public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
+public class NetIso<T extends RealType<T>> extends GenericNetwork implements
 	Command
 {
 
@@ -94,15 +94,7 @@ public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
 
 	final ExecutorService pool = Executors.newWorkStealingPool();
 
-	@Override
-	public void initialize() {
-
-		super.initialize();
-
-		modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-iso.zip";
-		modelName = "net_iso";
-
-	}
+	private String modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-iso.zip";
 
 	@Override
 	protected void initTiling() {
@@ -194,7 +186,7 @@ public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
 	public void run() {
 		try {
 			tryToInitialize();
-			validateInput(getInput(),
+			DatasetHelper.validate(getInput(),
 				"4D image with dimension order X-Y-C-Z and two channels", OptionalLong
 					.empty(), OptionalLong.empty(), OptionalLong.of(2), OptionalLong
 						.empty());
@@ -211,15 +203,6 @@ public class NetIso<T extends RealType<T>> extends CSBDeepCommand implements
 	public void dispose() {
 		super.dispose();
 		pool.shutdown();
-	}
-
-	@Override
-	protected boolean handleOutOfMemoryError() {
-		batchSize /= 2;
-		if (batchSize < 1) {
-			return false;
-		}
-		return true;
 	}
 
 	private class IsoOutputProcessor<T extends RealType<T> & NativeType<T>>

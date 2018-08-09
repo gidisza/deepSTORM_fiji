@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.OptionalLong;
 
+import mpicbg.csbd.util.DatasetHelper;
 import org.scijava.command.Command;
 import org.scijava.plugin.Plugin;
 
@@ -44,24 +45,16 @@ import net.imagej.axis.Axes;
  */
 @Plugin(type = Command.class,
 	menuPath = "Plugins>CSBDeep>Demo>Surface Projection - Flywing", headless = true)
-public class NetProject extends CSBDeepCommand implements Command {
+public class NetProject extends GenericNetwork implements Command {
 
-	@Override
-	public void initialize() {
-
-		super.initialize();
-
-		modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-project.zip";
-		modelName = "net_project";
-
-	}
+	String modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-project.zip";
 
 	@Override
 	public void run() {
 		tryToInitialize();
 		network.setDoDimensionReduction(true, Axes.Z);
 		try {
-			validateInput(getInput(), "3D grayscale image with dimension order X-Y-Z",
+			DatasetHelper.validate(getInput(), "3D grayscale image with dimension order X-Y-Z",
 				OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
 			super.run();
 		}

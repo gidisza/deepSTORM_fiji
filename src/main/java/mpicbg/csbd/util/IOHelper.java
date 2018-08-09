@@ -3,12 +3,16 @@ package mpicbg.csbd.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.scijava.io.http.HTTPLocation;
 import org.scijava.io.location.FileLocation;
 import org.scijava.io.location.Location;
+import org.scijava.module.MethodCallException;
 
 public class IOHelper {
 
@@ -33,6 +37,18 @@ public class IOHelper {
 		}
 		return source;
 
+	}
+
+	public static boolean urlExists(String url) {
+		HttpURLConnection.setFollowRedirects(false);
+		HttpURLConnection con = null;
+		try {
+			con = (HttpURLConnection) new URL(url).openConnection();
+			con.setRequestMethod("HEAD");
+			return con.getResponseCode() == HttpURLConnection.HTTP_OK;
+		} catch (IOException | IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 }

@@ -47,7 +47,7 @@ import net.imglib2.view.Views;
 
 public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 
-	protected final int tilesNum;
+	protected int tilesNum;
 	protected int batchSize;
 	protected int blockMultiple;
 	protected int overlap;
@@ -77,6 +77,11 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 			long[] tiling = new long[input.numDimensions()];
 			Arrays.fill(tiling, 1);
 			computeTiling(input, tiling, tilingActions);
+			int currentTiles = 1;
+			for (long tiles : tiling) {
+				currentTiles *= tiles;
+			}
+			tilesNum = currentTiles;
 			long[] padding = getPadding(tiling);
 			computeBatching(input, tiling, tilingActions);
 			parent.log("Dividing image into " + arrayProduct(tiling) + " tile(s)..");
@@ -286,6 +291,11 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 
 		parent.setFailed();
 		return null;
+	}
+
+	@Override
+	public int getTilesNum() {
+		return 0;
 	}
 
 	protected RandomAccessibleInterval<T> removePadding(
