@@ -57,7 +57,7 @@ import net.imagej.axis.AxisType;
 	menuPath = "Plugins>CSBDeep>Demo>Deconvolution - Microtubules", headless = true)
 public class NetTubulin implements Command {
 
-	@Parameter(type = ItemIO.INPUT, initializer = "processDataset")
+	@Parameter(type = ItemIO.INPUT)
 	public Dataset input;
 
 	@Parameter(type = ItemIO.OUTPUT)

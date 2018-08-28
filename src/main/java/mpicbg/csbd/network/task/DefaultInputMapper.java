@@ -8,13 +8,23 @@ import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultInputMapper extends DefaultTask implements InputMapper {
 
 	protected AxisType[] mapping = null;
 
-	private Map<Character, AxisType> axesMap = Map.of('X', Axes.X, 'Y', Axes.Y, 'Z', Axes.Z, 'T', Axes.TIME, 'C', Axes.CHANNEL);
+	private Map<Character, AxisType> axesMap = Collections.unmodifiableMap(new HashMap<Character, AxisType>() {
+		{
+			put('X', Axes.X);
+			put('Y', Axes.Y);
+			put('Z', Axes.Z);
+			put('T', Axes.TIME);
+			put('C', Axes.CHANNEL);
+		}
+	});
 
 	@Override
 	public void setMapping(final AxisType[] mapping) {

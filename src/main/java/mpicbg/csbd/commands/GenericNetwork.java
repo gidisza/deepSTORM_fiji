@@ -76,7 +76,16 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -114,6 +123,10 @@ public class GenericNetwork implements
 
 	@Parameter(label = "Batch size", min = "1")
 	protected int batchSize = 1;
+
+	public enum NetworkInputSourceType { UNSET, FILE, URL }
+	
+	private NetworkInputSourceType networkInputSourceType = NetworkInputSourceType.UNSET;
 
 	@Parameter(label = "Import model (.zip)", callback = "modelFileChanged",
 			initializer = "modelFileInitialized", persist = false, required = false)
@@ -174,7 +187,7 @@ public class GenericNetwork implements
 
 	protected String cacheName;
 	protected String modelFileKey;
-	private String modelFileUrl;
+	private String modelFileUrl = "";
 
 	private boolean modelChangeCallbackCalled = false;
 
@@ -190,34 +203,54 @@ public class GenericNetwork implements
 	/** Executed whenever the {@link #modelFile} parameter is initialized. */
 	protected void modelFileInitialized() {
 		final String p_modelfile = prefService.get(String.class, modelFileKey, "");
-		if (p_modelfile != "") {
+		if (!p_modelfile.isEmpty()) {
 			modelFile = new File(p_modelfile);
-			if(modelFile != null) {
+			if(modelFile.exists()) {
 				modelFileChanged();
 			}
 		}
 	}
 
 	private void updateCacheName() {
-		if(modelFile != null) {
-			try {
-				FileInputStream fis = new FileInputStream(modelFile);
-				String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-				cacheName = this.getClass().getSimpleName() + "_" + md5;
-				savePreferences();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		switch(networkInputSourceType) {
+			case UNSET:
+			default:
+				break;
+			case FILE:
+				try {
+					FileInputStream fis = new FileInputStream(modelFile);
+					String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+					cacheName = this.getClass().getSimpleName() + "_" + md5;
+					savePreferences();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				break;
+			case URL:
+				try {
+					URL url = new URL(modelUrl);
+					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+					Long dateTime = connection.getLastModified();
+					connection.disconnect();
+					ZonedDateTime urlLastModified = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of("GMT"));
+
+					cacheName = this.getClass().getSimpleName()
+							+ "_" + url.getPath().replace(".zip", "").replace("/", "")
+							+ "_" + DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss").format(urlLastModified);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				break;
 		}
 	}
 
 	protected void modelFileChanged() {
 		if(!modelChangeCallbackCalled) {
 			modelChangeCallbackCalled = true;
-			modelUrl = null;
 			if (modelFile != null && modelFile.exists()) {
+				modelUrl = null;
+				networkInputSourceType = NetworkInputSourceType.FILE;
 				modelFileUrl = modelFile.getAbsolutePath();
-				updateCacheName();
 				modelChanged();
 			}else {
 				modelChangeCallbackCalled = false;
@@ -228,9 +261,10 @@ public class GenericNetwork implements
 	protected void modelUrlChanged() {
 		if(!modelChangeCallbackCalled) {
 			modelChangeCallbackCalled = true;
-			modelFile = null;
-			if(modelUrl.length() > new String("https://").length()) {
+			if(modelUrl != null && modelUrl.length() > new String("https://").length()) {
 				if (IOHelper.urlExists(modelUrl)) {
+					modelFile = null;
+					networkInputSourceType = NetworkInputSourceType.URL;
 					modelFileUrl = modelUrl;
 					modelChanged();
 					return;
@@ -242,6 +276,7 @@ public class GenericNetwork implements
 
 	protected void modelChanged() {
 		System.out.println("modelChanged");
+		updateCacheName();
 		restartPool();
 		modelLoadingFuture = modelLoadingPool.submit(() -> {
 			savePreferences();
@@ -266,9 +301,7 @@ public class GenericNetwork implements
 		if(modelLoadingFuture != null) {
 			try {
 				modelLoadingFuture.get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
@@ -366,65 +399,62 @@ public class GenericNetwork implements
 
 		pool = Executors.newSingleThreadExecutor();
 
-		future = pool.submit(() -> {
-
-			updateCacheName();
-			savePreferences();
-			tryToInitialize();
-
-			taskManager.finalizeSetup();
-
-			prepareInputAndNetwork();
-
-			//find out what to do about different dimensions
-//			checkAndResolveDimensionReduction();
-
-			final Dataset normalizedInput;
-			if (doInputNormalization()) {
-				setupNormalizer();
-				normalizedInput = inputNormalizer.run(getInput(), opService,
-						datasetService);
-			} else {
-				normalizedInput = getInput();
-			}
-
-			final List<RandomAccessibleInterval> processedInput = inputProcessor.run(
-					normalizedInput);
-
-			log("INPUT NODE: ");
-			network.getInputNode().printMapping();
-			log("OUTPUT NODE: ");
-			network.getOutputNode().printMapping();
-
-			initTiling();
-			try {
-				final List<AdvancedTiledView<FloatType>> tiledOutput =
-						tryToTileAndRunNetwork(processedInput);
-				if(tiledOutput != null) {
-					final List<RandomAccessibleInterval<FloatType>> output = outputTiler.run(
-							tiledOutput, tiling, getAxesArray(network.getOutputNode()));
-					for (AdvancedTiledView obj : tiledOutput) {
-						obj.dispose();
-					}
-					this.output.clear();
-					this.output.addAll(outputProcessor.run(output, getInput(), network,
-							datasetService));
-				}
-			} catch (OutOfMemoryError e) {
-				e.printStackTrace();
-			}
-
-		});
-
 		try {
+
+			future = pool.submit(this::mainThread);
 			if(future != null) future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
+
+		} catch (OutOfMemoryError | InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 
 		dispose();
+
+	}
+
+	protected void mainThread() throws OutOfMemoryError {
+
+		updateCacheName();
+		savePreferences();
+		tryToInitialize();
+
+		taskManager.finalizeSetup();
+
+		prepareInputAndNetwork();
+
+		//find out what to do about different dimensions
+//			checkAndResolveDimensionReduction();
+
+		final Dataset normalizedInput;
+		if (doInputNormalization()) {
+			setupNormalizer();
+			normalizedInput = inputNormalizer.run(getInput(), opService,
+					datasetService);
+		} else {
+			normalizedInput = getInput();
+		}
+
+		final List<RandomAccessibleInterval> processedInput = inputProcessor.run(
+				normalizedInput);
+
+		log("INPUT NODE: ");
+		network.getInputNode().printMapping();
+		log("OUTPUT NODE: ");
+		network.getOutputNode().printMapping();
+
+		initTiling();
+		final List<AdvancedTiledView<FloatType>> tiledOutput =
+				tryToTileAndRunNetwork(processedInput);
+		if(tiledOutput != null) {
+			final List<RandomAccessibleInterval<FloatType>> output = outputTiler.run(
+					tiledOutput, tiling, getAxesArray(network.getOutputNode()));
+			for (AdvancedTiledView obj : tiledOutput) {
+				obj.dispose();
+			}
+			this.output.clear();
+			this.output.addAll(outputProcessor.run(output, getInput(), network,
+					datasetService));
+		}
 
 	}
 
@@ -440,9 +470,9 @@ public class GenericNetwork implements
 
 	protected void prepareInputAndNetwork() {
 
-		if(modelFile != null) {
-			modelFileUrl = modelFile.getAbsolutePath();
-		}
+		if(modelFileUrl.isEmpty()) modelFileChanged();
+		if(modelFileUrl.isEmpty()) modelUrlChanged();
+
 		modelName = cacheName;
 		modelLoader.run(modelName, network, modelFileUrl, inputNodeName,
 			outputNodeName, getInput());

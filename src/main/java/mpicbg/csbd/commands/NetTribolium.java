@@ -54,7 +54,7 @@ import java.util.concurrent.Future;
 	menuPath = "Plugins>CSBDeep>Demo>3D Denoising - Tribolium", headless = true)
 public class NetTribolium implements Command {
 
-	@Parameter(type = ItemIO.INPUT, initializer = "processDataset")
+	@Parameter(type = ItemIO.INPUT)
 	public Dataset input;
 
 	@Parameter(type = ItemIO.OUTPUT)
@@ -66,7 +66,7 @@ public class NetTribolium implements Command {
 	@Parameter
 	ModuleService moduleService;
 
-	String modelFileUrl = "http://csbdeep.bioimagecomputing.com/model-tribolium.zip";
+	private String modelUrl = "http://csbdeep.bioimagecomputing.com/model-tribolium.zip";
 
 	@Override
 	public void run() {
@@ -83,9 +83,9 @@ public class NetTribolium implements Command {
 //			}
 //			setMapping(mapping);
 			Future<CommandModule> resFuture = commandService.run(
-					GenericNetwork.class, true,
+					GenericNetwork.class, false,
 					"input", input,
-					"modelFileUrl", modelFileUrl);
+					"modelUrl", modelUrl);
 			final CommandModule module = moduleService.waitFor(resFuture);
 			output.addAll((Collection) module.getOutput("output"));
 		}

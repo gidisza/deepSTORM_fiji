@@ -53,8 +53,11 @@ public class DatasetHelper {
 		final OptionalLong... expectedDims) throws IOException
 	{
 		if (dataset.numDimensions() != expectedDims.length) {
-			throw new IOException("Can not process " + dataset.numDimensions() +
-				"D images.\nExpected format: " + formatDesc);
+			//TODO ugly check if dataset has channel, if it does, ignore it for the dimension check.. fix this
+			if (!(dataset.axis(Axes.CHANNEL).isPresent() && dataset.numDimensions()-1 == expectedDims.length)) {
+				throw new IOException("Can not process " + dataset.numDimensions() +
+						"D images.\nExpected format: " + formatDesc);
+			}
 		}
 		for (int i = 0; i < expectedDims.length; i++) {
 			if (expectedDims[i].isPresent() && expectedDims[i].getAsLong() != dataset
