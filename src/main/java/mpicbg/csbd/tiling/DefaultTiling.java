@@ -77,11 +77,7 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 			long[] tiling = new long[input.numDimensions()];
 			Arrays.fill(tiling, 1);
 			computeTiling(input, tiling, tilingActions);
-			int currentTiles = 1;
-			for (long tiles : tiling) {
-				currentTiles *= tiles;
-			}
-			tilesNum = currentTiles;
+			tilesNum = (int) arrayProduct(tiling);
 			long[] padding = getPadding(tiling);
 			computeBatching(input, tiling, tilingActions);
 			parent.log("Dividing image into " + arrayProduct(tiling) + " tile(s)..");
@@ -93,8 +89,7 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 
 			parent.log("Size of single image tile: " + Arrays.toString(tileSize));
 
-			final AdvancedTiledView<T> tiledView = createTiledView(parent,
-				expandedInput, tileSize, padding, axes, tilingActions);
+			final AdvancedTiledView<T> tiledView = createTiledView(expandedInput, tileSize, padding, axes, tilingActions);
 			for (int i = 0; i < input.numDimensions(); i++) {
 				tiledView.getOriginalDims().put(axes[i], input.dimension(
 					i));
@@ -227,8 +222,7 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 		return tileSize;
 	}
 
-	protected AdvancedTiledView<T> createTiledView(Task parent,
-		RandomAccessibleInterval<T> input, long[] tileSize, long[] padding,
+	protected AdvancedTiledView<T> createTiledView(RandomAccessibleInterval<T> input, long[] tileSize, long[] padding,
 		AxisType[] types, TilingAction[] tilingActions)
 	{
 		return new AdvancedTiledView<>(input, tileSize, padding, types,
@@ -295,7 +289,7 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 
 	@Override
 	public int getTilesNum() {
-		return 0;
+		return tilesNum;
 	}
 
 	protected RandomAccessibleInterval<T> removePadding(

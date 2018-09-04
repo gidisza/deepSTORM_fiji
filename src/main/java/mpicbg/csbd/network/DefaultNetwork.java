@@ -24,12 +24,12 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 {
 
 	protected Task status;
-	protected ImageTensor inputNode;
-	protected ImageTensor outputNode;
+	protected ImageTensor inputNode = null;
+	protected ImageTensor outputNode = null;
 	protected TiledView<T> tiledView;
 	protected boolean supportsGPU = false;
 	protected Integer doneTileCount;
-	protected boolean dropSingletonDims = true;
+	protected boolean dropSingletonDims = false;
 	protected boolean doDimensionReduction = false;
 	protected AxisType axisToRemove;
 	ExecutorService pool;
@@ -136,16 +136,15 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	}
 
 	@Override
-	public void loadInputNode(final String defaultName, final Dataset dataset) {
+	public void loadInputNode(final Dataset dataset) {
 		inputNode = new ImageTensor();
 		inputNode.initialize(dataset);
-		inputNode.setName(defaultName);
 	}
 
 	@Override
-	public void loadOutputNode(final String defaultName) {
+	public void loadOutputNode(Dataset dataset) {
 		outputNode = new ImageTensor();
-		outputNode.setName(defaultName);
+		outputNode.initialize(dataset);
 	}
 
 	@Override

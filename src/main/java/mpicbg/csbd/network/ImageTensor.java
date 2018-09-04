@@ -4,7 +4,9 @@ package mpicbg.csbd.network;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
+import mpicbg.csbd.task.Task;
 import mpicbg.csbd.util.ArrayHelper;
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
@@ -24,25 +26,23 @@ public class ImageTensor {
 	private long[] nodeShape;
 	private final List<Integer> finalMapping = new ArrayList<>();
 	private Dataset dataset;
-	private boolean mappingInitialized = false;
-	private boolean reducedZ = false;
+	private boolean mappingInitialized;
+	private boolean reducedAxis = false;
 
 	public ImageTensor() {
-
+		mappingInitialized = false;
 	}
 
 	public void initialize(final Dataset dataset) {
 		this.dataset = dataset;
-		final long[] dims = new long[dataset.numDimensions()];
-		dataset.dimensions(dims);
 	}
 
 	public void setNodeShape(final long[] shape) {
 
 		nodeShape = shape;
-		while (nodeAxes.size() > nodeShape.length) {
-			nodeAxes.remove(nodeAxes.size() - 1);
-		}
+//		while (nodeAxes.size() > nodeShape.length) {
+//			nodeAxes.remove(nodeAxes.size() - 1);
+//		}
 	}
 
 	public void initializeNodeMapping() {
@@ -80,12 +80,12 @@ public class ImageTensor {
 
 		finalMapping.clear();
 
-		for (int i = 0; i < nodeShape.length; i++) {
+		for (int i = 0; i < dataset.numDimensions(); i++) {
 			finalMapping.add(getNodeDimByDatasetDim(i));
 		}
 
 		// if a dimension is not set, assign an unused dimension
-		ArrayHelper.replaceNegativeIndicesWithUnusedIndices(finalMapping);
+//		ArrayHelper.replaceNegativeIndicesWithUnusedIndices(finalMapping);
 	}
 
 	public AxisType getDimType(final int dim) {
@@ -99,14 +99,7 @@ public class ImageTensor {
 		return dataset;
 	}
 
-	public void initMapping() {
-		if (!isMappingInitialized()) {
-			setMappingDefaults();
-		}
-	}
-
 	public void setMappingDefaults() {
-		setMappingInitialized(true);
 		final int tensorDimCount = nodeShape.length;
 		if (tensorDimCount == 5) {
 			setNodeAxis(0, Axes.TIME);
@@ -119,24 +112,12 @@ public class ImageTensor {
 			if (tensorDimCount == 4) {
 				setNodeAxis(1, Axes.Y);
 				setNodeAxis(2, Axes.X);
-				if (dataset.dimension(Axes.Z) > 1) {
+				setNodeAxis(3, Axes.CHANNEL);
+				if (dataset != null && dataset.dimension(Axes.Z) > 1) {
 					setNodeAxis(0, Axes.Z);
-					if (dataset.dimension(Axes.CHANNEL) > 1) {
-						setNodeAxis(3, Axes.CHANNEL);
-					}
-					else {
-						setNodeAxis(3, Axes.TIME);
-					}
 				}
 				else {
-					if (dataset.dimension(Axes.CHANNEL) > 1) {
-						setNodeAxis(0, Axes.CHANNEL);
-						setNodeAxis(3, Axes.TIME);
-					}
-					else {
-						setNodeAxis(0, Axes.TIME);
-						setNodeAxis(3, Axes.CHANNEL);
-					}
+					setNodeAxis(0, Axes.TIME);
 				}
 			}
 		}
@@ -151,24 +132,9 @@ public class ImageTensor {
 		return dataset.numDimensions();
 	}
 
-//	public long getDatasetDimSize(final int knownAxesIndex) {
-//		if (availableAxes.length > knownAxesIndex) {
-//			return dataset.dimension(dataset.dimensionIndex(
-//				availableAxes[knownAxesIndex]));
-//		}
-//		return 1;
-//	}
-
 	public String getDatasetDimName(final AxisType axis) {
 		return axis.getLabel().substring(0, 1);
 	}
-
-//	public String getDatasetDimName(final int knownAxesIndex) {
-//		if (availableAxes.length > knownAxesIndex) {
-//			return getDatasetDimName(availableAxes[knownAxesIndex]);
-//		}
-//		return "not found";
-//	}
 
 	public String getDatasetDimName(final int datasetAxisIndex) {
 		if (dataset.numDimensions() > datasetAxisIndex) {
@@ -179,35 +145,32 @@ public class ImageTensor {
 
 	public boolean removeAxisFromMapping(final AxisType axisToRemove) {
 		System.out.println("REMOVING " + axisToRemove.getLabel());
-		if (!reducedZ) {
+		if (!reducedAxis) {
 			if (nodeAxes.contains(axisToRemove)) {
 				nodeAxes.remove(axisToRemove);
-				reducedZ = true;
+				reducedAxis = true;
 			}
 			printMapping();
 		}
-		return reducedZ;
-	}
-
-	public void setMappingInitialized(final boolean mappingInitialized) {
-		this.mappingInitialized = mappingInitialized;
-	}
-
-	public boolean isMappingInitialized() {
-		return mappingInitialized;
+		return reducedAxis;
 	}
 
 	public void printMapping() {
+		printMapping(null);
+	}
+
+	public void printMapping(Task task) {
+		Consumer<String> logFunction = System.out::println;
+		if(task != null) logFunction = task::log;
 		if (dataset != null) {
 			final AxisType[] axes = new AxisType[dataset.numDimensions()];
 			for (int i = 0; i < dataset.numDimensions(); i++) {
 				axes[i] = dataset.axis(i).type();
 			}
-			System.out.println("datasetAxes:" + Arrays.toString(axes));
+			logFunction.accept("   datasetAxes:" + Arrays.toString(axes));
 		}
-		System.out.println("nodeAxes:" + nodeAxes.toString());
-		System.out.println("mapping:" + finalMapping.toString());
-		System.out.println("--------------");
+		logFunction.accept("   nodeAxes:" + nodeAxes.toString());
+		logFunction.accept("   mapping:" + finalMapping.toString());
 	}
 
 	public Long getDatasetDimSizeByNodeDim(final int nodeDim) {
@@ -268,7 +231,6 @@ public class ImageTensor {
 	}
 
 	public void setMapping(final AxisType[] newmapping) {
-		setMappingInitialized(true);
 		nodeAxes.clear();
 		for (int i = 0; i < newmapping.length; i++) {
 			nodeAxes.add(newmapping[i]);

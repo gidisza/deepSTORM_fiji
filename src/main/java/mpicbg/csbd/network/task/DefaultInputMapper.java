@@ -42,13 +42,18 @@ public class DefaultInputMapper extends DefaultTask implements InputMapper {
 			network.initMapping();
 		}
 
-		if (network.getInputNode() != null) {
-			if(mapping != null) {
-				network.getInputNode().setMapping(mapping);
-			}else {
-				mapping = network.getInputNode().getMapping();
-			}
-		}
+//		if (network.getInputNode() != null) {
+//			if(mapping != null) {
+//				//TODO
+//				// network input and output have default dimension reduction.
+//				// if the mapping is set to something different for the input, make sure to remove the same dimension slots
+//				network.getInputNode().setMapping(mapping);
+//			}else {
+//				mapping = network.getInputNode().getMapping();
+//			}
+//		}
+
+		mapping = network.getInputNode().getMapping();
 
 		setFinished();
 

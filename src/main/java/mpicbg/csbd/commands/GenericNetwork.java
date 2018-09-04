@@ -78,7 +78,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -162,8 +161,6 @@ public class GenericNetwork implements
 	private PrefService prefService;
 
 	protected String modelName;
-	protected String inputNodeName = "input";
-	protected String outputNodeName = "output";
 	protected int blockMultiple = 8;
 
 	protected TaskManager taskManager;
@@ -193,6 +190,9 @@ public class GenericNetwork implements
 
 	private ExecutorService modelLoadingPool = null;
 	private Future<?> modelLoadingFuture = null;
+
+	private int oldNTiles;
+	private int oldBatchesSize;
 
 	protected void openTFMappingDialog() {
 		System.out.println("openTFMappingDialog");
@@ -393,6 +393,10 @@ public class GenericNetwork implements
 		return new DefaultOutputProcessor();
 	}
 
+	protected void initTiling() {
+		tiling = new DefaultTiling(nTiles, batchSize, blockMultiple, overlap);
+	}
+
 	public void run() {
 
 		if (noInputData()) return;
@@ -422,9 +426,6 @@ public class GenericNetwork implements
 
 		prepareInputAndNetwork();
 
-		//find out what to do about different dimensions
-//			checkAndResolveDimensionReduction();
-
 		final Dataset normalizedInput;
 		if (doInputNormalization()) {
 			setupNormalizer();
@@ -438,9 +439,9 @@ public class GenericNetwork implements
 				normalizedInput);
 
 		log("INPUT NODE: ");
-		network.getInputNode().printMapping();
+		network.getInputNode().printMapping(inputProcessor);
 		log("OUTPUT NODE: ");
-		network.getOutputNode().printMapping();
+		network.getOutputNode().printMapping(inputProcessor);
 
 		initTiling();
 		final List<AdvancedTiledView<FloatType>> tiledOutput =
@@ -474,15 +475,13 @@ public class GenericNetwork implements
 		if(modelFileUrl.isEmpty()) modelUrlChanged();
 
 		modelName = cacheName;
-		modelLoader.run(modelName, network, modelFileUrl, inputNodeName,
-			outputNodeName, getInput());
+		modelLoader.run(modelName, network, modelFileUrl, getInput());
 		inputMapper.run(getInput(), network);
 		checkAndResolveDimensionReduction();
 	}
 
 	private void checkAndResolveDimensionReduction() {
-		for (int i = 0; i < getInput().numDimensions(); i++) {
-			AxisType axis = getInput().axis(i).type();
+		for (AxisType axis : network.getInputNode().getNodeAxes()) {
 			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
 				// log("Network input node axis " + axis.getLabel() + " not present in
 				// output node, will be reduced");
@@ -531,10 +530,6 @@ public class GenericNetwork implements
 		return res;
 	}
 
-	protected void initTiling() {
-		tiling = new DefaultTiling(nTiles, batchSize, blockMultiple, overlap);
-	}
-
 	private List<AdvancedTiledView<FloatType>> tryToTileAndRunNetwork(
 		final List<RandomAccessibleInterval> normalizedInput)
 		throws OutOfMemoryError
@@ -568,10 +563,14 @@ public class GenericNetwork implements
 	}
 
 	private AxisType[] getAxesArray(Dataset input) {
-		AxisType[] res = new AxisType[input.numDimensions()];
+		boolean hasChannel = input.axis(Axes.CHANNEL).isPresent();
+		int numDim = input.numDimensions();
+		if(!hasChannel) numDim++;
+		AxisType[] res = new AxisType[numDim];
 		for (int i = 0; i < input.numDimensions(); i++) {
 			res[i] = input.axis(i).type();
 		}
+		if(!hasChannel) res[res.length-1] = Axes.CHANNEL;
 		return res;
 	}
 
@@ -603,22 +602,22 @@ public class GenericNetwork implements
 	private boolean tryHandleOutOfMemoryError() {
 		// We expect it to be an out of memory exception and
 		// try it again with more tiles or smaller batches.
+		//TODO this needs a test
 		final Task modelExecutorTask = modelExecutor;
 		nTiles = tiling.getTilesNum();
-		int oldNTiles = nTiles;
-		int oldBatchesSize = batchSize;
-
-		handleOutOfMemoryError();
-		modelExecutorTask.logError(
-			"Out of memory exception occurred. Trying with " + nTiles +
-				" tiles, batch size " + batchSize + " and overlap " + overlap + "...");
-		initTiling();
-		nTiles = tiling.getTilesNum();
-
 		if(oldNTiles == nTiles && oldBatchesSize == batchSize) {
 			modelExecutorTask.setFailed();
 			return false;
 		}
+		oldNTiles = nTiles;
+		oldBatchesSize = batchSize;
+
+		handleOutOfMemoryError();
+		initTiling();
+		nTiles = tiling.getTilesNum();
+		modelExecutorTask.logError(
+			"Out of memory exception occurred. Trying with " + nTiles +
+				" tiles, batch size " + batchSize + " and overlap " + overlap + "...");
 
 		modelExecutorTask.startNewIteration();
 		inputTiler.addIteration();
@@ -628,6 +627,7 @@ public class GenericNetwork implements
 	protected void handleOutOfMemoryError() {
 		batchSize /= 2;
 		if (batchSize < 1) {
+			batchSize = 1;
 			nTiles *= 2;
 //				if (overlap == 0) return false;
 //				overlap *= 0.5;

@@ -4,6 +4,7 @@ package mpicbg.csbd.network.tensorflow;
 import java.io.IOException;
 import java.util.Arrays;
 
+import mpicbg.csbd.network.ImageTensor;
 import org.scijava.io.location.Location;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
@@ -87,9 +88,9 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	}
 
 	@Override
-	public void loadInputNode(final String defaultName, final Dataset dataset) {
-		super.loadInputNode(defaultName, dataset);
-		if (sig != null && sig.isInitialized() && sig.getInputsCount() > 0) {
+	public void loadInputNode(final Dataset dataset) {
+		super.loadInputNode( dataset);
+		if (sig != null && sig.getInputsCount() > 0) {
 			inputNode.setName(sig.getInputsMap().keySet().iterator().next());
 			setInputTensor(sig.getInputsOrThrow(inputNode.getName()));
 			inputNode.setNodeShape(getShape(getInputTensorInfo().getTensorShape()));
@@ -98,13 +99,13 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	}
 
 	@Override
-	public void loadOutputNode(final String defaultName) {
-		super.loadOutputNode(defaultName);
-		if (sig != null && sig.isInitialized() && sig.getOutputsCount() > 0) {
+	public void loadOutputNode(Dataset dataset) {
+		super.loadOutputNode(dataset);
+		if (sig != null && sig.getOutputsCount() > 0) {
 			outputNode.setName(sig.getOutputsMap().keySet().iterator().next());
 			setOutputTensor(sig.getOutputsOrThrow(outputNode.getName()));
 			outputNode.setNodeShape(getShape(getOutputTensorInfo().getTensorShape()));
-			outputNode.initializeNodeMapping(inputNode.getNodeShape());
+			outputNode.initializeNodeMapping();
 		}
 	}
 
@@ -153,16 +154,21 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 
 	@Override
 	public void initMapping() {
-		inputNode.initMapping();
+		inputNode.setMappingDefaults();
+		outputNode.setMappingDefaults();
+		log("INPUT NODE: ");
+		getInputNode().printMapping(status);
+		log("OUTPUT NODE: ");
+		getOutputNode().printMapping(status);
+
 	}
 
 	protected void calculateMapping() {
 
-		for (int i = 0; i < inputNode.getNodeShape().length; i++) {
-			outputNode.setNodeAxis(i, inputNode.getNodeAxis(i));
-		}
-		handleDimensionReduction();
-		generateMapping();
+//		for (int i = 0; i < inputNode.getNodeShape().length; i++) {
+//			outputNode.setNodeAxis(i, inputNode.getNodeAxis(i));
+//		}
+		doDimensionReduction();
 	}
 
 	@Override
@@ -202,7 +208,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		final AxisType axisToRemove)
 	{
 		int numDims = input.numDimensions();
-		if (input.axis(axisToRemove) != null) {
+		if (input.axis(axisToRemove).isPresent()) {
 			numDims--;
 		}
 		final long[] dims = new long[numDims];
@@ -256,7 +262,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		logTensorShape("Shape of input tensor", tensorInfo);
 	}
 
-	private void logTensorShape(String title, final TensorInfo tensorInfo) {
+	protected void logTensorShape(String title, final TensorInfo tensorInfo) {
 		long[] dims = new long[tensorInfo.getTensorShape().getDimCount()];
 		for (int i = 0; i < dims.length; i++) {
 			dims[i] = tensorInfo.getTensorShape().getDimList().get(i).getSize();

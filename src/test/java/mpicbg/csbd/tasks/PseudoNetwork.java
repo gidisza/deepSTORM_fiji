@@ -38,16 +38,14 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 	public void testGPUSupport() {}
 
 	@Override
-	public void loadInputNode(final String defaultName, final Dataset dataset) {
+	public void loadInputNode(final Dataset dataset) {
 		inputNode = new ImageTensor();
-		inputNode.setName("input");
 		inputNode.initializeNodeMapping();
 	}
 
 	@Override
-	public void loadOutputNode(final String defaultName) {
+	public void loadOutputNode(Dataset dataset) {
 		outputNode = new ImageTensor();
-		outputNode.setName("output");
 		outputNode.initializeNodeMapping();
 	}
 
@@ -70,7 +68,7 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 
 	@Override
 	public void initMapping() {
-		inputNode.initMapping();
+		inputNode.setMappingDefaults();
 	}
 
 	protected void calculateMapping() {

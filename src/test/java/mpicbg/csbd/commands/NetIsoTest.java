@@ -21,7 +21,7 @@ public class NetIsoTest extends CSBDeepTest {
 	@Test
 	// @Ignore
 	public void testNetIso() {
-		testDataset(new FloatType(), new long[] { 30, 80, 2, 5 }, new AxisType[] {
+		testDataset(new FloatType(), new long[] { 20, 30, 2, 5 }, new AxisType[] {
 			Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z });
 	}
 
@@ -53,9 +53,15 @@ public class NetIsoTest extends CSBDeepTest {
 				assertTrue(
 					"Z axis dimension size output should be greater than input size ",
 					output.dimension(i_output) > input.dimension(i));
-			}
-			else {
-				assertEquals(input.dimension(i), output.dimension(i_output));
+			}else {
+				if (axis == Axes.CHANNEL) {
+					assertTrue(
+							"Since the iso network is probabilistic, the channels should double",
+							output.dimension(i_output) == input.dimension(i)*2);
+				}
+				else {
+					assertEquals(input.dimension(i), output.dimension(i_output));
+				}
 			}
 			assertEquals(axis, output.axis(i_output).type());
 			i_output++;

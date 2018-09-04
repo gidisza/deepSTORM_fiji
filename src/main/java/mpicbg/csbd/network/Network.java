@@ -37,9 +37,9 @@ public interface Network<T extends RealType<T>> extends
 
 	ImageTensor getOutputNode();
 
-	void loadInputNode(String defaultName, Dataset dataset);
+	void loadInputNode(Dataset dataset);
 
-	void loadOutputNode(String defaultName);
+	void loadOutputNode(Dataset dataset);
 
 	void initMapping();
 

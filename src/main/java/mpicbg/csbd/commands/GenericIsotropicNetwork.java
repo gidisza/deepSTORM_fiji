@@ -85,7 +85,7 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 	Command
 {
 
-	@Parameter(label = "Scale Z", min = "1", max = "15")
+	@Parameter(label = "Scale factor of Z-Axis (same as during training)", min = "1")
 	protected float scale = 10.2f;
 
 	final ExecutorService pool = Executors.newWorkStealingPool();
@@ -261,6 +261,7 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 		}
 	}
 
+	//TODO find out why the resulting length should not be old_length*scale and fix it
 	/**
 	 * Scales the given dimension by the given scale and uses linear interpolation
 	 * for the missing values. NOTE: This method will return very fast because the
