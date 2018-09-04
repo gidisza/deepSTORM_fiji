@@ -18,13 +18,13 @@ public class InputMapperTest {
 		network.loadOutputNode(input);
 		network.initMapping();
 		new DefaultInputMapper().run(input, network);
-		for (AxisType axis : network.getInputNode().getNodeAxes()) {
-			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
-				// log("Network input node axis " + axis.getLabel() + " not present in
-				// output node, will be reduced");
-				network.setDoDimensionReduction(true, axis);
-			}
-		}
+//		for (AxisType axis : network.getInputNode().getNodeAxes()) {
+//			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
+//				// log("Network input node axis " + axis.getLabel() + " not present in
+//				// output node, will be reduced");
+//				network.setDoDimensionReduction(true, axis);
+//			}
+//		}
 		network.doDimensionReduction();
 		network.getInputNode().printMapping();
 	}

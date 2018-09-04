@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import mpicbg.csbd.network.ImageTensor;
+import net.imagej.axis.Axes;
 import org.scijava.io.location.Location;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
@@ -38,6 +39,8 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	private TensorInfo inputTensorInfo, outputTensorInfo;
 	private boolean foundJNI = true;
 	private boolean gpuSupport = false;
+	protected boolean isDoingDimensionReduction = false;
+	protected AxisType axisToRemove;
 	// Same as
 	// tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY
 	// in Python. Perhaps this should be an exported constant in TensorFlow's Java
@@ -169,12 +172,22 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 //			outputNode.setNodeAxis(i, inputNode.getNodeAxis(i));
 //		}
 		doDimensionReduction();
+		generateMapping();
 	}
 
 	@Override
 	public void doDimensionReduction() {
+		int diff = getOutputNode().getNodeShape().length - getInputNode().getNodeShape().length;
+		if(diff == 0) return;
+		if(diff > 0) status.logError("Cannot handle case INPUT TENSOR SIZE < OUTPUT TENSOR SIZE");
+		if(diff < -1) status.logError("OUTPUT TENSOR SIZE can only be one dimension smaller than INPUT TENSOR SIZE");
+		isDoingDimensionReduction = true;
+		if(getInputNode().getDataset().axis(Axes.TIME).isPresent()) {
+			axisToRemove = Axes.TIME;
+		} else {
+			axisToRemove = Axes.Z;
+		}
 		handleDimensionReduction();
-		generateMapping();
 	}
 
 	@Override
@@ -193,7 +206,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	}
 
 	private void handleDimensionReduction() {
-		if (doDimensionReduction) {
+		if (isDoingDimensionReduction) {
 			getOutputNode().removeAxisFromMapping(axisToRemove);
 			final Dataset outputDummy = createEmptyDuplicateWithoutAxis(inputNode
 				.getDataset(), axisToRemove);
@@ -292,6 +305,8 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		outputTensorInfo = null;
 		foundJNI = true;
 		gpuSupport = false;
+		isDoingDimensionReduction = false;
+		axisToRemove = null;
 	}
 
 }

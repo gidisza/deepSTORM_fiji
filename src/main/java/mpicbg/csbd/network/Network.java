@@ -55,11 +55,11 @@ public interface Network<T extends RealType<T>> extends
 	 * dimension. Default value is true.
 	 */
 	void setDropSingletonDims(final boolean dropSingletonDims);
-
-	void setDoDimensionReduction(boolean doDimensionReduction);
-
-	void setDoDimensionReduction(boolean doDimensionReduction,
-		AxisType axisToRemove);
+//
+//	void setDoDimensionReduction(boolean doDimensionReduction);
+//
+//	void setDoDimensionReduction(boolean doDimensionReduction,
+//		AxisType axisToRemove);
 
 	void doDimensionReduction();
 

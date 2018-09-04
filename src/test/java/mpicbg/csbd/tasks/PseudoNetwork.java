@@ -87,15 +87,7 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 	}
 
 	private void handleDimensionReduction() {
-		if (doDimensionReduction) {
-			getOutputNode().removeAxisFromMapping(axisToRemove);
-			final Dataset outputDummy = createEmptyDuplicateWithoutAxis(inputNode
-				.getDataset(), axisToRemove);
-			getOutputNode().initialize(outputDummy);
-		}
-		else {
-			getOutputNode().initialize(inputNode.getDataset().duplicate());
-		}
+		getOutputNode().initialize(inputNode.getDataset().duplicate());
 	}
 
 	private Dataset createEmptyDuplicateWithoutAxis(final Dataset input,

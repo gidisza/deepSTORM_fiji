@@ -30,8 +30,6 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 	protected boolean supportsGPU = false;
 	protected Integer doneTileCount;
 	protected boolean dropSingletonDims = false;
-	protected boolean doDimensionReduction = false;
-	protected AxisType axisToRemove;
 	ExecutorService pool;
 
 	public DefaultNetwork(Task associatedTask) {
@@ -214,18 +212,18 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 		this.dropSingletonDims = dropSingletonDims;
 	}
 
-	@Override
-	public void setDoDimensionReduction(final boolean doDimensionReduction) {
-		setDoDimensionReduction(doDimensionReduction, Axes.Z);
-	}
-
-	@Override
-	public void setDoDimensionReduction(final boolean doDimensionReduction,
-		final AxisType axisToRemove)
-	{
-		this.doDimensionReduction = doDimensionReduction;
-		this.axisToRemove = axisToRemove;
-	}
+//	@Override
+//	public void setDoDimensionReduction(final boolean doDimensionReduction) {
+//		setDoDimensionReduction(doDimensionReduction, Axes.Z);
+//	}
+//
+//	@Override
+//	public void setDoDimensionReduction(final boolean doDimensionReduction,
+//		final AxisType axisToRemove)
+//	{
+//		this.doDimensionReduction = doDimensionReduction;
+//		this.axisToRemove = axisToRemove;
+//	}
 
 	@Override
 	public void dispose() {
@@ -233,7 +231,5 @@ public abstract class DefaultNetwork<T extends RealType<T>> implements
 			pool.shutdown();
 		}
 		pool = null;
-		doDimensionReduction = false;
-		axisToRemove = null;
 	}
 }
