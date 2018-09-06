@@ -61,6 +61,8 @@ public interface Network<T extends RealType<T>> extends
 //	void setDoDimensionReduction(boolean doDimensionReduction,
 //		AxisType axisToRemove);
 
+	void calculateMapping();
+
 	void doDimensionReduction();
 
 	boolean libraryLoaded();

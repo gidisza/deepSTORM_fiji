@@ -18,15 +18,7 @@ public class InputMapperTest {
 		network.loadOutputNode(input);
 		network.initMapping();
 		new DefaultInputMapper().run(input, network);
-//		for (AxisType axis : network.getInputNode().getNodeAxes()) {
-//			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
-//				// log("Network input node axis " + axis.getLabel() + " not present in
-//				// output node, will be reduced");
-//				network.setDoDimensionReduction(true, axis);
-//			}
-//		}
-		network.doDimensionReduction();
-		network.getInputNode().printMapping();
+		network.calculateMapping();
 	}
 
 	@Test
@@ -96,9 +88,9 @@ public class InputMapperTest {
 		assertEquals(Axes.CHANNEL, network.getOutputNode().getNodeAxis(3));
 
 		assertEquals(3, network.getInputNode().getMappingIndices().length);
-		assertEquals(2, network.getInputNode().getMappingIndices()[0]);
-		assertEquals(1, network.getInputNode().getMappingIndices()[1]);
-		assertEquals(0, network.getInputNode().getMappingIndices()[2]);
+		assertEquals(3, network.getInputNode().getMappingIndices()[0]);
+		assertEquals(2, network.getInputNode().getMappingIndices()[1]);
+		assertEquals(1, network.getInputNode().getMappingIndices()[2]);
 	}
 
 	@Test
@@ -121,9 +113,9 @@ public class InputMapperTest {
 		assertEquals(Axes.X, network.getOutputNode().getNodeAxis(3));
 		assertEquals(Axes.CHANNEL, network.getOutputNode().getNodeAxis(4));
 
-		assertEquals(2, network.getInputNode().getMappingIndices().length);
+		assertEquals(3, network.getInputNode().getMappingIndices().length);
+		assertEquals(3, network.getInputNode().getMappingIndices()[0]);
 		assertEquals(2, network.getInputNode().getMappingIndices()[1]);
 		assertEquals(1, network.getInputNode().getMappingIndices()[2]);
-		assertEquals(0, network.getInputNode().getMappingIndices()[3]);
 	}
 }

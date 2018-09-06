@@ -71,7 +71,8 @@ public class PseudoNetwork<T extends RealType<T>> extends DefaultNetwork<T> {
 		inputNode.setMappingDefaults();
 	}
 
-	protected void calculateMapping() {
+	@Override
+	public void calculateMapping() {
 
 		for (int i = 0; i < inputNode.getNodeShape().length; i++) {
 			outputNode.setNodeAxis(i, inputNode.getNodeAxis(i));

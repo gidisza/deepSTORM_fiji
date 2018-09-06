@@ -166,7 +166,8 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 
 	}
 
-	protected void calculateMapping() {
+	@Override
+	public void calculateMapping() {
 
 //		for (int i = 0; i < inputNode.getNodeShape().length; i++) {
 //			outputNode.setNodeAxis(i, inputNode.getNodeAxis(i));
@@ -207,13 +208,15 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 
 	private void handleDimensionReduction() {
 		if (isDoingDimensionReduction) {
-			getOutputNode().removeAxisFromMapping(axisToRemove);
 			final Dataset outputDummy = createEmptyDuplicateWithoutAxis(inputNode
 				.getDataset(), axisToRemove);
 			getOutputNode().initialize(outputDummy);
+			getOutputNode().setMapping(getInputNode().getMapping());
+			getOutputNode().removeAxisFromMapping(axisToRemove);
 		}
 		else {
 			getOutputNode().initialize(inputNode.getDataset().duplicate());
+			getOutputNode().setMapping(getInputNode().getMapping());
 		}
 	}
 

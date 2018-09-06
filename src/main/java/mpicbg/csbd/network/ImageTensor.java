@@ -162,6 +162,7 @@ public class ImageTensor {
 	public void printMapping(Task task) {
 		Consumer<String> logFunction = System.out::println;
 		if(task != null) logFunction = task::log;
+		logFunction.accept("Mapping of tensor " + getName() + ": ");
 		if (dataset != null) {
 			final AxisType[] axes = new AxisType[dataset.numDimensions()];
 			for (int i = 0; i < dataset.numDimensions(); i++) {

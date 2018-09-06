@@ -105,7 +105,7 @@ public class NetTubulin implements Command {
 					"input", input,
 					"modelUrl", url,
 					"batchSize", batchSize,
-					"batchDimension", Axes.TIME.getLabel());
+					"batchAxis", Axes.TIME.getLabel());
 			final CommandModule module = moduleService.waitFor(resFuture);
 			output.addAll((Collection) module.getOutput("output"));
 		}
