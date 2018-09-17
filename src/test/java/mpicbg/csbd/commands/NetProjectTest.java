@@ -1,6 +1,7 @@
 
 package mpicbg.csbd.commands;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -54,8 +55,7 @@ public class NetProjectTest extends CSBDeepTest {
 		launchImageJ();
 		final Dataset input = createDataset(type, dims, axes);
 		final List<Dataset> result = runPlugin(NetProject.class, input);
-		assertTrue("result should contain one dataset bis contains " + result
-			.size(), result.size() == 1);
+		assertEquals(1, result.size());
 		final Dataset output = result.get(0);
 		testResultAxesAndSizeByRemovingAxis(input, output, Axes.Z);
 	}

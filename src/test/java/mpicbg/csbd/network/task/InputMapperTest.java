@@ -39,7 +39,7 @@ public class InputMapperTest {
 		assertEquals(Axes.X, network.getOutputNode().getNodeAxis(2));
 		assertEquals(Axes.CHANNEL, network.getOutputNode().getNodeAxis(3));
 
-		assertEquals(2, network.getInputNode().getMappingIndices().length);
+		assertEquals(4, network.getInputNode().getMappingIndices().length);
 		assertEquals(2, network.getInputNode().getMappingIndices()[0]);
 		assertEquals(1, network.getInputNode().getMappingIndices()[1]);
 	}
@@ -62,7 +62,7 @@ public class InputMapperTest {
 		assertEquals(Axes.X, network.getOutputNode().getNodeAxis(2));
 		assertEquals(Axes.CHANNEL, network.getOutputNode().getNodeAxis(3));
 
-		assertEquals(3, network.getInputNode().getMappingIndices().length);
+		assertEquals(4, network.getInputNode().getMappingIndices().length);
 		assertEquals(2, network.getInputNode().getMappingIndices()[0]);
 		assertEquals(1, network.getInputNode().getMappingIndices()[1]);
 		assertEquals(0, network.getInputNode().getMappingIndices()[2]);
@@ -87,7 +87,7 @@ public class InputMapperTest {
 		assertEquals(Axes.X, network.getOutputNode().getNodeAxis(2));
 		assertEquals(Axes.CHANNEL, network.getOutputNode().getNodeAxis(3));
 
-		assertEquals(3, network.getInputNode().getMappingIndices().length);
+		assertEquals(5, network.getInputNode().getMappingIndices().length);
 		assertEquals(3, network.getInputNode().getMappingIndices()[0]);
 		assertEquals(2, network.getInputNode().getMappingIndices()[1]);
 		assertEquals(1, network.getInputNode().getMappingIndices()[2]);
@@ -113,7 +113,7 @@ public class InputMapperTest {
 		assertEquals(Axes.X, network.getOutputNode().getNodeAxis(3));
 		assertEquals(Axes.CHANNEL, network.getOutputNode().getNodeAxis(4));
 
-		assertEquals(3, network.getInputNode().getMappingIndices().length);
+		assertEquals(5, network.getInputNode().getMappingIndices().length);
 		assertEquals(3, network.getInputNode().getMappingIndices()[0]);
 		assertEquals(2, network.getInputNode().getMappingIndices()[1]);
 		assertEquals(1, network.getInputNode().getMappingIndices()[2]);

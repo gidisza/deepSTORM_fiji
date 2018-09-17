@@ -1,32 +1,12 @@
 
 package mpicbg.csbd.network.task;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import mpicbg.csbd.network.DefaultNetwork;
-import mpicbg.csbd.network.tensorflow.DatasetTensorflowConverter;
 import mpicbg.csbd.network.tensorflow.TensorFlowNetwork;
-import mpicbg.csbd.network.tensorflow.TensorFlowRunner;
-import mpicbg.csbd.task.Task;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
-import net.imagej.axis.AxisType;
 import net.imagej.tensorflow.TensorFlowService;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
-import org.scijava.io.location.Location;
-import org.tensorflow.SavedModelBundle;
-import org.tensorflow.Tensor;
-import org.tensorflow.TensorFlow;
-import org.tensorflow.TensorFlowException;
-import org.tensorflow.framework.MetaGraphDef;
-import org.tensorflow.framework.SignatureDef;
 import org.tensorflow.framework.TensorInfo;
-import org.tensorflow.framework.TensorShapeProto;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 public abstract class TestNetwork<T extends RealType<T>> extends
 		TensorFlowNetwork<T>

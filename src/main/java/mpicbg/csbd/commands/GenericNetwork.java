@@ -114,6 +114,9 @@ public class GenericNetwork implements
 	@Parameter(label = "Number of tiles", min = "1")
 	protected int nTiles = 8;
 
+	@Parameter(label = "Tile size has to be a multiple of", min = "1")
+	protected int blockMultiple = 8;
+
 	@Parameter(label = "Overlap between tiles", min = "0", stepSize = "16")
 	protected int overlap = 32;
 
@@ -161,7 +164,6 @@ public class GenericNetwork implements
 	private PrefService prefService;
 
 	protected String modelName;
-	protected int blockMultiple = 8;
 
 	protected TaskManager taskManager;
 
@@ -291,9 +293,7 @@ public class GenericNetwork implements
 	}
 
 	private void restartPool() {
-		if(modelLoadingPool != null) {
-			modelLoadingPool.shutdownNow();
-		}
+		finishModelLoading();
 		modelLoadingPool = Executors.newSingleThreadExecutor();
 	}
 
@@ -418,11 +418,14 @@ public class GenericNetwork implements
 
 	protected void mainThread() throws OutOfMemoryError {
 
+		finishModelLoading();
 		updateCacheName();
 		savePreferences();
 		tryToInitialize();
 
 		taskManager.finalizeSetup();
+
+		solveModelSource();
 
 		prepareInputAndNetwork();
 
@@ -459,6 +462,16 @@ public class GenericNetwork implements
 
 	}
 
+	private void solveModelSource() {
+		if(modelFileUrl.isEmpty()) modelFileChanged();
+		if(modelFileUrl.isEmpty()) modelUrlChanged();
+		try {
+			modelLoadingFuture.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
+
 	protected void setupNormalizer() {
 		((DefaultInputNormalizer) inputNormalizer).getNormalizer().setup(
 				new float[] { percentileBottom, percentileTop }, new float[] { min,
@@ -471,24 +484,11 @@ public class GenericNetwork implements
 
 	protected void prepareInputAndNetwork() {
 
-		if(modelFileUrl.isEmpty()) modelFileChanged();
-		if(modelFileUrl.isEmpty()) modelUrlChanged();
-
 		modelName = cacheName;
 		modelLoader.run(modelName, network, modelFileUrl, getInput());
 		inputMapper.run(getInput(), network);
-		checkAndResolveDimensionReduction();
-	}
-
-	private void checkAndResolveDimensionReduction() {
-//		for (AxisType axis : network.getInputNode().getNodeAxes()) {
-//			if (!network.getOutputNode().getNodeAxes().contains(axis)) {
-//				// log("Network input node axis " + axis.getLabel() + " not present in
-//				// output node, will be reduced");
-//				network.setDoDimensionReduction(true, axis);
-//			}
-//		}
 		network.doDimensionReduction();
+
 	}
 
 	private void savePreferences() {
@@ -530,7 +530,7 @@ public class GenericNetwork implements
 		return res;
 	}
 
-	private List<AdvancedTiledView<FloatType>> tryToTileAndRunNetwork(
+	protected List<AdvancedTiledView<FloatType>> tryToTileAndRunNetwork(
 		final List<RandomAccessibleInterval> normalizedInput)
 		throws OutOfMemoryError
 	{

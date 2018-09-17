@@ -1,6 +1,7 @@
 
 package mpicbg.csbd.commands;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class NetTriboliumTest extends CSBDeepTest {
 		launchImageJ();
 		final Dataset input = createDataset(type, dims, axes);
 		final List<Dataset> result = runPlugin(NetTribolium.class, input);
-		assertTrue("result should contain one dataset", result.size() == 1);
+		assertEquals(1, result.size());
 		final Dataset output = result.get(0);
 		testResultAxesAndSize(input, output);
 	}

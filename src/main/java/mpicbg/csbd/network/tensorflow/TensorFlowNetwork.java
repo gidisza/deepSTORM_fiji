@@ -4,7 +4,6 @@ package mpicbg.csbd.network.tensorflow;
 import java.io.IOException;
 import java.util.Arrays;
 
-import mpicbg.csbd.network.ImageTensor;
 import net.imagej.axis.Axes;
 import org.scijava.io.location.Location;
 import org.tensorflow.SavedModelBundle;
@@ -249,7 +248,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		final RandomAccessibleInterval<T> tile) throws Exception
 	{
 
-		final Tensor inputTensor = DatasetTensorflowConverter.datasetToTensor(tile,
+		final Tensor inputTensor = DatasetTensorFlowConverter.datasetToTensor(tile,
 			getInputNode().getMappingIndices());
 		if (inputTensor != null) {
 			RandomAccessibleInterval<T> output = null;
@@ -257,7 +256,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 				getInputTensorInfo(), getOutputTensorInfo());
 
 			if (outputTensor != null) {
-				output = DatasetTensorflowConverter.tensorToDataset(outputTensor, tile
+				output = DatasetTensorFlowConverter.tensorToDataset(outputTensor, tile
 					.randomAccess().get(), getOutputNode().getMappingIndices(),
 					dropSingletonDims);
 				outputTensor.close();

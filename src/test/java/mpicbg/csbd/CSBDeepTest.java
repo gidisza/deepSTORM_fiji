@@ -1,26 +1,28 @@
 
 package mpicbg.csbd;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Future;
-
+import mpicbg.csbd.imglib2.TiledView;
+import net.imagej.Dataset;
+import net.imagej.ImageJ;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.AbstractInterval;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.module.Module;
 
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Future;
+
+import static mpicbg.csbd.tiling.DefaultTiling.arrayProduct;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class CSBDeepTest {
 
@@ -104,12 +106,24 @@ public class CSBDeepTest {
 		System.out.println(title + ": " + Arrays.toString(dims));
 	}
 
+	protected static void printDim(final String title, final AbstractInterval input) {
+		final long[] dims = new long[input.numDimensions()];
+		input.dimensions(dims);
+		System.out.println(title + ": " + Arrays.toString(dims));
+	}
+
 	protected static void printAxes(final String title, final Dataset input) {
 		final String[] axes = new String[input.numDimensions()];
 		for (int i = 0; i < axes.length; i++) {
 			axes[i] = input.axis(i).type().getLabel();
 		}
 		System.out.println(title + ": " + Arrays.toString(axes));
+	}
+
+	protected static long getNumTiles(TiledView tiledView) {
+		long[] dims = new long[tiledView.numDimensions()];
+		tiledView.dimensions(dims);
+		return arrayProduct(dims);
 	}
 
 }

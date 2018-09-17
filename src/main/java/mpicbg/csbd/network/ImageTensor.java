@@ -28,6 +28,7 @@ public class ImageTensor {
 	private Dataset dataset;
 	private boolean mappingInitialized;
 	private boolean reducedAxis = false;
+	private boolean generatingMapping = false;
 
 	public ImageTensor() {
 		mappingInitialized = false;
@@ -78,14 +79,19 @@ public class ImageTensor {
 
 	public void generateMapping() {
 
+		generatingMapping = true;
+
 		finalMapping.clear();
 
-		for (int i = 0; i < dataset.numDimensions(); i++) {
+		for (int i = 0; i < nodeShape.length; i++) {
 			finalMapping.add(getNodeDimByDatasetDim(i));
 		}
 
 		// if a dimension is not set, assign an unused dimension
-//		ArrayHelper.replaceNegativeIndicesWithUnusedIndices(finalMapping);
+		ArrayHelper.replaceNegativeIndicesWithUnusedIndices(finalMapping);
+
+		generatingMapping = false;
+
 	}
 
 	public AxisType getDimType(final int dim) {

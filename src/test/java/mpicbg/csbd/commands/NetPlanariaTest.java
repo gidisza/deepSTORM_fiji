@@ -1,6 +1,7 @@
 
 package mpicbg.csbd.commands;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -20,11 +21,15 @@ import net.imglib2.type.numeric.real.FloatType;
 public class NetPlanariaTest extends CSBDeepTest {
 
 	@Test
-	public void testPlanariaFloatType() {
-		testDataset(new FloatType(), new long[] { 50, 100, 10 }, new AxisType[] {
+	public void testPlanariaFloatTypeXYZ() {
+		testDataset(new FloatType(), new long[] { 10, 20, 3 }, new AxisType[] {
 			Axes.X, Axes.Y, Axes.Z });
+	}
+
+	@Test
+	public void testPlanariaFloatTypeXZY() {
 		testDataset(new FloatType(), new long[] { 10, 10, 10 }, new AxisType[] {
-			Axes.X, Axes.Z, Axes.Y });
+				Axes.X, Axes.Z, Axes.Y });
 	}
 
 	@Test
@@ -41,7 +46,7 @@ public class NetPlanariaTest extends CSBDeepTest {
 		launchImageJ();
 		final Dataset input = createDataset(type, dims, axes);
 		final List<Dataset> result = runPlugin(NetPlanaria.class, input);
-		assertTrue("result should contain one dataset", result.size() == 1);
+		assertEquals(1, result.size());
 		final Dataset output = result.get(0);
 		testResultAxesAndSize(input, output);
 	}

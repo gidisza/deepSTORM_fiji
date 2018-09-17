@@ -29,9 +29,6 @@
 
 package mpicbg.csbd.network.tensorflow;
 
-import org.tensorflow.DataType;
-import org.tensorflow.Tensor;
-
 import mpicbg.csbd.converter.*;
 import net.imagej.tensorflow.Tensors;
 import net.imglib2.RandomAccessibleInterval;
@@ -45,8 +42,10 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import org.tensorflow.DataType;
+import org.tensorflow.Tensor;
 
-public class DatasetTensorflowConverter {
+public class DatasetTensorFlowConverter {
 
 	public static <T extends RealType<T>, U extends RealType<U>>
 		RandomAccessibleInterval<T> tensorToDataset(final Tensor<U> tensor,
