@@ -112,11 +112,6 @@ public class DatasetTensorFlowConverter {
 		RandomAccessibleInterval<T> image, final int[] mapping)
 	{
 
-		// Add dimensions until it fits the input tensor
-		while (image.numDimensions() < mapping.length) {
-			image = Views.addDimension(image, 0, 0);
-		}
-
 		Tensor tensor;
 		try {
 			tensor = Tensors.tensor(image, mapping);

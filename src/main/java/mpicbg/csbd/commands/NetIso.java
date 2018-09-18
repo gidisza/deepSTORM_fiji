@@ -61,7 +61,7 @@ public class NetIso implements
 	@Parameter(type = ItemIO.OUTPUT)
 	protected List<Dataset> output = new ArrayList<>();
 
-	@Parameter(label = "Scale factor of Z-Axis (same as during training, should be 10.2 for this demo network)", min = "1", max = "15")
+	@Parameter(label = "Scale factor of Z-Axis", min = "1", max = "15")
 	protected float scale = 10.2f;
 
 	@Parameter(label = "Batch size", min = "1")

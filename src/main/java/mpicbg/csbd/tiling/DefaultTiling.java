@@ -196,7 +196,8 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 		RandomAccessibleInterval<T> dataset, long[] tiling)
 	{
 		for (int i = 0; i < dataset.numDimensions(); i++) {
-			if (tilingActions[i] == TilingAction.TILE_WITH_PADDING) {
+			if (tilingActions[i] == TilingAction.TILE_WITH_PADDING
+			|| tilingActions[i] == TilingAction.TILE_WITHOUT_PADDING) {
 				dataset = expandDimToSize(dataset, i, getTileSize(dataset, i, tiling, blockMultiple) * tiling[i]);
 			}
 		}
@@ -244,7 +245,7 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 
 			RandomAccessibleInterval<T> firstResult = resultData.get(0);
 
-			parent.log("output axes: " + Arrays.toString(axisTypes));
+			parent.log("Output axes: " + Arrays.toString(axisTypes));
 
 			DatasetHelper.debugDim(parent, "result 0 before padding removement",
 				firstResult);
@@ -300,10 +301,10 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 	{
 
 		final long[] negPadding = new long[result.numDimensions()];
-		for (int i = 0; i < padding.length; i++) {
-			for (int j = 0; j < oldAxes.length; j++) {
-				if (newAxes[i] == oldAxes[j]) {
-					negPadding[i] = -padding[j];
+		for (int i = 0; i < oldAxes.length; i++) {
+			for (int j = 0; j < newAxes.length; j++) {
+				if (oldAxes[i] == newAxes[j]) {
+					negPadding[j] = -padding[i];
 				}
 			}
 		}
@@ -328,8 +329,9 @@ public class DefaultTiling<T extends RealType<T>> implements Tiling<T> {
 		RandomAccessibleInterval<T> fittedResult = null;
 		for (int i = 0; i < result.numDimensions(); i++) {
 			AxisType axis = outputAxes[i];
-			// TODO maybe implement this in a more dynamic way
+			// TODO maybe implement this in a more dynamic way, use tilingActions
 			if (axis != Axes.CHANNEL) {
+				if(originalDims.get(axis) == null) continue;
 				long originalSize = originalDims.get(axis);
 				fittedResult = expandDimToSize(fittedResult == null ? result
 					: fittedResult, i, originalSize);

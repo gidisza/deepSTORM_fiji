@@ -30,7 +30,6 @@
 package mpicbg.csbd.commands;
 
 import mpicbg.csbd.imglib2.TiledView;
-import mpicbg.csbd.network.Network;
 import mpicbg.csbd.task.DefaultTask;
 import mpicbg.csbd.tiling.DefaultTiling;
 import mpicbg.csbd.tiling.Tiling;
@@ -85,7 +84,7 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 	Command
 {
 
-	@Parameter(label = "Scale factor of Z-Axis (same as during training)", min = "1")
+	@Parameter(label = "Scale factor of Z-Axis", min = "1")
 	protected float scale = 10.2f;
 
 	final ExecutorService pool = Executors.newWorkStealingPool();
@@ -125,13 +124,18 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 	{
 
 		@Override
-		public List<RandomAccessibleInterval<FloatType>> run(final Dataset input) {
+		public List<RandomAccessibleInterval<FloatType>> run(final Dataset input, int numDimensions) {
 
 			setStarted();
 
-			final RandomAccessibleInterval<FloatType> inputRai = Converters.convert(
+			RandomAccessibleInterval<FloatType> inputRai = Converters.convert(
 				(RandomAccessibleInterval) input.getImgPlus(),
 				new RealFloatConverter<T>(), new FloatType());
+
+			// Add dimensions until it fits the input tensor
+			while (inputRai.numDimensions() < numDimensions) {
+				inputRai = Views.addDimension(inputRai, 0, 0);
+			}
 
 			log("Dataset type: " + input.getTypeLabelLong());
 			DatasetHelper.logDim(this, "Dataset dimensions", inputRai);
@@ -205,7 +209,7 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 
 		@Override
 		public List<Dataset> run(final List<RandomAccessibleInterval<T>> result,
-			final Dataset dataset, final Network network,
+			final Dataset dataset, final AxisType[] axes,
 			final DatasetService datasetService)
 		{
 			setStarted();
@@ -252,7 +256,7 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 			pointwiseGeometricMean(res0_pred, res1_pred, prediction);
 			DatasetHelper.logDim(this, "Merged output", prediction);
 
-			output.add(wrapIntoDataset(OUTPUT_NAMES[0], prediction, network,
+			output.add(wrapIntoDataset(OUTPUT_NAMES[0], prediction, axes,
 				datasetService));
 
 			setFinished();

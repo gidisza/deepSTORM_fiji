@@ -113,6 +113,10 @@ public class ImageTensor {
 			setNodeAxis(2, Axes.Y);
 			setNodeAxis(3, Axes.X);
 			setNodeAxis(4, Axes.CHANNEL);
+			if(dataset != null && dataset.dimension(Axes.Z) <= 1 && dataset.dimension(Axes.TIME) > 1) {
+				setNodeAxis(1, Axes.TIME);
+				setNodeAxis(0, Axes.Z);
+			}
 		}
 		else {
 			if (tensorDimCount == 4) {

@@ -23,28 +23,28 @@ public class NetProjectTest extends CSBDeepTest {
 	// @Ignore
 	@Test
 	public void testNetProject_Float_XYZ() {
-		testDataset(new FloatType(), new long[] { 100, 50, 10 }, new AxisType[] {
+		testDataset(new FloatType(), new long[] { 10, 5, 3 }, new AxisType[] {
 			Axes.X, Axes.Y, Axes.Z });
 	}
 
 	@Ignore
 	@Test
 	public void testNetProject_Float_ZXY() {
-		testDataset(new FloatType(), new long[] { 10, 50, 100 }, new AxisType[] {
+		testDataset(new FloatType(), new long[] { 2, 5, 10 }, new AxisType[] {
 			Axes.Z, Axes.X, Axes.Y });
 	}
 
 	@Ignore
 	@Test
 	public void testNetProject_Float_XZY() {
-		testDataset(new FloatType(), new long[] { 100, 10, 50 }, new AxisType[] {
+		testDataset(new FloatType(), new long[] { 10, 2, 5 }, new AxisType[] {
 			Axes.X, Axes.Z, Axes.Y });
 	}
 
 	@Ignore
 	@Test
 	public void testNetProject_Byte_XZY() {
-		testDataset(new ByteType(), new long[] { 50, 10, 100 }, new AxisType[] {
+		testDataset(new ByteType(), new long[] { 5, 2, 10 }, new AxisType[] {
 			Axes.X, Axes.Z, Axes.Y });
 	}
 

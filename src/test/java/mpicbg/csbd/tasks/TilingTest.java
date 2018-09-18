@@ -25,7 +25,7 @@ import net.imglib2.view.Views;
 public class TilingTest extends CSBDeepTest {
 
 	@Test
-	public void testTiling() {
+	public void testTilingZXY() {
 
 		final Tiling tiling = new DefaultTiling(8, 1, 32, 32);
 		final long[] datasetSize = { 10, 50, 100 };
@@ -50,6 +50,41 @@ public class TilingTest extends CSBDeepTest {
 
 		final RandomAccessibleInterval<FloatType> output = tiling.postprocess(task,
 			tiledView, axes);
+
+		assertTrue(tiledView != null);
+		assertTrue(output != null);
+
+		tiledView.dispose();
+
+		compareDimensions(input, output);
+	}
+
+	@Test
+	public void testTilingZXYC() {
+
+		final Tiling tiling = new DefaultTiling(8, 1, 32, 32);
+		final long[] datasetSize = { 10, 50, 100, 1 };
+		final AxisType[] axes = { Axes.Z, Axes.X, Axes.Y, Axes.CHANNEL };
+		final Task task = new DefaultTask();
+
+		launchImageJ();
+
+		final Dataset dataset = ij.dataset().create(new FloatType(), datasetSize,
+				"", axes);
+		final RandomAccessibleInterval<FloatType> input =
+				(RandomAccessibleInterval<FloatType>) dataset.getImgPlus();
+		final AdvancedTiledView<FloatType> tiledView = tiling.preprocess(input,
+				axes, getTilingActions(dataset), task);
+
+		tiledView.getProcessedTiles().clear();
+		final Cursor<RandomAccessibleInterval<FloatType>> cursor = Views.iterable(
+				tiledView).cursor();
+		while (cursor.hasNext()) {
+			tiledView.getProcessedTiles().add(cursor.next());
+		}
+
+		final RandomAccessibleInterval<FloatType> output = tiling.postprocess(task,
+				tiledView, axes);
 
 		assertTrue(tiledView != null);
 		assertTrue(output != null);
@@ -172,9 +207,9 @@ public class TilingTest extends CSBDeepTest {
 		assertEquals(10, tiledView.dimension(1));
 		assertEquals(20, tiledView.dimension(2));
 
-		assertEquals(5, tiledView.getBlockSize()[0]);
-		assertEquals(5, tiledView.getBlockSize()[1]);
-		assertEquals(5, tiledView.getBlockSize()[2]);
+		assertEquals(10, tiledView.getBlockSize()[0]);
+		assertEquals(10, tiledView.getBlockSize()[1]);
+		assertEquals(10, tiledView.getBlockSize()[2]);
 
 		assertEquals(0, tiledView.getOverlap()[0]);
 		assertEquals(0, tiledView.getOverlap()[1]);

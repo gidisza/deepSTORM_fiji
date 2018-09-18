@@ -115,7 +115,7 @@ public class GenericNetwork implements
 	protected int nTiles = 8;
 
 	@Parameter(label = "Tile size has to be a multiple of", min = "1")
-	protected int blockMultiple = 8;
+	protected int blockMultiple = 32;
 
 	@Parameter(label = "Overlap between tiles", min = "0", stepSize = "16")
 	protected int overlap = 32;
@@ -439,7 +439,7 @@ public class GenericNetwork implements
 		}
 
 		final List<RandomAccessibleInterval> processedInput = inputProcessor.run(
-				normalizedInput);
+				normalizedInput, network.getInputNode().getNodeShape().length);
 
 		log("INPUT NODE: ");
 		network.getInputNode().printMapping(inputProcessor);
@@ -456,8 +456,8 @@ public class GenericNetwork implements
 				obj.dispose();
 			}
 			this.output.clear();
-			this.output.addAll(outputProcessor.run(output, getInput(), network,
-					datasetService));
+			this.output.addAll(outputProcessor.run(output, getInput(),
+					getAxesArray(network.getOutputNode()), datasetService));
 		}
 
 	}
@@ -487,7 +487,6 @@ public class GenericNetwork implements
 		modelName = cacheName;
 		modelLoader.run(modelName, network, modelFileUrl, getInput());
 		inputMapper.run(getInput(), network);
-		network.doDimensionReduction();
 
 	}
 
@@ -512,20 +511,10 @@ public class GenericNetwork implements
 	}
 
 	private AxisType[] getAxesArray(final ImageTensor outputNode) {
-		int numDim = outputNode.numDimensions();
-		boolean addChannel = false;
-		if (numDim < outputNode.getNodeShape().length && outputNode
-			.getNodeShape()[outputNode.getNodeShape().length - 1] > 1)
-		{
-			addChannel = true;
-			numDim++;
-		}
+		int numDim = outputNode.getNodeShape().length;
 		final AxisType[] res = new AxisType[numDim];
-		for (int i = 0; i < outputNode.numDimensions(); i++) {
-			res[i] = outputNode.getAxisByDatasetDim(i);
-		}
-		if (addChannel) {
-			res[res.length - 1] = Axes.CHANNEL;
+		for (int i = 0; i < outputNode.getMapping().length; i++) {
+			res[i] = outputNode.getMapping()[outputNode.getMappingIndices()[i]];
 		}
 		return res;
 	}
@@ -562,26 +551,36 @@ public class GenericNetwork implements
 		return tiledOutput;
 	}
 
-	private AxisType[] getAxesArray(Dataset input) {
+	protected AxisType[] getAxesArray(Dataset input) {
+		if(network != null && network.getInputNode() != null && network.getInputNode().getNodeShape() != null) {
+			return getAxesArray(input, network.getInputNode().getNodeShape().length);
+		}
+		return getAxesArray(input, input.numDimensions());
+	}
+
+	protected AxisType[] getAxesArray(Dataset input, int size) {
 		boolean hasChannel = input.axis(Axes.CHANNEL).isPresent();
-		int numDim = input.numDimensions();
-		if(!hasChannel) numDim++;
-		AxisType[] res = new AxisType[numDim];
+		if(!hasChannel && size <= input.numDimensions()) size = input.numDimensions()+1;
+		AxisType[] res = new AxisType[size];
+		Arrays.fill(res, Axes.unknown());
 		for (int i = 0; i < input.numDimensions(); i++) {
 			res[i] = input.axis(i).type();
 		}
-		if(!hasChannel) res[res.length-1] = Axes.CHANNEL;
+		if(!hasChannel) res[input.numDimensions()] = Axes.CHANNEL;
 		return res;
 	}
 
 	protected Tiling.TilingAction[] getTilingActions() {
-		Tiling.TilingAction[] actions = new Tiling.TilingAction[getInput()
-			.numDimensions()];
+		Tiling.TilingAction[] actions = new Tiling.TilingAction[network.getInputNode().getNodeShape().length];
 		Arrays.fill(actions, Tiling.TilingAction.NO_TILING);
 		for (int i = 0; i < actions.length; i++) {
+			if(input.numDimensions() <= i) break;
 			AxisType type = getInput().axis(i).type();
 			if (type.isSpatial()) {
 				actions[i] = Tiling.TilingAction.TILE_WITH_PADDING;
+			}
+			if(type.getLabel().equals(batchAxis)) {
+				actions[i] = Tiling.TilingAction.TILE_WITHOUT_PADDING;
 			}
 		}
 		return actions;

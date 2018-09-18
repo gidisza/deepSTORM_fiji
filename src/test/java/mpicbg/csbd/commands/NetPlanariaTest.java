@@ -22,20 +22,25 @@ public class NetPlanariaTest extends CSBDeepTest {
 
 	@Test
 	public void testPlanariaFloatTypeXYZ() {
-		testDataset(new FloatType(), new long[] { 10, 20, 3 }, new AxisType[] {
-			Axes.X, Axes.Y, Axes.Z });
+		testDataset(new FloatType(), new long[] { 4, 3, 2 }, new AxisType[] {
+				Axes.X, Axes.Y, Axes.Z });
+	}
+
+	@Test
+	public void testPlanariaFloatTypeXYZC() {
+		testDataset(new FloatType(), new long[] { 3, 4, 10, 1 }, new AxisType[] {
+			Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL });
 	}
 
 	@Test
 	public void testPlanariaFloatTypeXZY() {
-		testDataset(new FloatType(), new long[] { 10, 10, 10 }, new AxisType[] {
+		testDataset(new FloatType(), new long[] { 5, 10, 1 }, new AxisType[] {
 				Axes.X, Axes.Z, Axes.Y });
 	}
 
 	@Test
-	@Ignore
 	public void testNetPlanariaByteType() {
-		testDataset(new ByteType(), new long[] { 100, 50, 10 }, new AxisType[] {
+		testDataset(new ByteType(), new long[] { 20, 10, 5 }, new AxisType[] {
 			Axes.X, Axes.Y, Axes.Z });
 	}
 
