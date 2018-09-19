@@ -74,14 +74,7 @@ import org.scijava.widget.Button;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -220,9 +213,7 @@ public class GenericNetwork implements
 				break;
 			case FILE:
 				try {
-					FileInputStream fis = new FileInputStream(modelFile);
-					String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-					cacheName = this.getClass().getSimpleName() + "_" + md5;
+					cacheName = IOHelper.getFileCacheName(this.getClass(), modelFile);
 					savePreferences();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -230,15 +221,8 @@ public class GenericNetwork implements
 				break;
 			case URL:
 				try {
-					URL url = new URL(modelUrl);
-					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-					Long dateTime = connection.getLastModified();
-					connection.disconnect();
-					ZonedDateTime urlLastModified = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of("GMT"));
-
-					cacheName = this.getClass().getSimpleName()
-							+ "_" + url.getPath().replace(".zip", "").replace("/", "")
-							+ "_" + DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss").format(urlLastModified);
+					cacheName = IOHelper.getUrlCacheName(this.getClass(), modelUrl);
+					savePreferences();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -254,9 +238,8 @@ public class GenericNetwork implements
 				networkInputSourceType = NetworkInputSourceType.FILE;
 				modelFileUrl = modelFile.getAbsolutePath();
 				modelChanged();
-			}else {
-				modelChangeCallbackCalled = false;
 			}
+			modelChangeCallbackCalled = false;
 		}
 	}
 
@@ -272,12 +255,11 @@ public class GenericNetwork implements
 					return;
 				}
 			}
+			modelChangeCallbackCalled = false;
 		}
-		modelChangeCallbackCalled = false;
 	}
 
 	protected void modelChanged() {
-		System.out.println("modelChanged");
 		updateCacheName();
 		restartPool();
 		modelLoadingFuture = modelLoadingPool.submit(() -> {
@@ -288,7 +270,6 @@ public class GenericNetwork implements
 				tryToInitialize();
 			}
 			prepareInputAndNetwork();
-			modelChangeCallbackCalled = false;
 		});
 	}
 
@@ -298,16 +279,17 @@ public class GenericNetwork implements
 	}
 
 	protected void finishModelLoading() {
-		if(modelLoadingFuture != null) {
-			try {
+		try {
+			if(modelLoadingFuture != null) {
 				modelLoadingFuture.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
 			}
-		}
-		if(modelLoadingPool != null) {
-			modelLoadingPool.shutdown();
-			modelLoadingPool = null;
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		} finally {
+			if(modelLoadingPool != null) {
+				modelLoadingPool.shutdown();
+				modelLoadingPool = null;
+			}
 		}
 	}
 
@@ -601,7 +583,6 @@ public class GenericNetwork implements
 	private boolean tryHandleOutOfMemoryError() {
 		// We expect it to be an out of memory exception and
 		// try it again with more tiles or smaller batches.
-		//TODO this needs a test
 		final Task modelExecutorTask = modelExecutor;
 		nTiles = tiling.getTilesNum();
 		if(oldNTiles == nTiles && oldBatchesSize == batchSize) {
@@ -628,9 +609,6 @@ public class GenericNetwork implements
 		if (batchSize < 1) {
 			batchSize = 1;
 			nTiles *= 2;
-//				if (overlap == 0) return false;
-//				overlap *= 0.5;
-//				if (overlap < 2) overlap = 0;
 		}
 	}
 

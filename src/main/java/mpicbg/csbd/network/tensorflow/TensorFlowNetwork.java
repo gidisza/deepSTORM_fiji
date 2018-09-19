@@ -1,10 +1,17 @@
 
 package mpicbg.csbd.network.tensorflow;
 
-import java.io.IOException;
-import java.util.Arrays;
-
+import com.google.protobuf.InvalidProtocolBufferException;
+import mpicbg.csbd.network.DefaultNetwork;
+import mpicbg.csbd.task.Task;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
 import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.tensorflow.TensorFlowService;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.io.location.Location;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Tensor;
@@ -15,17 +22,10 @@ import org.tensorflow.framework.SignatureDef;
 import org.tensorflow.framework.TensorInfo;
 import org.tensorflow.framework.TensorShapeProto;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import mpicbg.csbd.network.DefaultNetwork;
-import mpicbg.csbd.task.Task;
-import net.imagej.Dataset;
-import net.imagej.DatasetService;
-import net.imagej.axis.AxisType;
-import net.imagej.tensorflow.TensorFlowService;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TensorFlowNetwork<T extends RealType<T>> extends
 	DefaultNetwork<T>
@@ -158,11 +158,6 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	public void initMapping() {
 		inputNode.setMappingDefaults();
 		outputNode.setMappingDefaults();
-		log("INPUT NODE: ");
-		getInputNode().printMapping(status);
-		log("OUTPUT NODE: ");
-		getOutputNode().printMapping(status);
-
 	}
 
 	@Override
@@ -182,7 +177,7 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 		if(diff > 0) status.logError("Cannot handle case INPUT TENSOR SIZE < OUTPUT TENSOR SIZE");
 		if(diff < -1) status.logError("OUTPUT TENSOR SIZE can only be one dimension smaller than INPUT TENSOR SIZE");
 		isDoingDimensionReduction = true;
-		if(getInputNode().getDataset().axis(Axes.TIME).isPresent()) {
+		if(getInputNode().getImageAxes().contains(Axes.TIME)) {
 			axisToRemove = Axes.TIME;
 		} else {
 			axisToRemove = Axes.Z;
@@ -208,32 +203,34 @@ public class TensorFlowNetwork<T extends RealType<T>> extends
 	private void handleDimensionReduction() {
 		if (isDoingDimensionReduction) {
 			final Dataset outputDummy = createEmptyDuplicateWithoutAxis(inputNode
-				.getDataset(), axisToRemove);
+				.getImageAxes(), inputNode.getImageDimensions(), axisToRemove);
 			getOutputNode().initialize(outputDummy);
-			getOutputNode().setMapping(getInputNode().getMapping());
-			getOutputNode().removeAxisFromMapping(axisToRemove);
+			List<AxisType> mapping = new ArrayList<>();
+			mapping.addAll(getInputNode().getNodeAxes());
+			mapping.remove(axisToRemove);
+			getOutputNode().setMapping(mapping.toArray(new AxisType[0]));
+//			getOutputNode().removeAxisFromMapping(axisToRemove);
 		}
 		else {
-			getOutputNode().initialize(inputNode.getDataset().duplicate());
+			getOutputNode().initialize(inputNode.getImage());
 			getOutputNode().setMapping(getInputNode().getMapping());
 		}
 	}
 
-	private Dataset createEmptyDuplicateWithoutAxis(final Dataset input,
-		final AxisType axisToRemove)
+	private Dataset createEmptyDuplicateWithoutAxis(List<AxisType> imageAxes, List<Long> imageDimensions, AxisType axisToRemove)
 	{
-		int numDims = input.numDimensions();
-		if (input.axis(axisToRemove).isPresent()) {
+		int numDims = imageAxes.size();
+		if (imageAxes.contains(axisToRemove)) {
 			numDims--;
 		}
 		final long[] dims = new long[numDims];
 		final AxisType[] axes = new AxisType[numDims];
 		int j = 0;
-		for (int i = 0; i < input.numDimensions(); i++) {
-			final AxisType axisType = input.axis(i).type();
+		for (int i = 0; i < numDims; i++) {
+			final AxisType axisType = imageAxes.get(i);
 			if (axisType != axisToRemove) {
 				axes[j] = axisType;
-				dims[j] = input.dimension(i);
+				dims[j] = imageDimensions.get(i);
 				j++;
 			}
 		}

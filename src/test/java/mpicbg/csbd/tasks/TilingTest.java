@@ -219,6 +219,32 @@ public class TilingTest extends CSBDeepTest {
 
 	}
 
+	@Test
+	public void testSmallDataset() {
+
+		final Tiling tiling = new DefaultTiling(8, 1, 32, 32);
+		final long[] datasetSize = { 3, 4, 5 };
+		final AxisType[] axes = { Axes.X, Axes.Y, Axes.TIME };
+		Tiling.TilingAction[] actions = new Tiling.TilingAction[axes.length];
+		Arrays.fill(actions, Tiling.TilingAction.TILE_WITH_PADDING);
+
+		final AdvancedTiledView<FloatType> tiledView = runTiling(datasetSize, axes, tiling, actions);
+
+		assertEquals(1, tiledView.dimension(0));
+		assertEquals(1, tiledView.dimension(1));
+		assertEquals(1, tiledView.dimension(2));
+
+		assertEquals(32, tiledView.getBlockSize()[0]);
+		assertEquals(32, tiledView.getBlockSize()[1]);
+		assertEquals(32, tiledView.getBlockSize()[2]);
+
+		assertEquals(0, tiledView.getOverlap()[0]);
+		assertEquals(0, tiledView.getOverlap()[1]);
+		assertEquals(0, tiledView.getOverlap()[2]);
+
+		tiledView.dispose();
+	}
+
 	private AdvancedTiledView<FloatType> runTiling(long[] datasetSize, AxisType[] axes, Tiling tiling, Tiling.TilingAction[] actions) {
 
 		launchImageJ();

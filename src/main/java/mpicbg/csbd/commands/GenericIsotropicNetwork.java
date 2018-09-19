@@ -182,19 +182,14 @@ public class GenericIsotropicNetwork<T extends RealType<T>> extends GenericNetwo
 
 	@Override
 	public void run() {
-		try {
-			tryToInitialize();
-			DatasetHelper.validate(getInput(),
-				"4D image with dimension order X-Y-C-Z and two channels", OptionalLong
-					.empty(), OptionalLong.empty(), OptionalLong.of(2), OptionalLong
-						.empty());
-			final AxisType[] mapping = { Axes.Z, Axes.Y, Axes.X, Axes.CHANNEL };
-			setMapping(mapping);
-			super.run();
-		}
-		catch (final IOException e) {
-			showError(e.getMessage());
-		}
+		tryToInitialize();
+		DatasetHelper.validate(getInput(),
+			"4D image with size order X-Y-C-Z and two channels", OptionalLong
+				.empty(), OptionalLong.empty(), OptionalLong.of(2), OptionalLong
+					.empty());
+		final AxisType[] mapping = { Axes.Z, Axes.Y, Axes.X, Axes.CHANNEL };
+		setMapping(mapping);
+		super.run();
 	}
 
 	@Override

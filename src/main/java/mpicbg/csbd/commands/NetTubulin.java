@@ -29,15 +29,9 @@
 
 package mpicbg.csbd.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.OptionalLong;
-import java.util.concurrent.Future;
-
 import mpicbg.csbd.util.DatasetHelper;
+import net.imagej.Dataset;
+import net.imagej.ImageJ;
 import org.scijava.ItemIO;
 import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
@@ -46,10 +40,13 @@ import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.OptionalLong;
+import java.util.concurrent.Future;
 
 /**
  */
@@ -90,12 +87,12 @@ public class NetTubulin implements Command {
 		Exception prevException = null;
 		try {
 			try {
-				DatasetHelper.validate(input, "3D image with dimension order X-Y-T",
+				DatasetHelper.validateThrowingException(input, "3D image with size order X-Y-T",
 					OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
 			}
 			catch (final IOException e) {
 				prevException = e;
-				DatasetHelper.validate(input, "2D image with dimension order X-Y",
+				DatasetHelper.validateThrowingException(input, "2D image with size order X-Y",
 					OptionalLong.empty(), OptionalLong.empty());
 			}
 //			final AxisType[] mapping = { Axes.TIME, Axes.Y, Axes.X, Axes.CHANNEL };
@@ -104,8 +101,9 @@ public class NetTubulin implements Command {
 					GenericNetwork.class, true,
 					"input", input,
 					"modelUrl", url,
-					"batchSize", batchSize,
-					"batchAxis", Axes.TIME.getLabel());
+//					"batchSize", batchSize,
+//					"batchAxis", Axes.TIME.getLabel(),
+					"blockMultiple", 8);
 			final CommandModule module = moduleService.waitFor(resFuture);
 			output.addAll((Collection) module.getOutput("output"));
 		}

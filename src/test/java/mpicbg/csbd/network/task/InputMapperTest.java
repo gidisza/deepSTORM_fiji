@@ -19,6 +19,10 @@ public class InputMapperTest {
 		network.initMapping();
 		new DefaultInputMapper().run(input, network);
 		network.calculateMapping();
+		System.out.println("INPUT:");
+		network.getInputNode().printMapping();
+		System.out.println("OUTPUT:");
+		network.getOutputNode().printMapping();
 	}
 
 	@Test

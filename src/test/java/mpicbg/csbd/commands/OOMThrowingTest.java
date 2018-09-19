@@ -44,4 +44,24 @@ public class OOMThrowingTest {
 		assertEquals(1, batchSizeHistory.get(3));
 	}
 
+	@Test
+	public void testHandlingOfOOMsSmallDataset() {
+		ImageJ ij = new ImageJ();
+		final Dataset input =  ij.dataset().create(new FloatType(), new long[]{3,4,5}, "", new AxisType[]{Axes.X, Axes.Y, Axes.TIME});
+		final Future<CommandModule> future = ij.command().run(OOMThrowingNetwork.class, false,
+				"input", input,
+				"nTiles", 1,
+				"overlap", 0,
+				"blockMultiple", 10,
+				"actions", new Tiling.TilingAction[]{Tiling.TilingAction.TILE_WITH_PADDING, Tiling.TilingAction.TILE_WITH_PADDING, Tiling.TilingAction.TILE_WITH_PADDING});
+		assertNotEquals(null, future);
+		final Module module = ij.module().waitFor(future);
+		List nTilesHistory = (List) module.getOutput("nTilesHistory");
+		List batchSizeHistory = (List) module.getOutput("batchSizeHistory");
+		assertEquals(nTilesHistory.size(), batchSizeHistory.size());
+		assertEquals(1, nTilesHistory.size());
+		assertEquals(1, nTilesHistory.get(0));
+		assertEquals(1, batchSizeHistory.get(0));
+	}
+
 }

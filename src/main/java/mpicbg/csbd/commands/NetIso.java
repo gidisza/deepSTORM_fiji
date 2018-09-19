@@ -78,23 +78,18 @@ public class NetIso implements
 	@Override
 	public void run() {
 
-		try {
+		DatasetHelper.validate(input, "3D grayscale image with size order X-Y-Z",
+				OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
 
-			DatasetHelper.validate(input, "3D grayscale image with dimension order X-Y-Z",
-					OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
-
-			Future<CommandModule> resFuture = commandService.run(
-					GenericIsotropicNetwork.class, false,
-					"input", input,
-					"modelUrl", modelFileUrl,
-					"scale", scale,
-					"batchSize", batchSize);
-			final CommandModule module = moduleService.waitFor(resFuture);
-			output.addAll((Collection) module.getOutput("output"));
-		}
-		catch (final IOException e) {
-			e.printStackTrace();
-		}
+		Future<CommandModule> resFuture = commandService.run(
+				GenericIsotropicNetwork.class, false,
+				"input", input,
+				"modelUrl", modelFileUrl,
+				"scale", scale,
+				"batchSize", batchSize,
+				"blockMultiple", 8);
+		final CommandModule module = moduleService.waitFor(resFuture);
+		output.addAll((Collection) module.getOutput("output"));
 
 	}
 

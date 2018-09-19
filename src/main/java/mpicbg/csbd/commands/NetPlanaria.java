@@ -73,30 +73,20 @@ public class NetPlanaria implements Command {
 
 	@Override
 	public void run() {
-		try {
 
-			DatasetHelper.validate(input, "3D grayscale image with dimension order X-Y-Z",
-				OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
+		DatasetHelper.validate(input, "3D grayscale image with size order X-Y-Z",
+			OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty());
 
-//			final AxisType[] mapping = { Axes.TIME, Axes.Z, Axes.Y, Axes.X,
-//				Axes.CHANNEL };
-//			if (getInput().dimension(Axes.Z) < getInput().dimension(Axes.CHANNEL)) {
-//				mapping[1] = Axes.CHANNEL;
-//				mapping[4] = Axes.Z;
-//			}
-//			setMapping(mapping);
+		Future<CommandModule> resFuture = commandService.run(
+				GenericNetwork.class, false,
+				"input", input,
+				"modelUrl", modelFileUrl,
+//				"batchSize", 10,
+//				"batchAxis", Axes.TIME.getLabel(),
+				"blockMultiple", 8);
+		final CommandModule module = moduleService.waitFor(resFuture);
+		output.addAll((Collection) module.getOutput("output"));
 
-			Future<CommandModule> resFuture = commandService.run(
-					GenericNetwork.class, false,
-					"input", input,
-					"modelUrl", modelFileUrl);
-			final CommandModule module = moduleService.waitFor(resFuture);
-			output.addAll((Collection) module.getOutput("output"));
-
-		}
-		catch (final IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public static void main(final String... args) throws Exception {
