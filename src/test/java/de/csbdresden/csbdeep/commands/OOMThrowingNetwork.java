@@ -47,7 +47,7 @@ import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 
 @Plugin(type = Command.class)
-public class OOMThrowingNetwork extends GenericNetwork
+public class OOMThrowingNetwork extends DeepSTORM
 {
 
 	@Parameter

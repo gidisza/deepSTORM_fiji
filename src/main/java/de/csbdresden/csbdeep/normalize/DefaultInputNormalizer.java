@@ -12,7 +12,7 @@ public class DefaultInputNormalizer<T extends RealType<T> & NativeType<T>>
 	extends DefaultTask implements InputNormalizer<T>
 {
 
-	private Normalizer normalizer = new PercentileNormalizer<>();
+    private Normalizer normalizer = new MeanSTDNormalizer<>();
 
 	@Override
 	public Dataset run(Dataset input, OpService opService,

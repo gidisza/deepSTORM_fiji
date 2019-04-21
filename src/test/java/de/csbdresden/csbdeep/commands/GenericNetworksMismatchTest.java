@@ -69,7 +69,7 @@ public class GenericNetworksMismatchTest extends CSBDeepTest {
 	private void test(String network, Dataset input) {
 		URL networkUrl = this.getClass().getResource(network);
 		try {
-			final Module module = ij.command().run(GenericNetwork.class,
+			final Module module = ij.command().run(DeepSTORM.class,
 					false,
 					"input", input,
 					"modelFile", new File(networkUrl.getPath()),

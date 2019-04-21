@@ -80,8 +80,8 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.type.numeric.real.FloatType;
 
-@Plugin(type = Command.class, menuPath = "Plugins>CSBDeep>Run your network")
-public class GenericNetwork implements
+@Plugin(type = Command.class, menuPath = "Plugins>deep-STORM>Run your STORM network")
+public class DeepSTORM implements
 		Command, Cancelable, Initializable, Disposable
 {
 
@@ -91,9 +91,9 @@ public class GenericNetwork implements
 	@Parameter
 	protected boolean normalizeInput = true;
 	@Parameter
-	protected float percentileBottom = 3.0f;
+    protected float Mean = 0;
 	@Parameter
-	protected float percentileTop = 99.8f;
+    protected float STD = 0;
 
 	protected float min = 0;
 	protected float max = 1;
@@ -468,9 +468,7 @@ public class GenericNetwork implements
 	}
 
 	protected void setupNormalizer() {
-		((DefaultInputNormalizer) inputNormalizer).getNormalizer().setup(
-				new float[] { percentileBottom, percentileTop }, new float[] { min,
-						max }, clip);
+        ((DefaultInputNormalizer) inputNormalizer).getNormalizer().setup(Mean, STD);
 	}
 
 	protected boolean doInputNormalization() {
@@ -691,7 +689,7 @@ public class GenericNetwork implements
 			ij.ui().show(dataset);
 
 			// invoke the plugin
-			ij.command().run(GenericNetwork.class, true);
+            ij.command().run(DeepSTORM.class, true);
 		}
 
 	}

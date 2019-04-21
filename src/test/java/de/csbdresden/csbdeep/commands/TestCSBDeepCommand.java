@@ -34,7 +34,7 @@ public class TestCSBDeepCommand implements Command {
 	@Override
 	public void run() {
 		try {
-			Module module = command.run(GenericNetwork.class, false, "input", input,
+			Module module = command.run(DeepSTORM.class, false, "input", input,
 					"normalizeInput", normalizeInput,
 					"percentileBottom", percentileBottom,
 					"percentileTop", percentileTop,

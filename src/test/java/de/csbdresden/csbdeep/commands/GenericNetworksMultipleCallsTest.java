@@ -35,7 +35,7 @@ public class GenericNetworksMultipleCallsTest extends CSBDeepTest {
 		for (int i = 0; i < 3; i++) {
 			for(String networkSrc : networks) {
 				URL networkUrl = this.getClass().getResource(networkSrc);
-				final Future<CommandModule> future = ij.command().run(GenericNetwork.class,
+				final Future<CommandModule> future = ij.command().run(DeepSTORM.class,
 						false,
 						"input", input,
 						"modelFile", new File(networkUrl.getPath()),

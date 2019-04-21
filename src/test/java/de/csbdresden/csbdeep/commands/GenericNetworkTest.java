@@ -26,7 +26,7 @@ public class GenericNetworkTest extends CSBDeepTest {
 	public void testMissingNetwork() throws ExecutionException, InterruptedException {
 		launchImageJ();
 		final Dataset input = createDataset(new FloatType(), new long[]{2,2}, new AxisType[]{Axes.X, Axes.Y});
-		final Module module = ij.command().run(GenericNetwork.class,
+		final Module module = ij.command().run(DeepSTORM.class,
 				false, "input", input, "modelFile", new File(
 						"/some/non/existing/path.zip")).get();
 	}
@@ -34,10 +34,10 @@ public class GenericNetworkTest extends CSBDeepTest {
 	@Test
 	public void testNonExistingNetworkPref() throws ExecutionException, InterruptedException {
 		launchImageJ();
-		String bla = new GenericNetwork().getModelFileKey();
-		ij.prefs().put(GenericNetwork.class, bla, "/something/useless");
+		String bla = new DeepSTORM().getModelFileKey();
+		ij.prefs().put(DeepSTORM.class, bla, "/something/useless");
 		final Dataset input = createDataset(new FloatType(), new long[]{2,2}, new AxisType[]{Axes.X, Axes.Y});
-		ij.command().run(GenericNetwork.class,
+		ij.command().run(DeepSTORM.class,
 				true, "input", input, "modelUrl", "http://csbdeep.bioimagecomputing.com/model-tubulin.zip").get();
 	}
 
@@ -65,7 +65,7 @@ public class GenericNetworkTest extends CSBDeepTest {
 
 		final Dataset input = createDataset(type, dims, axes);
 		try {
-			final Module module = ij.command().run(GenericNetwork.class,
+			final Module module = ij.command().run(DeepSTORM.class,
 				false, "input", input, "modelFile", new File(networkUrl.getPath())).get();
 			Dataset output = (Dataset) module.getOutput("output");
 			assertNotNull(output);

@@ -31,46 +31,45 @@ package de.csbdresden.csbdeep.normalize;
 
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.Axis;
 import net.imagej.axis.AxisType;
 import net.imagej.ops.OpService;
+import net.imagej.ops.Ops;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
 
-public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
+import java.util.ArrayList;
+import java.util.stream.IntStream;
+
+public class MeanSTDNormalizer<T extends RealType<T> & NativeType<T>>
 	implements Normalizer
 {
-
-	private float[] percentiles = new float[] { 3, 99.7f };
-	private float[] destValues = new float[] { 0, 1 };
-	private float[] resValues;
-	private boolean clip = false;
-
-	protected float min;
-	protected float max;
-	protected float factor;
+	private float STD;
+	private float mean;
 
 	public float normalize( final T val ) {
-		if ( clip ) { return Math.max(
-				min,
-				Math.min( max, ( val.getRealFloat() - resValues[0] ) * factor + min ) ); }
-		return Math.max( 0, ( val.getRealFloat() - resValues[0] ) * factor + min );
+
+		return (val.getRealFloat() - mean) / STD;
 	}
 
+	public float project01(final T val, final T min, final T max) {
+		return (val.getRealFloat() - min.getRealFloat()) / (max.getRealFloat() - min.getRealFloat());
+	}
 	@Override
 	public Dataset normalize(final Dataset im, OpService opService,
 		DatasetService datasetService)
 	{
-		HistogramPercentile<T> percentile = new HistogramPercentile<>();
-		resValues = percentile.computePercentiles((RandomAccessibleInterval<T>) im
-			.getImgPlus(), percentiles, opService);
-		min = destValues[0];
-		max = destValues[1];
-		factor = (destValues[1] - destValues[0]) / (resValues[1] - resValues[0]);
-
 		long[] dims = new long[im.numDimensions()];
 		im.dimensions(dims);
 		AxisType[] axes = new AxisType[im.numDimensions()];
@@ -81,31 +80,42 @@ public class PercentileNormalizer<T extends RealType<T> & NativeType<T>>
 		final Dataset output = datasetService.create(new FloatType(), dims,
 			"normalized input", axes);
 
-		final RandomAccess<T> in = (RandomAccess<T>) im.getImgPlus().randomAccess();
-		final Cursor<FloatType> out = (Cursor<FloatType>) output.getImgPlus()
-			.localizingCursor();
-		while (out.hasNext()) {
-			out.fwd();
-			in.setPosition(out);
-			out.get().set(normalize(in.get()));
+
+		//final Cursor<FloatType> out = (Cursor<FloatType>) output.getImgPlus()
+		//	.localizingCursor();
+
+
+		GenericMinMax<ByteType> minMax = new GenericMinMax<>();
+
+		for (int i = 0; i <= im.getImgPlus().dimension(2); i++) {
+			IntervalView viewInput = Views.hyperSlice(im.getImgPlus(), 2, i);
+			IntervalView viewOutput = Views.hyperSlice(output.getImgPlus(), 2, i);
+			net.imglib2.util.Pair minMaxtmp = minMax.calculate(viewInput);
+			T max = (T) minMaxtmp.getB();
+			T min = (T) minMaxtmp.getA();
+			Cursor<FloatType> outCursor = viewOutput.localizingCursor();
+			Cursor<T> inCursor = viewInput.localizingCursor();
+			while (outCursor.hasNext()) {
+				outCursor.fwd();
+				inCursor.fwd();
+				outCursor.get().set(project01(inCursor.get(), min, max));
+				outCursor.get().set(normalize(inCursor.get()));
+			}
 		}
+//		while (out.hasNext()) {
+//			out.fwd();
+//			in.setPosition(out);
+//			out.get().set(normalize(in.get()));
+//		}
 
 		return output;
 	}
 
 	@Override
-	public void setup(final float[] percentiles, final float[] destValues,
-		boolean clip)
-	{
-		assert (percentiles.length == 2);
-		assert (destValues.length == 2);
-		this.percentiles = percentiles;
-		this.destValues = destValues;
-		this.clip = clip;
-	}
+	public void setup(float mean, float std) {
 
-	public float[] getResValues() {
-		return resValues;
+		this.mean = mean;
+		this.STD = std;
 	}
 
 }

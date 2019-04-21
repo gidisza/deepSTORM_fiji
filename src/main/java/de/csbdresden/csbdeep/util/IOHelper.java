@@ -18,7 +18,7 @@ import org.scijava.io.http.HTTPLocation;
 import org.scijava.io.location.FileLocation;
 import org.scijava.io.location.Location;
 
-import de.csbdresden.csbdeep.commands.GenericNetwork;
+import de.csbdresden.csbdeep.commands.DeepSTORM;
 
 public class IOHelper {
 
@@ -62,7 +62,7 @@ public class IOHelper {
 		return existingUrl;
 	}
 
-	public static String getFileCacheName(Class<? extends GenericNetwork> parentClass, File file) throws IOException {
+	public static String getFileCacheName(Class<? extends DeepSTORM> parentClass, File file) throws IOException {
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(file);
@@ -77,7 +77,7 @@ public class IOHelper {
 		}
 	}
 
-	public static String getUrlCacheName(Class<? extends GenericNetwork> parentClass, String modelUrl) throws IOException {
+	public static String getUrlCacheName(Class<? extends DeepSTORM> parentClass, String modelUrl) throws IOException {
 		URL url = new URL(modelUrl);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setReadTimeout(1000*10*1);

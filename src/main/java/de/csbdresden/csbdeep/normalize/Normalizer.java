@@ -38,5 +38,5 @@ public interface Normalizer {
 	Dataset normalize(Dataset im, OpService opService,
 		DatasetService datasetService);
 
-	void setup(float[] percentiles, float[] destValues, boolean clip);
+	void setup(float mean, float std);
 }
