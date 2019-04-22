@@ -1,5 +1,5 @@
 
-package de.csbdresden.csbdeep.tasks;
+package il.shechtman.deepSTORM.tasks;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,8 +8,8 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import de.csbdresden.csbdeep.io.DefaultInputProcessor;
-import de.csbdresden.csbdeep.io.InputProcessor;
+import il.shechtman.deepSTORM.io.DefaultInputProcessor;
+import il.shechtman.deepSTORM.io.InputProcessor;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;

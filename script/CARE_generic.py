@@ -15,7 +15,7 @@
 
 from java.io import File
 import sys
-from de.csbdresden.csbdeep.commands import GenericNetwork
+from il.shechtman.deepSTORM.commands import GenericNetwork
 
 def getFileName(path):
 	fileparts = path.split("/")

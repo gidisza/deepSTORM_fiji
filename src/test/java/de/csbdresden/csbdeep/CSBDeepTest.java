@@ -1,7 +1,7 @@
 
-package de.csbdresden.csbdeep;
+package il.shechtman.deepSTORM;
 
-import static de.csbdresden.csbdeep.tiling.DefaultTiling.arrayProduct;
+import static il.shechtman.deepSTORM.tiling.DefaultTiling.arrayProduct;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import org.scijava.command.Command;
 import org.scijava.command.CommandModule;
 import org.scijava.module.Module;
 
-import de.csbdresden.csbdeep.imglib2.TiledView;
+import il.shechtman.deepSTORM.imglib2.TiledView;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;

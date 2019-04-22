@@ -1,4 +1,4 @@
-package de.csbdresden.csbdeep.network.model.tensorflow;
+package il.shechtman.deepSTORM.network.model.tensorflow;
 
 import java.io.FileNotFoundException;
 import java.sql.Timestamp;
@@ -8,9 +8,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
 
-import de.csbdresden.csbdeep.network.DefaultModelLoader;
-import de.csbdresden.csbdeep.network.ModelLoader;
-import de.csbdresden.csbdeep.network.model.Network;
+import il.shechtman.deepSTORM.network.DefaultModelLoader;
+import il.shechtman.deepSTORM.network.ModelLoader;
+import il.shechtman.deepSTORM.network.model.Network;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;

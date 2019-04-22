@@ -27,7 +27,7 @@
  * #L%
  */
 
-package de.csbdresden.csbdeep.commands;
+package il.shechtman.deepSTORM.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +38,11 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-import de.csbdresden.csbdeep.network.ModelExecutor;
-import de.csbdresden.csbdeep.network.model.Network;
-import de.csbdresden.csbdeep.task.DefaultTask;
-import de.csbdresden.csbdeep.tiling.AdvancedTiledView;
-import de.csbdresden.csbdeep.tiling.Tiling;
+import il.shechtman.deepSTORM.network.ModelExecutor;
+import il.shechtman.deepSTORM.network.model.Network;
+import il.shechtman.deepSTORM.task.DefaultTask;
+import il.shechtman.deepSTORM.tiling.AdvancedTiledView;
+import il.shechtman.deepSTORM.tiling.Tiling;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 

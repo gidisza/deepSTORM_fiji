@@ -1,5 +1,5 @@
 
-package de.csbdresden.csbdeep.commands;
+package il.shechtman.deepSTORM.commands;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.scijava.command.CommandModule;
 import org.scijava.module.Module;
 
-import de.csbdresden.csbdeep.CSBDeepTest;
+import il.shechtman.deepSTORM.CSBDeepTest;
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;

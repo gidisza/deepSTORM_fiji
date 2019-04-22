@@ -1,5 +1,5 @@
 
-package de.csbdresden.csbdeep.tasks;
+package il.shechtman.deepSTORM.tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,13 +8,13 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import de.csbdresden.csbdeep.CSBDeepTest;
-import de.csbdresden.csbdeep.network.model.ImageTensor;
-import de.csbdresden.csbdeep.task.DefaultTask;
-import de.csbdresden.csbdeep.task.Task;
-import de.csbdresden.csbdeep.tiling.AdvancedTiledView;
-import de.csbdresden.csbdeep.tiling.DefaultTiling;
-import de.csbdresden.csbdeep.tiling.Tiling;
+import il.shechtman.deepSTORM.CSBDeepTest;
+import il.shechtman.deepSTORM.network.model.ImageTensor;
+import il.shechtman.deepSTORM.task.DefaultTask;
+import il.shechtman.deepSTORM.task.Task;
+import il.shechtman.deepSTORM.tiling.AdvancedTiledView;
+import il.shechtman.deepSTORM.tiling.DefaultTiling;
+import il.shechtman.deepSTORM.tiling.Tiling;
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;

@@ -1,4 +1,4 @@
-package de.csbdresden.csbdeep.network.model.tensorflow;
+package il.shechtman.deepSTORM.network.model.tensorflow;
 
 import org.junit.Ignore;
 import org.junit.Test;

@@ -1,14 +1,14 @@
 
-package de.csbdresden.csbdeep.tasks;
+package il.shechtman.deepSTORM.tasks;
 
 import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.scijava.io.location.Location;
 
-import de.csbdresden.csbdeep.network.model.DefaultNetwork;
-import de.csbdresden.csbdeep.network.model.ImageTensor;
-import de.csbdresden.csbdeep.task.Task;
+import il.shechtman.deepSTORM.network.model.DefaultNetwork;
+import il.shechtman.deepSTORM.network.model.ImageTensor;
+import il.shechtman.deepSTORM.task.Task;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;

@@ -1,5 +1,5 @@
 
-package de.csbdresden.csbdeep.network;
+package il.shechtman.deepSTORM.network;
 
 import net.imagej.DatasetService;
 import net.imagej.tensorflow.TensorFlowService;

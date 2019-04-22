@@ -1,9 +1,9 @@
 
-package de.csbdresden.csbdeep.network;
+package il.shechtman.deepSTORM.network;
 
 import org.tensorflow.framework.TensorInfo;
 
-import de.csbdresden.csbdeep.network.model.tensorflow.TensorFlowNetwork;
+import il.shechtman.deepSTORM.network.model.tensorflow.TensorFlowNetwork;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.tensorflow.TensorFlowService;

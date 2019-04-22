@@ -1,4 +1,4 @@
-package de.csbdresden.csbdeep.network.model;
+package il.shechtman.deepSTORM.network.model;
 
 import static org.junit.Assert.*;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import de.csbdresden.csbdeep.tiling.Tiling;
+import il.shechtman.deepSTORM.tiling.Tiling;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 

@@ -1,10 +1,10 @@
-package de.csbdresden.csbdeep.network;
+package il.shechtman.deepSTORM.network;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import de.csbdresden.csbdeep.network.model.Network;
+import il.shechtman.deepSTORM.network.model.Network;
 import net.imagej.Dataset;
 import net.imagej.ImageJ;
 import net.imagej.axis.Axes;

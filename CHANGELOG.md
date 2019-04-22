@@ -8,7 +8,7 @@
 ```
 - package names changed in the same fashion, e.g. usage in Python script:
 ```python
-from de.csbdresden.csbdeep.commands import GenericNetwork
+from il.shechtman.deepSTORM.commands import GenericNetwork
 ```
 - Commands now return `Dataset` instead of `List<Dataset>` as `output`:
 ```Java
