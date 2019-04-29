@@ -9,17 +9,17 @@
 		<relativePath />
 	</parent>
 
-	<groupId>de.csbdresden</groupId>
-	<artifactId>csbdeep</artifactId>
-	<version>0.3.5-SNAPSHOT</version>
+	<groupId>il.shechtman</groupId>
+	<artifactId>deepstorm</artifactId>
+	<version>0.0.1</version>
 
-	<name>CSBDeep</name>
-	<description>CSBDeep: CNNs for image restoration of fluorescence microscopy.</description>
-	<url>http://csbdeep.bioimagecomputing.com/</url>
-	<inceptionYear>2017</inceptionYear>
+	<name>deepSTORM</name>
+	<description>deepSTORM: CNN for image restoration </description>
+	<url></url>
+	<inceptionYear>2019</inceptionYear>
 	<organization>
-		<name>Center for System Biology Dresden</name>
-		<url>http://www.csbdresden.de/</url>
+		<name>The Technion</name>
+		<url>http://www.technion.ac.il/</url>
 	</organization>
 	<licenses>
 		<license>
@@ -30,24 +30,11 @@
 
 	<developers>
 		<!-- See https://imagej.net/Team -->
+
 		<developer>
-			<id>frauzufall</id>
-			<name>Deborah Schmidt</name>
-			<url>https://github.com/frauzufall</url>
-			<roles>
-				<role>founder</role>
-				<role>lead</role>
-				<role>developer</role>
-				<role>debugger</role>
-				<role>reviewer</role>
-				<role>support</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>HedgehogCode</id>
-			<name>Benjamin Wilhelm</name>
-			<url>https://github.com/HedgehogCode</url>
+			<id>tsof</id>
+			<name>tsofiya szanton</name>
+			<url>https://github.com/tsofiya</url>
 			<roles>
 				<role>lead</role>
 				<role>developer</role>
@@ -57,15 +44,7 @@
 				<role>maintainer</role>
 			</roles>
 		</developer>
-		<developer>
-			<id>fjug</id>
-			<name>Florian Jug</name>
-			<url>https://github.com/fjug</url>
-			<roles>
-				<role>lead</role>
-				<role>developer</role>
-			</roles>
-		</developer>
+
 	</developers>
 	<contributors>
 		<contributor>
@@ -80,20 +59,20 @@
 		</mailingList>
 	</mailingLists>
 
-	<scm>
-		<connection>scm:git:git://github.com/CSBDeep/CSBDeep_fiji</connection>
-		<developerConnection>scm:git:git@github.com:CSBDeep/CSBDeep_fiji</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://github.com/CSBDeep/CSBDeep_fiji</url>
-	</scm>
-	<issueManagement>
-		<system>GitHub Issues</system>
-		<url>https://github.com/imagej/CSBDeep/CSBDeep_fiji/issues</url>
-	</issueManagement>
-	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.com/CSBDeep/CSBDeep_fiji</url>
-	</ciManagement>
+	<!--<scm>-->
+		<!--<connection>scm:git:git://github.com/CSBDeep/CSBDeep_fiji</connection>-->
+		<!--<developerConnection>scm:git:git@github.com:CSBDeep/CSBDeep_fiji</developerConnection>-->
+		<!--<tag>HEAD</tag>-->
+		<!--<url>https://github.com/CSBDeep/CSBDeep_fiji</url>-->
+	<!--</scm>-->
+	<!--<issueManagement>-->
+		<!--<system>GitHub Issues</system>-->
+		<!--<url>https://github.com/imagej/CSBDeep/CSBDeep_fiji/issues</url>-->
+	<!--</issueManagement>-->
+	<!--<ciManagement>-->
+		<!--<system>Travis CI</system>-->
+		<!--<url>https://travis-ci.com/CSBDeep/CSBDeep_fiji</url>-->
+	<!--</ciManagement>-->
 
 	<properties>
 		<package-name>mpicbg.csbd</package-name>
@@ -110,6 +89,7 @@
 	</properties>
 
 	<repositories>
+
 		<repository>
 			<id>imagej.public</id>
 			<url>http://maven.imagej.net/content/groups/public</url>
@@ -117,6 +97,13 @@
 	</repositories>
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/net.imglib2/imglib2 -->
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+			<version>5.6.3</version>
+		</dependency>
+
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -137,12 +124,13 @@
             <groupId>org.tensorflow</groupId>
             <artifactId>libtensorflow</artifactId>
             <version>${tensorflow.version}</version>
-        </dependency><!--
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>libtensorflow_jni_gpu</artifactId>
-            <version>${tensorflow.version}</version>
-        </dependency>-->
+        </dependency>
+
+		<!--<dependency>-->
+            <!--<groupId>org.tensorflow</groupId>-->
+            <!--<artifactId>libtensorflow_jni_gpu</artifactId>-->
+            <!--<version>${tensorflow.version}</version>-->
+        <!--</dependency>-->
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-tensorflow</artifactId>

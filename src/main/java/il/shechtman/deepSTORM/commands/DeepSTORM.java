@@ -95,14 +95,8 @@ public class DeepSTORM implements
 	@Parameter
     protected float STD = 0;
 
-	@Parameter(label = "Upsampling Factor: ", min = "1")
-	protected float UpsamplingFactor = 8;
-
 	protected float min = 0;
 	protected float max = 1;
-
-	@Parameter(label = "Clip normalization")
-	protected boolean clip = false;
 
 
 	protected int nTiles = 1;
@@ -126,8 +120,8 @@ public class DeepSTORM implements
 			initializer = "modelFileInitialized", persist = false, required = false)
 	private File modelFile;
 
-	@Parameter(label = "Import model (.zip) from URL", callback = "modelUrlChanged",
-			initializer = "modelUrlChanged", persist = false, required = false)
+//	@Parameter(label = "Import model (.zip) from URL", callback = "modelUrlChanged",
+//			initializer = "modelUrlChanged", persist = false, required = false)
 	protected String modelUrl;
 
 	@Parameter(label = "Adjust mapping of TF network input",
